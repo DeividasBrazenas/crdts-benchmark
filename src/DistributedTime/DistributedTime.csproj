@@ -15,4 +15,8 @@
     <Folder Include="Extensions\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Node\Cluster.csproj" />
+  </ItemGroup>
+
 </Project>

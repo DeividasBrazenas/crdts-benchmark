@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Cluster.Entities;
 using CRDT.DistributedTime.Enums;
 using CRDT.DistributedTime.Extensions;
 

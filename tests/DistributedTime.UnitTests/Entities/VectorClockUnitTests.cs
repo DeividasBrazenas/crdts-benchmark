@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture;
+using Cluster.Entities;
 using CRDT.DistributedTime.Entities;
 using Xunit;
+using static UnitTestHelpers.GuidHelpers;
 
 namespace CRDT.DistributedTime.UnitTests.Entities
 {
@@ -84,16 +86,16 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 193),
-                (new Node(id3.ToString()), 164)
+                (new Node(id1), 182),
+                (new Node(id2), 193),
+                (new Node(id3), 164)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 193),
-                (new Node(id3.ToString()), 164)
+                (new Node(id1), 182),
+                (new Node(id2), 193),
+                (new Node(id3), 164)
             });
 
             var isSame = leftClock.IsSameAs(rightClock);
@@ -107,16 +109,16 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 193),
-                (new Node(id3.ToString()), 164)
+                (new Node(id1), 182),
+                (new Node(id2), 193),
+                (new Node(id3), 164)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 180),
-                (new Node(id2.ToString()), 190),
-                (new Node(id3.ToString()), 160)
+                (new Node(id1), 180),
+                (new Node(id2), 190),
+                (new Node(id3), 160)
             });
 
             var isAfter = leftClock.IsAfter(rightClock);
@@ -130,16 +132,16 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 182),
-                (new Node("b" + id2), 193),
-                (new Node("c" + id3), 164)
+                (new Node(GenerateGuid('a', id1)), 182),
+                (new Node(GenerateGuid('b', id2)), 193),
+                (new Node(GenerateGuid('c', id3)), 164)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 180),
-                (new Node("b" + id2), 195),
-                (new Node("c" + id3), 160)
+                (new Node(GenerateGuid('a', id1)), 180),
+                (new Node(GenerateGuid('b', id2)), 195),
+                (new Node(GenerateGuid('c', id3)), 160)
             });
 
             var isConcurrent = leftClock.IsConcurrentWith(rightClock);
@@ -153,16 +155,16 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 182),
-                (new Node("b" + id2), 193),
-                (new Node("c" + id3), 164)
+                (new Node(GenerateGuid('a', id1)), 182),
+                (new Node(GenerateGuid('b', id2)), 193),
+                (new Node(GenerateGuid('c', id3)), 164)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 190),
-                (new Node("b" + id2), 178),
-                (new Node("c" + id3), 170)
+                (new Node(GenerateGuid('a', id1)), 190),
+                (new Node(GenerateGuid('b', id2)), 178),
+                (new Node(GenerateGuid('c', id3)), 170)
             });
 
             var isConcurrent = leftClock.IsConcurrentWith(rightClock);
@@ -176,16 +178,16 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 193),
-                (new Node(id3.ToString()), 164)
+                (new Node(id1), 182),
+                (new Node(id2), 193),
+                (new Node(id3), 164)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 197),
-                (new Node(id2.ToString()), 242),
-                (new Node(id3.ToString()), 198)
+                (new Node(id1), 197),
+                (new Node(id2), 242),
+                (new Node(id3), 198)
             });
 
             var isBefore = leftClock.IsBefore(rightClock);
@@ -199,16 +201,16 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 193),
-                (new Node(id3.ToString()), 164)
+                (new Node(id1), 182),
+                (new Node(id2), 193),
+                (new Node(id3), 164)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 197),
-                (new Node(id2.ToString()), 170),
-                (new Node(id3.ToString()), 198)
+                (new Node(id1), 197),
+                (new Node(id2), 170),
+                (new Node(id3), 198)
             });
 
             var isConcurrent = leftClock.IsConcurrentWith(rightClock);
@@ -222,15 +224,15 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 193)
+                (new Node(id1), 182),
+                (new Node(id2), 193)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 190),
-                (new Node(id2.ToString()), 199),
-                (new Node(id3.ToString()), 199)
+                (new Node(id1), 190),
+                (new Node(id2), 199),
+                (new Node(id3), 199)
             });
 
             var isBefore = leftClock.IsBefore(rightClock);
@@ -244,15 +246,15 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 205),
-                (new Node(id2.ToString()), 208)
+                (new Node(id1), 205),
+                (new Node(id2), 208)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 190),
-                (new Node(id2.ToString()), 199),
-                (new Node(id3.ToString()), 199)
+                (new Node(id1), 190),
+                (new Node(id2), 199),
+                (new Node(id3), 199)
             });
 
             var isConcurrent = leftClock.IsConcurrentWith(rightClock);
@@ -266,15 +268,15 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 205),
-                (new Node(id2.ToString()), 208)
+                (new Node(id1), 205),
+                (new Node(id2), 208)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 205),
-                (new Node(id2.ToString()), 208),
-                (new Node(id3.ToString()), 199)
+                (new Node(id1), 205),
+                (new Node(id2), 208),
+                (new Node(id3), 199)
             });
 
             var isBefore = leftClock.IsBefore(rightClock);
@@ -288,15 +290,15 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 209),
-                (new Node(id3.ToString()), 193)
+                (new Node(id1), 182),
+                (new Node(id2), 209),
+                (new Node(id3), 193)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 203),
-                (new Node(id2.ToString()), 207)
+                (new Node(id1), 203),
+                (new Node(id2), 207)
             });
 
             var isConcurrent = leftClock.IsConcurrentWith(rightClock);
@@ -310,15 +312,15 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 193),
-                (new Node(id3.ToString()), 193)
+                (new Node(id1), 182),
+                (new Node(id2), 193),
+                (new Node(id3), 193)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 170),
-                (new Node(id2.ToString()), 183)
+                (new Node(id1), 170),
+                (new Node(id2), 183)
             });
 
             var isAfter = leftClock.IsAfter(rightClock);
@@ -332,15 +334,15 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 193),
-                (new Node(id3.ToString()), 193)
+                (new Node(id1), 182),
+                (new Node(id2), 193),
+                (new Node(id3), 193)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 203),
-                (new Node(id2.ToString()), 207)
+                (new Node(id1), 203),
+                (new Node(id2), 207)
             });
 
             var isConcurrent = leftClock.IsConcurrentWith(rightClock);
@@ -354,15 +356,15 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 193),
-                (new Node(id3.ToString()), 193)
+                (new Node(id1), 182),
+                (new Node(id2), 193),
+                (new Node(id3), 193)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 193)
+                (new Node(id1), 182),
+                (new Node(id2), 193)
             });
 
             var isAfter = leftClock.IsAfter(rightClock);
@@ -376,15 +378,15 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 209)
+                (new Node(id1), 182),
+                (new Node(id2), 209)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 203),
-                (new Node(id2.ToString()), 207),
-                (new Node(id3.ToString()), 193)
+                (new Node(id1), 203),
+                (new Node(id2), 207),
+                (new Node(id3), 193)
             });
 
             var isConcurrent = leftClock.IsConcurrentWith(rightClock);
@@ -398,16 +400,16 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 182),
-                (new Node(id2.ToString()), 209),
-                (new Node(Guid.NewGuid().ToString()), 209)
+                (new Node(id1), 182),
+                (new Node(id2), 209),
+                (new Node(Guid.NewGuid()), 209)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node(id1.ToString()), 203),
-                (new Node(id2.ToString()), 207),
-                (new Node(Guid.NewGuid().ToString()), 193)
+                (new Node(id1), 203),
+                (new Node(id2), 207),
+                (new Node(Guid.NewGuid()), 193)
             });
 
             var isConcurrent = leftClock.IsConcurrentWith(rightClock);
@@ -421,14 +423,14 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 182),
-                (new Node("b" + id2), 209)
+                (new Node(GenerateGuid('a', id1)), 182),
+                (new Node(GenerateGuid('b', id2)), 209)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 182),
-                (new Node("b" + id2), 209)
+                (new Node(GenerateGuid('a', id1)), 182),
+                (new Node(GenerateGuid('b', id2)), 209)
             });
 
             var mergedClock = leftClock.Merge(rightClock);
@@ -444,14 +446,14 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 182),
-                (new Node("b" + id2), 209)
+                (new Node(GenerateGuid('a', id1)), 182),
+                (new Node(GenerateGuid('b', id2)), 209)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 211),
-                (new Node("b" + id2), 187)
+                (new Node(GenerateGuid('a', id1)), 211),
+                (new Node(GenerateGuid('b', id2)), 187)
             });
 
             var mergedClock = leftClock.Merge(rightClock);
@@ -467,15 +469,15 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 182),
-                (new Node("b" + id2), 209),
-                (new Node("c" + Guid.NewGuid()), 177)
+                (new Node(GenerateGuid('a', id1)), 182),
+                (new Node(GenerateGuid('b', id2)), 209),
+                (new Node(GenerateGuid('c', Guid.NewGuid())), 177)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 211),
-                (new Node("b" + id2), 187)
+                (new Node(GenerateGuid('a', id1)), 211),
+                (new Node(GenerateGuid('b', id2)), 187)
             });
 
             var mergedClock = leftClock.Merge(rightClock);
@@ -492,15 +494,15 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 182),
-                (new Node("b" + id2), 209)
+                (new Node(GenerateGuid('a', id1)), 182),
+                (new Node(GenerateGuid('b', id2)), 209)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 211),
-                (new Node("b" + id2), 187),
-                (new Node("c" + Guid.NewGuid()), 177)
+                (new Node(GenerateGuid('a', id1)), 211),
+                (new Node(GenerateGuid('b', id2)), 187),
+                (new Node(GenerateGuid('c', Guid.NewGuid())), 177)
             });
 
             var mergedClock = leftClock.Merge(rightClock);
@@ -517,17 +519,17 @@ namespace CRDT.DistributedTime.UnitTests.Entities
         {
             var leftClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 182),
-                (new Node("b" + id2), 209),
-                (new Node("c" + Guid.NewGuid()), 194),
-                (new Node("d" + Guid.NewGuid()), 206)
+                (new Node(GenerateGuid('a', id1)), 182),
+                (new Node(GenerateGuid('b', id2)), 209),
+                (new Node(GenerateGuid('c', Guid.NewGuid())), 194),
+                (new Node(GenerateGuid('d', Guid.NewGuid())), 206)
             });
 
             var rightClock = BuildClock(new List<(Node, long)>
             {
-                (new Node("a" + id1), 211),
-                (new Node("b" + id2), 197),
-                (new Node("e" + Guid.NewGuid()), 177)
+                (new Node(GenerateGuid('a', id1)), 211),
+                (new Node(GenerateGuid('b', id2)), 197),
+                (new Node(GenerateGuid('e', Guid.NewGuid())), 177)
             });
 
             var mergedClock = leftClock.Merge(rightClock);
