@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Node\Cluster.csproj" />
+    <ProjectReference Include="..\Cluster\Cluster.csproj" />
   </ItemGroup>
 
 </Project>
