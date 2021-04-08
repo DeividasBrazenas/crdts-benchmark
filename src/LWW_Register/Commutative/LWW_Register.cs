@@ -44,18 +44,18 @@ namespace LWW_Register.Commutative
 
         private LWW_Register<T> MergeOperation(Operation operation)
         {
-            var jObject = JObject.FromObject(Value);
+            var valueJObject = JObject.FromObject(Value);
 
-            jObject.Merge(operation.Value, new JsonMergeSettings
+            valueJObject.Merge(operation.Value, new JsonMergeSettings
             {
                 MergeArrayHandling = MergeArrayHandling.Replace,
                 MergeNullValueHandling = MergeNullValueHandling.Merge,
                 PropertyNameComparison = StringComparison.InvariantCultureIgnoreCase
             });
 
-            var value = jObject.ToObject<T>();
+            var newValue = valueJObject.ToObject<T>();
 
-            return new LWW_Register<T>(value, operation.UpdatedBy, operation.Timestamp.Value);
+            return new LWW_Register<T>(newValue, operation.UpdatedBy, operation.Timestamp.Value);
         }
     }
 }
