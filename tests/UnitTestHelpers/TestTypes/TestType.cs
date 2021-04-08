@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Abstractions.Entities;
 
 namespace UnitTestHelpers.TestTypes
@@ -14,6 +15,10 @@ namespace UnitTestHelpers.TestTypes
         public long? NullableLongValue { get; set; }
 
         public Guid? GuidValue { get; set; }
+
+        public int[] IntArray { get; set; }
+
+        public List<long> LongList { get; set; }
 
         public InnerTestType ObjectValue { get; set; }
 

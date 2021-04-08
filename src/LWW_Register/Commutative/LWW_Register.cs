@@ -48,7 +48,7 @@ namespace LWW_Register.Commutative
 
             jObject.Merge(operation.Value, new JsonMergeSettings
             {
-                MergeArrayHandling = MergeArrayHandling.Union,
+                MergeArrayHandling = MergeArrayHandling.Replace,
                 MergeNullValueHandling = MergeNullValueHandling.Merge,
                 PropertyNameComparison = StringComparison.InvariantCultureIgnoreCase
             });

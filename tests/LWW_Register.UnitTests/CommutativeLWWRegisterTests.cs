@@ -124,6 +124,32 @@ namespace LWW_Register.UnitTests
 
         [Theory]
         [AutoData]
+        public void Merge_ArrayValues_SetsNewValues(TestType value, Node node)
+        {
+            var lww = new LWW_Register<TestType>(value, node, 0);
+
+            var result = lww.Merge(new Operation(1, node, JToken.Parse("{\"IntArray\": [1, 2, 3, 4, 5]}")));
+            result = result.Merge(new Operation(2, node, JToken.Parse("{\"LongList\": []}")));
+
+            Assert.Equal(5, result.Value.IntArray.Length);
+            Assert.Empty(result.Value.LongList);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Merge_ListValues_SetsNewValues(TestType value, Node node)
+        {
+            var lww = new LWW_Register<TestType>(value, node, 0);
+
+            var result = lww.Merge(new Operation(1, node, JToken.Parse("{\"IntArray\": []}")));
+            result = result.Merge(new Operation(2, node, JToken.Parse("{\"LongList\": [-1000, 100, 200, 300, 400, 500]}")));
+
+            Assert.Equal(6, result.Value.LongList.Count);
+            Assert.Empty(result.Value.IntArray);
+        }
+
+        [Theory]
+        [AutoData]
         public void Merge_NodeWithSmallerId_DoesNotTakeEffect(TestType value, string stringValue)
         {
             var node = new Node(GenerateGuid('a', Guid.Empty));
