@@ -1,27 +1,22 @@
-﻿using Cluster.Entities;
+﻿using Abstractions.Entities;
+using Abstractions.Interfaces;
+using Cluster.Entities;
 using CRDT.DistributedTime.Entities;
 
-namespace LWW_Register.StateBased
+namespace LWW_Register.Convergent
 {
-    public sealed class LWW_Register<T>
+    public sealed class LWW_Register<T> : Abstractions.CRDT<T>, IConvergent<LWW_Register<T>>
+        where T : DistributedEntity
     {
-        private T _value;
-
-        public Node UpdatedBy { get; }
-
         public Timestamp Timestamp { get; }
 
-        public LWW_Register(T value, Node updatedBy)
+        public LWW_Register(T value, Node updatedBy) : base(value, updatedBy)
         {
-            _value = value;
-            UpdatedBy = updatedBy;
             Timestamp = new Timestamp();
         }
 
-        public LWW_Register(T value, Node updatedBy, long timestamp)
+        public LWW_Register(T value, Node updatedBy, long timestamp) : base(value, updatedBy)
         {
-            _value = value;
-            UpdatedBy = updatedBy;
             Timestamp = new Timestamp(timestamp);
         }
 
