@@ -15,11 +15,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedTime.UnitTests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LWW_Register", "src\LWW_Register\LWW_Register.csproj", "{8B791F19-A79F-4953-AA7C-CDAC0470AE6D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cluster", "src\Node\Cluster.csproj", "{5628E7C6-8F64-4E94-9C6B-CFDEC69F5387}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cluster", "src\Cluster\Cluster.csproj", "{5628E7C6-8F64-4E94-9C6B-CFDEC69F5387}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LWW_Register.UnitTests", "tests\LWW_Register.UnitTests\LWW_Register.UnitTests.csproj", "{6C5B6090-F262-4551-AAFE-3B0804795B17}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestHelpers", "tests\UnitTestHelpers\UnitTestHelpers.csproj", "{F59CBD69-A264-42B1-A798-9D66868C1590}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Abstractions", "src\Abstractions\Abstractions.csproj", "{CCBBDBC1-7951-41B5-BC40-4073093D9E08}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{F59CBD69-A264-42B1-A798-9D66868C1590}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F59CBD69-A264-42B1-A798-9D66868C1590}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F59CBD69-A264-42B1-A798-9D66868C1590}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCBBDBC1-7951-41B5-BC40-4073093D9E08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCBBDBC1-7951-41B5-BC40-4073093D9E08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCBBDBC1-7951-41B5-BC40-4073093D9E08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCBBDBC1-7951-41B5-BC40-4073093D9E08}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +68,7 @@ Global
 		{5628E7C6-8F64-4E94-9C6B-CFDEC69F5387} = {F1CAA958-37EC-4588-873E-D00333BD38A0}
 		{6C5B6090-F262-4551-AAFE-3B0804795B17} = {34FC17B2-9746-4B57-B54B-DD5E4886437D}
 		{F59CBD69-A264-42B1-A798-9D66868C1590} = {34FC17B2-9746-4B57-B54B-DD5E4886437D}
+		{CCBBDBC1-7951-41B5-BC40-4073093D9E08} = {F1CAA958-37EC-4588-873E-D00333BD38A0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C701D26B-E79A-426E-B815-F2314CEEF64D}
