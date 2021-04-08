@@ -7,5 +7,7 @@
         public int IntValue { get; set; }
 
         public decimal DecimalValue { get; set; }
+
+        public long? NullableLongValue { get; set; }
     }
 }
