@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Abstractions.Entities;
+using CRDT.Abstractions.Entities;
 
-namespace UnitTestHelpers.TestTypes
+namespace CRDT.UnitTestHelpers.TestTypes
 {
     public class TestType : DistributedEntity
     {
@@ -22,9 +22,20 @@ namespace UnitTestHelpers.TestTypes
 
         public InnerTestType ObjectValue { get; set; }
 
-
         public TestType(Guid id) : base(id)
         {
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return StringValue;
+            yield return IntValue;
+            yield return DecimalValue;
+            yield return NullableLongValue;
+            yield return GuidValue;
+            yield return IntArray;
+            yield return LongList;
+            yield return ObjectValue;
         }
     }
 }

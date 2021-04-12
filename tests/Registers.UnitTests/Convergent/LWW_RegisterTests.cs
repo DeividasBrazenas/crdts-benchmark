@@ -1,14 +1,14 @@
 using System;
 using AutoFixture.Xunit2;
-using Cluster.Entities;
-using LWW_Register.Convergent;
-using UnitTestHelpers.TestTypes;
+using CRDT.Cluster.Entities;
+using CRDT.Registers.Convergent;
+using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
-using static UnitTestHelpers.GuidHelpers;
+using static CRDT.UnitTestHelpers.GuidHelpers;
 
-namespace LWW_Register.UnitTests
+namespace CRDT.Registers.UnitTests.Convergent
 {
-    public class ConvergentLWWRegisterTests
+    public class LWW_RegisterTests
     {
         [Theory]
         [AutoData]

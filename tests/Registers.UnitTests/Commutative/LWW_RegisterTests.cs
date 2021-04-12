@@ -1,16 +1,15 @@
 ﻿using System;
-using Abstractions.Entities;
 using AutoFixture.Xunit2;
-using Cluster.Entities;
-using LWW_Register.Commutative;
+using CRDT.Cluster.Entities;
+using CRDT.Registers.Commutative;
+using CRDT.UnitTestHelpers.TestTypes;
 using Newtonsoft.Json.Linq;
-using UnitTestHelpers.TestTypes;
 using Xunit;
-using static UnitTestHelpers.GuidHelpers;
+using static CRDT.UnitTestHelpers.GuidHelpers;
 
-namespace LWW_Register.UnitTests
+namespace CRDT.Registers.UnitTests.Commutative
 {
-    public class CommutativeLWWRegisterTests
+    public class LWW_RegisterTests
     {
         [Theory]
         [AutoData]

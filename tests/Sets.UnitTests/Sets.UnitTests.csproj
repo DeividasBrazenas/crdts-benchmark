@@ -2,14 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>CRDT.UnitTestHelpers</RootNamespace>
-    <AssemblyName>CRDT.UnitTestHelpers</AssemblyName>
+    <RootNamespace>CRDT.Sets.UnitTests</RootNamespace>
+    <AssemblyName>CRDT.Sets.UnitTests</AssemblyName>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoFixture.Xunit2" Version="4.16.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
@@ -23,7 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Abstractions\Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Sets\Sets.csproj" />
+    <ProjectReference Include="..\UnitTestHelpers\UnitTestHelpers.csproj" />
   </ItemGroup>
 
 </Project>

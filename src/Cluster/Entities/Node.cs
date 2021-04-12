@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Cluster.Entities
+namespace CRDT.Cluster.Entities
 {
     public class Node : IComparable<Node>
     {

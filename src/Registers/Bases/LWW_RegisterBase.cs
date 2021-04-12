@@ -1,0 +1,18 @@
+﻿using CRDT.Abstractions.Entities;
+using CRDT.Cluster.Entities;
+
+namespace CRDT.Registers.Bases
+{
+    public abstract class LWW_RegisterBase<T> where T : DistributedEntity
+    {
+        public T Value { get; }
+
+        public Node UpdatedBy { get; }
+
+        protected LWW_RegisterBase(T value, Node updatedBy)
+        {
+            Value = value;
+            UpdatedBy = updatedBy;
+        }
+    }
+}

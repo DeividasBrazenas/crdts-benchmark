@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>CRDT.LWW_Register.UnitTests</RootNamespace>
+    <AssemblyName>CRDT.LWW_Register.UnitTests</AssemblyName>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -22,6 +24,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\LWW_Register\LWW_Register.csproj" />
     <ProjectReference Include="..\UnitTestHelpers\UnitTestHelpers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Commutative\" />
+    <Folder Include="Convergent\" />
   </ItemGroup>
 
 </Project>

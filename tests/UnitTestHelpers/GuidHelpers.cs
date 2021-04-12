@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UnitTestHelpers
+namespace CRDT.UnitTestHelpers
 {
     public static class GuidHelpers
     {

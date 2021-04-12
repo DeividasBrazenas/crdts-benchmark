@@ -1,8 +1,8 @@
-﻿using Cluster.Entities;
+﻿using CRDT.Cluster.Entities;
 using CRDT.DistributedTime.Entities;
 using Newtonsoft.Json.Linq;
 
-namespace Abstractions.Entities
+namespace CRDT.Registers
 {
     public sealed class Operation
     {

@@ -1,8 +1,9 @@
 ﻿using System;
+using CRDT.Abstractions.Bases;
 
-namespace Abstractions.Entities
+namespace CRDT.Abstractions.Entities
 {
-    public abstract class DistributedEntity
+    public abstract class DistributedEntity : ValueObject
     {
         public Guid Id { get; }
 

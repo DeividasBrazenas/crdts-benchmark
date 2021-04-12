@@ -1,13 +1,12 @@
 ﻿using System;
-using Abstractions.Entities;
-using Abstractions.Interfaces;
-using Cluster.Entities;
+using CRDT.Abstractions.Entities;
+using CRDT.Cluster.Entities;
 using CRDT.DistributedTime.Entities;
 using Newtonsoft.Json.Linq;
 
-namespace LWW_Register.Commutative
+namespace CRDT.Registers.Commutative
 {
-    public sealed class LWW_Register<T> : Abstractions.CRDT<T>, ICommutative<LWW_Register<T>>
+    public sealed class LWW_Register<T> : Bases.LWW_RegisterBase<T>
         where T : DistributedEntity
     {
         public Timestamp Timestamp { get; }

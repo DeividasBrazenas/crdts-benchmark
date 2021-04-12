@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture;
-using Cluster.Entities;
+using CRDT.Cluster.Entities;
 using CRDT.DistributedTime.Entities;
 using Xunit;
-using static UnitTestHelpers.GuidHelpers;
+using static CRDT.UnitTestHelpers.GuidHelpers;
 
 namespace CRDT.DistributedTime.UnitTests.Entities
 {

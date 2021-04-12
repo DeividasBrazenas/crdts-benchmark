@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>CRDT.Sets</RootNamespace>
+    <AssemblyName>CRDT.Sets</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

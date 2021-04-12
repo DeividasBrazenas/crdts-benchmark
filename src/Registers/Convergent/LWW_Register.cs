@@ -1,11 +1,10 @@
-﻿using Abstractions.Entities;
-using Abstractions.Interfaces;
-using Cluster.Entities;
+﻿using CRDT.Abstractions.Entities;
+using CRDT.Cluster.Entities;
 using CRDT.DistributedTime.Entities;
 
-namespace LWW_Register.Convergent
+namespace CRDT.Registers.Convergent
 {
-    public sealed class LWW_Register<T> : Abstractions.CRDT<T>, IConvergent<LWW_Register<T>>
+    public sealed class LWW_Register<T> : Bases.LWW_RegisterBase<T>
         where T : DistributedEntity
     {
         public Timestamp Timestamp { get; }
