@@ -35,16 +35,14 @@ namespace CRDT.Sets.UnitTests.Commutative
 
             var valueJson = JsonConvert.SerializeObject(value);
 
-            var newGSet = gSet.Add(new Operation(JToken.Parse(valueJson)));
+            gSet = gSet.Add(new Operation(JToken.Parse(valueJson)));
 
-            var actualValue = newGSet.Values.FirstOrDefault(x => x.Id.Equals(value.Id));
-
-            Assert.Equal(valueJson, JsonConvert.SerializeObject(actualValue));
+            Assert.Contains(value, gSet.Values);
         }
 
         [Theory]
         [AutoData]
-        public void Merge_MergesTwoGSets(TestType one, TestType two, TestType three)
+        public void Merge_MergesValues(TestType one, TestType two, TestType three)
         {
             var firstGSet = new G_Set<TestType>(new[] { one, two }.ToImmutableHashSet());
 

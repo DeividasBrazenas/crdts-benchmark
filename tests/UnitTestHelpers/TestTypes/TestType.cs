@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CRDT.Abstractions.Entities;
+using Newtonsoft.Json;
 
 namespace CRDT.UnitTestHelpers.TestTypes
 {
@@ -33,8 +34,8 @@ namespace CRDT.UnitTestHelpers.TestTypes
             yield return DecimalValue;
             yield return NullableLongValue;
             yield return GuidValue;
-            yield return IntArray;
-            yield return LongList;
+            yield return JsonConvert.SerializeObject(IntArray);
+            yield return JsonConvert.SerializeObject(LongList);
             yield return ObjectValue;
         }
     }

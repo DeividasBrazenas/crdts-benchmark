@@ -30,25 +30,25 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var gSet = new G_Set<TestType>(existingElements.ToImmutableHashSet());
 
-            var newGSet = gSet.Add(value);
+            gSet = gSet.Add(value);
 
-            Assert.Contains(value, newGSet.Values);
+            Assert.Contains(value, gSet.Values);
         }
 
         [Theory]
         [AutoData]
-        public void Merge_MergesTwoGSets(TestType one, TestType two, TestType three)
+        public void Merge_MergesValues(TestType one, TestType two, TestType three)
         {
             var firstGSet = new G_Set<TestType>(new[] { one, two }.ToImmutableHashSet());
 
             var secondGSet = new G_Set<TestType>(new[] { two, three }.ToImmutableHashSet());
 
-            var newGSet = firstGSet.Merge(secondGSet);
+            var gSet = firstGSet.Merge(secondGSet);
 
-            Assert.Equal(3, newGSet.Values.Count);
-            Assert.Contains(one, newGSet.Values);
-            Assert.Contains(two, newGSet.Values);
-            Assert.Contains(three, newGSet.Values);
+            Assert.Equal(3, gSet.Values.Count);
+            Assert.Contains(one, gSet.Values);
+            Assert.Contains(two, gSet.Values);
+            Assert.Contains(three, gSet.Values);
         }
     }
 }
