@@ -51,28 +51,7 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_AddSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(TestType value, long timestamp)
-        {
-            var lwwSet = new LWW_Set<TestType>();
-
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            var firstAdd = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-            var secondAdd = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 100);
-
-            lwwSet = lwwSet.Add(firstAdd);
-            lwwSet = lwwSet.Add(secondAdd);
-
-            var expectedElement = new LWW_SetElement<TestType>(value, timestamp + 100);
-
-            Assert.True(lwwSet.Adds.Count(e => Equals(e.Value, value)) == 1);
-            Assert.Contains(expectedElement, lwwSet.Adds);
-
-        }
-
-        [Theory]
-        [AutoData]
-        public void Add_AddSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(TestType value, long timestamp)
+        public void Add_AddSameElementTwiceWithDifferentTimestamps_AddsTwoValues(TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -84,9 +63,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             lwwSet = lwwSet.Add(firstAdd);
             lwwSet = lwwSet.Add(secondAdd);
 
-            var expectedElement = new LWW_SetElement<TestType>(value, timestamp + 100);
-
-            Assert.Contains(expectedElement, lwwSet.Adds);
+            Assert.True(lwwSet.Adds.Count(e => Equals(e.Value, value)) == 2);
         }
 
         [Theory]
@@ -150,7 +127,8 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_RemovesElementToRemovesSet(TestType value, long timestamp)
+        public void Remove_RemovesElementToRemovesSet(
+            TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -169,7 +147,8 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(TestType value, long timestamp)
+        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_AddsTwoElements(
+            TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -183,36 +162,13 @@ namespace CRDT.Sets.UnitTests.Commutative
             lwwSet = lwwSet.Remove(firstRemove);
             lwwSet = lwwSet.Remove(secondRemove);
 
-            var expectedRemoveElement = new LWW_SetElement<TestType>(value, timestamp + 1000);
-
-            Assert.True(lwwSet.Removes.Count(e => Equals(e.Value, value)) == 1);
-            Assert.Contains(expectedRemoveElement, lwwSet.Removes);
+            Assert.True(lwwSet.Removes.Count(e => Equals(e.Value, value)) == 2);
         }
 
         [Theory]
         [AutoData]
-        public void Remove_RemoveSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(TestType value, long timestamp)
-        {
-            var lwwSet = new LWW_Set<TestType>();
-
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            var add = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-            var firstRemove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 1000);
-            var secondRemove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 100);
-
-            lwwSet = lwwSet.Add(add);
-            lwwSet = lwwSet.Remove(firstRemove);
-            lwwSet = lwwSet.Remove(secondRemove);
-
-            var expectedRemoveElement = new LWW_SetElement<TestType>(value, timestamp + 1000);
-
-            Assert.Contains(expectedRemoveElement, lwwSet.Removes);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_WithoutId_DoesNotDoAnything(TestType value, long timestamp)
+        public void Remove_WithoutId_DoesNotDoAnything(TestType value,
+            long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -241,7 +197,8 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_ConcurrentTimestamps_AddsOnlyOneObjectToRemoveSet(TestType value, long timestamp)
+        public void Remove_ConcurrentTimestamps_AddsOnlyOneObjectToRemoveSet(
+            TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -260,7 +217,8 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndNotRemoved_ReturnsAddedElement(TestType value, long timestamp)
+        public void Value_AddedAndNotRemoved_ReturnsAddedElement(
+            TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -277,7 +235,8 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Value_RemoveBeforeAdd_ReturnsAddedElement(TestType value, long timestamp)
+        public void Value_RemoveBeforeAdd_ReturnsAddedElement(
+            TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -298,7 +257,8 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Value_RemoveAfterAdd_ReturnsNull(TestType value, long timestamp)
+        public void Value_RemoveAfterAdd_ReturnsNull(
+            TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 

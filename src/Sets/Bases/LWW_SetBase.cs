@@ -27,8 +27,8 @@ namespace CRDT.Sets.Bases
 
         public T Value(Guid id)
         {
-            var added = Adds.FirstOrDefault(e => e.Value.Id == id);
-            var removed = Removes.FirstOrDefault(e => e.Value.Id == id);
+            var added = Adds.Where(e => e.Value.Id == id).OrderBy(a => a.Timestamp).LastOrDefault();
+            var removed = Removes.Where(e => e.Value.Id == id).OrderBy(a => a.Timestamp).LastOrDefault();
 
             if (added is not null && added?.Timestamp > removed?.Timestamp)
             {

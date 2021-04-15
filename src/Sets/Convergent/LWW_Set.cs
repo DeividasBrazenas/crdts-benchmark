@@ -18,17 +18,10 @@ namespace CRDT.Sets.Convergent
 
         public LWW_Set<T> Add(LWW_SetElement<T> element)
         {
-            var existingElement = Adds.FirstOrDefault(e => e.Value.Id == element.Value.Id);
-
-            if (existingElement?.Timestamp > element.Timestamp)
+            if (!Adds.Contains(element))
             {
-                return this;
+                Adds = Adds.Add(element);
             }
-
-            var adds = Adds.Where(e => e.Value.Id != element.Value.Id).ToList();
-            adds.Add(element);
-
-            Adds = adds.ToImmutableHashSet();
 
             return this;
         }
@@ -36,15 +29,13 @@ namespace CRDT.Sets.Convergent
         public LWW_Set<T> Remove(LWW_SetElement<T> element)
         {
             var addedElement = Adds.FirstOrDefault(e => Equals(e.Value, element.Value));
-            var existingElement = Removes.FirstOrDefault(e => Equals(e.Value, element.Value));
 
-            if (addedElement is not null && addedElement?.Timestamp < element.Timestamp 
-                                         && existingElement?.Timestamp < element.Timestamp)
+            if (addedElement is not null)
             {
-                var removes = Removes.Where(e => !Equals(e.Value, element.Value)).ToList();
-                removes.Add(element);
-
-                Removes = removes.ToImmutableHashSet();
+                if (!Removes.Contains(element))
+                {
+                    Removes = Removes.Add(element);
+                }
             }
 
             return this;

@@ -47,7 +47,7 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_AddSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(TestType value)
+        public void Add_AddSameElementTwiceWithDifferentTimestamp_AddsTwoElements(TestType value)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -57,28 +57,12 @@ namespace CRDT.Sets.UnitTests.Convergent
             lwwSet = lwwSet.Add(firstAdd);
             lwwSet = lwwSet.Add(secondAdd);
 
-            Assert.True(lwwSet.Adds.Count(e => Equals(e.Value, value)) == 1);
-            Assert.Contains(secondAdd, lwwSet.Adds);
+            Assert.True(lwwSet.Adds.Count(e => Equals(e.Value, value)) == 2);
         }
 
         [Theory]
         [AutoData]
-        public void Add_AddSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(TestType value)
-        {
-            var lwwSet = new LWW_Set<TestType>();
-
-            var firstAdd = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
-            var secondAdd = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
-
-            lwwSet = lwwSet.Add(firstAdd);
-            lwwSet = lwwSet.Add(secondAdd);
-
-            Assert.Contains(firstAdd, lwwSet.Adds);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Add_ConcurrentElements_AddsOnlyOne(TestType value, long timestamp)
+        public void Add_ConcurrentAdds_AddsOnlyOne(TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -119,7 +103,7 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(TestType value)
+        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_AddsTwoElements(TestType value)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -131,30 +115,12 @@ namespace CRDT.Sets.UnitTests.Convergent
             lwwSet = lwwSet.Remove(firstRemove);
             lwwSet = lwwSet.Remove(secondRemove);
 
-            Assert.True(lwwSet.Removes.Count(e => Equals(e.Value, value)) == 1);
-            Assert.Contains(secondRemove, lwwSet.Removes);
+            Assert.True(lwwSet.Removes.Count(e => Equals(e.Value, value)) == 2);
         }
 
         [Theory]
         [AutoData]
-        public void Remove_RemoveSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(TestType value)
-        {
-            var lwwSet = new LWW_Set<TestType>();
-
-            var add = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
-            var firstRemove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(2).Ticks);
-            var secondRemove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
-
-            lwwSet = lwwSet.Add(add);
-            lwwSet = lwwSet.Remove(firstRemove);
-            lwwSet = lwwSet.Remove(secondRemove);
-
-            Assert.Contains(firstRemove, lwwSet.Removes);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_ConcurrentRemoves_AddsOnlyOneObjectToRemoveSet(TestType value, long timestamp)
+        public void Remove_ConcurrentRemoves_AddsOnlyOne(TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 

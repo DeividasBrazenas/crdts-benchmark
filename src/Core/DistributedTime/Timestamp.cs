@@ -4,7 +4,7 @@ using CRDT.Core.Abstractions;
 
 namespace CRDT.Core.DistributedTime
 {
-    public sealed class Timestamp : ValueObject
+    public sealed class Timestamp : ValueObject, IComparable<Timestamp>
     {
         public long Value { get; }
 
@@ -19,12 +19,12 @@ namespace CRDT.Core.DistributedTime
         }
 
         public static bool operator <(Timestamp left, Timestamp right)
-            => Compare(left, right) == 1;
-
-        public static bool operator >(Timestamp left, Timestamp right)
             => Compare(left, right) == -1;
 
-        public static int Compare(Timestamp left, Timestamp right)
+        public static bool operator >(Timestamp left, Timestamp right)
+            => Compare(left, right) == 1;
+
+        private static int Compare(Timestamp left, Timestamp right)
         {
             if (left is null && right is null)
             {
@@ -33,22 +33,22 @@ namespace CRDT.Core.DistributedTime
 
             if (left is null)
             {
-                return 1;
+                return -1;
             }
 
             if (right is null)
             {
-                return -1;
+                return 1;
             }
 
             if (left.Value > right.Value)
             {
-                return -1;
+                return 1;
             }
 
             if (left.Value < right.Value)
             {
-                return 1;
+                return -1;
             }
 
             return 0;
@@ -57,6 +57,11 @@ namespace CRDT.Core.DistributedTime
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
+        }
+
+        public int CompareTo(Timestamp other)
+        {
+            return Compare(this, other);
         }
     }
 }

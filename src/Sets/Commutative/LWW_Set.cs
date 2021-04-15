@@ -23,22 +23,12 @@ namespace CRDT.Sets.Commutative
         {
             var value = operation.Value.ToObject<T>();
 
-            if (value?.Id == Guid.Empty)
+            var element = new LWW_SetElement<T>(value, operation.Timestamp);
+
+            if (!Adds.Contains(element))
             {
-                return this;
+                Adds = Adds.Add(element);
             }
-
-            var existingElement = Adds.FirstOrDefault(e => Equals(e.Value, value));
-
-            if (existingElement?.Timestamp > operation.Timestamp)
-            {
-                return this;
-            }
-
-            var adds = Adds.Where(e => !Equals(e.Value, value)).ToList();
-            adds.Add(new LWW_SetElement<T>(value, operation.Timestamp));
-
-            Adds = adds.ToImmutableHashSet();
 
             return this;
         }
@@ -47,22 +37,16 @@ namespace CRDT.Sets.Commutative
         {
             var value = operation.Value.ToObject<T>();
 
-            if (value?.Id == Guid.Empty)
-            {
-                return this;
-            }
-
             var addedElement = Adds.FirstOrDefault(e => Equals(e.Value, value));
-            var existingElement = Removes.FirstOrDefault(e => Equals(e.Value, value));
 
-            if (addedElement is not null && 
-                addedElement?.Timestamp < operation.Timestamp && 
-                existingElement?.Timestamp < operation.Timestamp)
+            if (addedElement is not null)
             {
-                var removes = Removes.Where(e => !Equals(e.Value, value)).ToList();
-                removes.Add(new LWW_SetElement<T>(value, operation.Timestamp));
+                var element = new LWW_SetElement<T>(value, operation.Timestamp);
 
-                Removes = removes.ToImmutableHashSet();
+                if (!Removes.Contains(element))
+                {
+                    Removes = Removes.Add(element);
+                }
             }
 
             return this;
