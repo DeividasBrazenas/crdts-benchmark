@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using CRDT.Cluster.Entities;
-using CRDT.DistributedTime.Enums;
-using CRDT.DistributedTime.Extensions;
+using CRDT.Core.Abstractions;
+using CRDT.Core.Extensions;
+using Newtonsoft.Json;
+using Node = CRDT.Core.Cluster.Node;
 
-namespace CRDT.DistributedTime.Entities
+namespace CRDT.Core.DistributedTime
 {
-    public sealed class VectorClock
+    public sealed class VectorClock : ValueObject
     {
         public ImmutableSortedDictionary<Node, long> Values { get; }
 
@@ -159,16 +160,10 @@ namespace CRDT.DistributedTime.Entities
 
             return CompareNext(commonValuesEnumerator.NextOrNull(), Order.Same);
         }
-        // TODO
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
 
-        // TODO
-        public override string ToString()
+        protected override IEnumerable<object> GetEqualityComponents()
         {
-            return base.ToString();
+            yield return JsonConvert.SerializeObject(Values);
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Immutable;
-using CRDT.Abstractions.Entities;
+using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
 
 namespace CRDT.Sets.Commutative 

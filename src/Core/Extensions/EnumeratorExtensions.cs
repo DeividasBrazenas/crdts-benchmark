@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace CRDT.DistributedTime.Extensions
+namespace CRDT.Core.Extensions
 {
     public static class EnumeratorExtensions
     {

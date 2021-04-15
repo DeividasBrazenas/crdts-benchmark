@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>CRDT.DistributedTime</RootNamespace>
-    <AssemblyName>CRDT.DistributedTime</AssemblyName>
+    <RootNamespace>CRDT.Core</RootNamespace>
+    <AssemblyName>CRDT.Core</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,10 +13,6 @@
 
   <ItemGroup>
     <Folder Include="Extensions\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Cluster\Cluster.csproj" />
   </ItemGroup>
 
 </Project>

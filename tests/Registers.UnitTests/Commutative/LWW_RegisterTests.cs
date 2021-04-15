@@ -1,6 +1,6 @@
 ﻿using System;
 using AutoFixture.Xunit2;
-using CRDT.Cluster.Entities;
+using CRDT.Core.Cluster;
 using CRDT.Registers.Commutative;
 using CRDT.UnitTestHelpers.TestTypes;
 using Newtonsoft.Json.Linq;

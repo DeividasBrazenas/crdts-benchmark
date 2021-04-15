@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture;
-using CRDT.Cluster.Entities;
-using CRDT.DistributedTime.Entities;
+using CRDT.Core.Cluster;
+using CRDT.Core.DistributedTime;
 using Xunit;
 using static CRDT.UnitTestHelpers.GuidHelpers;
 
-namespace CRDT.DistributedTime.UnitTests.Entities
+namespace CRDT.Core.UnitTests.DistributedTime
 {
     public class VectorClockUnitTests
     {

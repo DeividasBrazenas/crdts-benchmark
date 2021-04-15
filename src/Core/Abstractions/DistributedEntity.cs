@@ -1,7 +1,6 @@
 ﻿using System;
-using CRDT.Abstractions.Bases;
 
-namespace CRDT.Abstractions.Entities
+namespace CRDT.Core.Abstractions
 {
     public abstract class DistributedEntity : ValueObject
     {

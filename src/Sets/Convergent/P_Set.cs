@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
-using CRDT.Abstractions.Entities;
+using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
 
 namespace CRDT.Sets.Convergent

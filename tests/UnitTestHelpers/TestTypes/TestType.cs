@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using CRDT.Abstractions.Entities;
+using CRDT.Core.Abstractions;
 using Newtonsoft.Json;
 
 namespace CRDT.UnitTestHelpers.TestTypes

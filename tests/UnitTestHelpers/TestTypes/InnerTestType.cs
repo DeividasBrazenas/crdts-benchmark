@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using CRDT.Abstractions.Bases;
+using CRDT.Core.Abstractions;
 
 namespace CRDT.UnitTestHelpers.TestTypes
 {

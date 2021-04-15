@@ -1,5 +1,5 @@
-﻿using CRDT.Abstractions.Entities;
-using CRDT.Cluster.Entities;
+﻿using CRDT.Core.Abstractions;
+using CRDT.Core.Cluster;
 
 namespace CRDT.Registers.Bases
 {

@@ -67,7 +67,7 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Value_ReturnsAddedElementIfItWasNotRemoved(TestType[] adds, TestType value)
+        public void Value_AddedAndNotRemoved_ReturnsAddedElement(TestType[] adds, TestType value)
         {
             var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
 
@@ -80,7 +80,7 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Value_ReturnsNullIfItWasRemoved(TestType[] adds, TestType value)
+        public void Value_AddedAndRemoved_ReturnsNull(TestType[] adds, TestType value)
         {
             var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
 

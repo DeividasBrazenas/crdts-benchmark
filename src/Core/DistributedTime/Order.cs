@@ -1,4 +1,4 @@
-﻿namespace CRDT.DistributedTime.Enums
+﻿namespace CRDT.Core.DistributedTime
 {
     public enum Order
     {

@@ -1,6 +1,6 @@
-﻿using CRDT.Abstractions.Entities;
-using CRDT.Cluster.Entities;
-using CRDT.DistributedTime.Entities;
+﻿using CRDT.Core.Abstractions;
+using CRDT.Core.Cluster;
+using CRDT.Core.DistributedTime;
 
 namespace CRDT.Registers.Convergent
 {

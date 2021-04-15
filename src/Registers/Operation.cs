@@ -1,5 +1,5 @@
-﻿using CRDT.Cluster.Entities;
-using CRDT.DistributedTime.Entities;
+﻿using CRDT.Core.Cluster;
+using CRDT.Core.DistributedTime;
 using Newtonsoft.Json.Linq;
 
 namespace CRDT.Registers

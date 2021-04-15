@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>CRDT.DistributedTime.UnitTests</RootNamespace>
-    <AssemblyName>CRDT.DistributedTime.UnitTests</AssemblyName>
+    <RootNamespace>CRDT.Core.UnitTests</RootNamespace>
+    <AssemblyName>CRDT.Core.UnitTests</AssemblyName>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -23,11 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\DistributedTime\DistributedTime.csproj" />
+    <ProjectReference Include="..\..\src\Core\Core.csproj" />
     <ProjectReference Include="..\UnitTestHelpers\UnitTestHelpers.csproj" />
   </ItemGroup>
 
