@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Commutative;
 using CRDT.UnitTestHelpers.TestTypes;
@@ -37,6 +38,20 @@ namespace CRDT.Sets.UnitTests.Commutative
             gSet = gSet.Add(new Operation(JToken.Parse(valueJson)));
 
             Assert.Contains(value, gSet.Values);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Add_Concurrent_AddsOnlyOneElement(TestType[] existingElements, TestType value)
+        {
+            var gSet = new G_Set<TestType>(existingElements.ToImmutableHashSet());
+
+            var valueJson = JsonConvert.SerializeObject(value);
+
+            gSet = gSet.Add(new Operation(JToken.Parse(valueJson)));
+            gSet = gSet.Add(new Operation(JToken.Parse(valueJson)));
+
+            Assert.Equal(1, gSet.Values.Count(v => Equals(v, value)));
         }
 
         [Theory]

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Convergent;
 using CRDT.UnitTestHelpers.TestTypes;
@@ -33,6 +34,18 @@ namespace CRDT.Sets.UnitTests.Convergent
             gSet = gSet.Add(value);
 
             Assert.Contains(value, gSet.Values);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Add_Concurrent_AddsOnlyOneElement(TestType[] existingElements, TestType value)
+        {
+            var gSet = new G_Set<TestType>(existingElements.ToImmutableHashSet());
+
+            gSet = gSet.Add(value);
+            gSet = gSet.Add(value);
+
+            Assert.Equal(1, gSet.Values.Count(v => Equals(v, value)));
         }
 
         [Theory]

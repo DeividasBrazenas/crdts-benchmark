@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Convergent;
 using CRDT.UnitTestHelpers.TestTypes;
@@ -44,6 +45,18 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
+        public void Add_Concurrent_AddsOnlyOneElement(TestType[] adds, TestType value)
+        {
+            var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+
+            pSet = pSet.Add(value);
+            pSet = pSet.Add(value);
+
+            Assert.Equal(1, pSet.Adds.Count(v => Equals(v, value)));
+        }
+
+        [Theory]
+        [AutoData]
         public void Remove_BeforeAdd_HasNoEffect(TestType[] removes, TestType value)
         {
             var pSet = new P_Set<TestType>(ImmutableHashSet<TestType>.Empty, removes.ToImmutableHashSet());
@@ -63,6 +76,19 @@ namespace CRDT.Sets.UnitTests.Convergent
             pSet = pSet.Remove(value);
 
             Assert.Contains(value, pSet.Removes);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Remove_Concurrent_AddsOnlyOneElementToRemoveSet(TestType[] removes, TestType value)
+        {
+            var pSet = new P_Set<TestType>(ImmutableHashSet<TestType>.Empty, removes.ToImmutableHashSet());
+
+            pSet = pSet.Add(value);
+            pSet = pSet.Remove(value);
+            pSet = pSet.Remove(value);
+
+            Assert.Equal(1, pSet.Removes.Count(v => Equals(v, value)));
         }
 
         [Theory]

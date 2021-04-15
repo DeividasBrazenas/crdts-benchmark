@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Commutative;
 using CRDT.UnitTestHelpers.TestTypes;
@@ -48,6 +49,20 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
+        public void Add_Concurrent_AddsOnlyOneElement(TestType[] adds, TestType value)
+        {
+            var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+
+            var valueJson = JsonConvert.SerializeObject(value);
+
+            pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
+            pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
+
+            Assert.Equal(1, pSet.Adds.Count(v => Equals(v, value)));
+        }
+
+        [Theory]
+        [AutoData]
         public void Remove_BeforeAdd_HasNoEffect(TestType[] removes, TestType value)
         {
             var pSet = new P_Set<TestType>(ImmutableHashSet<TestType>.Empty, removes.ToImmutableHashSet());
@@ -71,6 +86,21 @@ namespace CRDT.Sets.UnitTests.Commutative
             pSet = pSet.Remove(new Operation(JToken.Parse(valueJson)));
 
             Assert.Contains(value, pSet.Removes);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Remove_Concurrent_AddsOnlyOneElementToRemoveSet(TestType[] removes, TestType value)
+        {
+            var pSet = new P_Set<TestType>(ImmutableHashSet<TestType>.Empty, removes.ToImmutableHashSet());
+
+            var valueJson = JsonConvert.SerializeObject(value);
+
+            pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
+            pSet = pSet.Remove(new Operation(JToken.Parse(valueJson)));
+            pSet = pSet.Remove(new Operation(JToken.Parse(valueJson)));
+
+            Assert.Equal(1, pSet.Removes.Count(v => Equals(v, value)));
         }
 
         [Theory]

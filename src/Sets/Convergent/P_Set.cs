@@ -6,6 +6,7 @@ using CRDT.Sets.Bases;
 
 namespace CRDT.Sets.Convergent
 {
+    // 2P-Set
     public sealed class P_Set<T> : P_SetBase<T> where T : DistributedEntity
     {
         public P_Set(IImmutableSet<T> adds, IImmutableSet<T> removes) : base(adds, removes)

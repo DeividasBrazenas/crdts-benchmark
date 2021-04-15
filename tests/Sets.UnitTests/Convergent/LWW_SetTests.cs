@@ -78,6 +78,21 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
+        public void Add_ConcurrentElements_AddsOnlyOne(LWW_SetElement<TestType>[] adds, TestType value, long timestamp)
+        {
+            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+
+            var firstAdd = new LWW_SetElement<TestType>(value, timestamp);
+            var secondAdd = new LWW_SetElement<TestType>(value, timestamp);
+
+            lwwSet = lwwSet.Add(firstAdd);
+            lwwSet = lwwSet.Add(secondAdd);
+
+            Assert.Equal(1, lwwSet.Adds.Count(e => Equals(e.Value, value)));
+        }
+
+        [Theory]
+        [AutoData]
         public void Remove_BeforeAdd_HasNoEffect(LWW_SetElement<TestType>[] removes, LWW_SetElement<TestType> element)
         {
             var lwwSet = new LWW_Set<TestType>(ImmutableHashSet<LWW_SetElement<TestType>>.Empty, removes.ToImmutableHashSet());
@@ -100,7 +115,6 @@ namespace CRDT.Sets.UnitTests.Convergent
             lwwSet = lwwSet.Add(add);
             lwwSet = lwwSet.Remove(remove);
 
-            Assert.Contains(add, lwwSet.Adds);
             Assert.Contains(remove, lwwSet.Removes);
         }
 
@@ -119,7 +133,6 @@ namespace CRDT.Sets.UnitTests.Convergent
             lwwSet = lwwSet.Remove(firstRemove);
             lwwSet = lwwSet.Remove(secondRemove);
 
-            Assert.Contains(add, lwwSet.Adds);
             Assert.True(lwwSet.Removes.Count(e => Equals(e.Value, value)) == 1);
             Assert.Contains(secondRemove, lwwSet.Removes);
         }
@@ -139,8 +152,25 @@ namespace CRDT.Sets.UnitTests.Convergent
             lwwSet = lwwSet.Remove(firstRemove);
             lwwSet = lwwSet.Remove(secondRemove);
 
-            Assert.Contains(add, lwwSet.Adds);
             Assert.Contains(firstRemove, lwwSet.Removes);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Remove_ConcurrentRemoves_AddsOnlyOneObjectToRemoveSet(LWW_SetElement<TestType>[] adds,
+            LWW_SetElement<TestType>[] removes, TestType value, long timestamp)
+        {
+            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+
+            var add = new LWW_SetElement<TestType>(value, timestamp);
+            var firstRemove = new LWW_SetElement<TestType>(value, timestamp + 100);
+            var secondRemove = new LWW_SetElement<TestType>(value, timestamp + 100);
+
+            lwwSet = lwwSet.Add(add);
+            lwwSet = lwwSet.Remove(firstRemove);
+            lwwSet = lwwSet.Remove(secondRemove);
+
+            Assert.Equal(1, lwwSet.Removes.Count(e => Equals(e.Value, value)));
         }
 
         [Theory]
