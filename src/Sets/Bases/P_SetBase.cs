@@ -9,6 +9,12 @@ namespace CRDT.Sets.Bases
 
         public IImmutableSet<T> Removes { get; protected set; }
 
+        protected P_SetBase()
+        {
+            Adds = ImmutableHashSet<T>.Empty;
+            Removes = ImmutableHashSet<T>.Empty;
+        }
+
         protected P_SetBase(IImmutableSet<T> adds, IImmutableSet<T> removes)
         {
             Adds = adds;

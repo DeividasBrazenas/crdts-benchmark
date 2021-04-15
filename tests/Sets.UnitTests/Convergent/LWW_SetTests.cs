@@ -36,9 +36,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToAddsSet(LWW_SetElement<TestType>[] adds, LWW_SetElement<TestType> element)
+        public void Add_AddsElementToAddsSet(LWW_SetElement<TestType> element)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+            var lwwSet = new LWW_Set<TestType>();
 
             lwwSet = lwwSet.Add(element);
 
@@ -47,9 +47,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_AddSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(LWW_SetElement<TestType>[] adds, TestType value)
+        public void Add_AddSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(TestType value)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+            var lwwSet = new LWW_Set<TestType>();
 
             var firstAdd = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
             var secondAdd = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
@@ -63,9 +63,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_AddSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(LWW_SetElement<TestType>[] adds, TestType value)
+        public void Add_AddSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(TestType value)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+            var lwwSet = new LWW_Set<TestType>();
 
             var firstAdd = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
             var secondAdd = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
@@ -78,9 +78,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_ConcurrentElements_AddsOnlyOne(LWW_SetElement<TestType>[] adds, TestType value, long timestamp)
+        public void Add_ConcurrentElements_AddsOnlyOne(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+            var lwwSet = new LWW_Set<TestType>();
 
             var firstAdd = new LWW_SetElement<TestType>(value, timestamp);
             var secondAdd = new LWW_SetElement<TestType>(value, timestamp);
@@ -93,9 +93,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Remove_BeforeAdd_HasNoEffect(LWW_SetElement<TestType>[] removes, LWW_SetElement<TestType> element)
+        public void Remove_BeforeAdd_HasNoEffect(LWW_SetElement<TestType> element)
         {
-            var lwwSet = new LWW_Set<TestType>(ImmutableHashSet<LWW_SetElement<TestType>>.Empty, removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var newLwwSet = lwwSet.Remove(element);
 
@@ -104,10 +104,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Remove_RemovesElementToRemovesSet(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value)
+        public void Remove_RemovesElementToRemovesSet(TestType value)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var add = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
             var remove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
@@ -120,10 +119,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value)
+        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(TestType value)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var add = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
             var firstRemove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
@@ -139,10 +137,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Remove_RemoveSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value)
+        public void Remove_RemoveSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(TestType value)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var add = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
             var firstRemove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(2).Ticks);
@@ -157,10 +154,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Remove_ConcurrentRemoves_AddsOnlyOneObjectToRemoveSet(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value, long timestamp)
+        public void Remove_ConcurrentRemoves_AddsOnlyOneObjectToRemoveSet(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var add = new LWW_SetElement<TestType>(value, timestamp);
             var firstRemove = new LWW_SetElement<TestType>(value, timestamp + 100);
@@ -175,10 +171,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndNotRemoved_ReturnsAddedElement(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, LWW_SetElement<TestType> element)
+        public void Value_AddedAndNotRemoved_ReturnsAddedElement(LWW_SetElement<TestType> element)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             lwwSet = lwwSet.Add(element);
 
@@ -189,10 +184,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Value_RemoveBeforeAdd_ReturnsAddedElement(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value)
+        public void Value_RemoveBeforeAdd_ReturnsAddedElement(TestType value)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var firstAdd = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
             var secondAdd = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(2).Ticks);
@@ -209,10 +203,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Value_RemoveAfterAdd_ReturnsNull(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value)
+        public void Value_RemoveAfterAdd_ReturnsNull(TestType value)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var add = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
             var remove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);

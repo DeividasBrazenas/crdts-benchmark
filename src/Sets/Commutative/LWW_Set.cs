@@ -4,11 +4,16 @@ using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
 using CRDT.Sets.Entities;
+using CRDT.Sets.Operations;
 
 namespace CRDT.Sets.Commutative 
 {
     public sealed class LWW_Set<T> : LWW_SetBase<T> where T : DistributedEntity
     {
+        public LWW_Set()
+        {
+        }
+
         public LWW_Set(IImmutableSet<LWW_SetElement<T>> adds, IImmutableSet<LWW_SetElement<T>> removes) 
             : base(adds, removes)
         {
@@ -23,14 +28,14 @@ namespace CRDT.Sets.Commutative
                 return this;
             }
 
-            var existingElement = Adds.FirstOrDefault(e => e.Value.Id == value.Id);
+            var existingElement = Adds.FirstOrDefault(e => Equals(e.Value, value));
 
             if (existingElement?.Timestamp > operation.Timestamp)
             {
                 return this;
             }
 
-            var adds = Adds.Where(e => e.Value.Id != value.Id).ToList();
+            var adds = Adds.Where(e => !Equals(e.Value, value)).ToList();
             adds.Add(new LWW_SetElement<T>(value, operation.Timestamp));
 
             Adds = adds.ToImmutableHashSet();
@@ -47,13 +52,14 @@ namespace CRDT.Sets.Commutative
                 return this;
             }
 
-            var addedElement = Adds.FirstOrDefault(e => e.Value.Id == value.Id);
-            var existingElement = Removes.FirstOrDefault(e => e.Value.Id == value.Id);
+            var addedElement = Adds.FirstOrDefault(e => Equals(e.Value, value));
+            var existingElement = Removes.FirstOrDefault(e => Equals(e.Value, value));
 
-            if (addedElement is not null && addedElement?.Timestamp < operation.Timestamp
-                                         && existingElement?.Timestamp < operation.Timestamp)
+            if (addedElement is not null && 
+                addedElement?.Timestamp < operation.Timestamp && 
+                existingElement?.Timestamp < operation.Timestamp)
             {
-                var removes = Removes.Where(e => e.Value.Id != value.Id).ToList();
+                var removes = Removes.Where(e => !Equals(e.Value, value)).ToList();
                 removes.Add(new LWW_SetElement<T>(value, operation.Timestamp));
 
                 Removes = removes.ToImmutableHashSet();

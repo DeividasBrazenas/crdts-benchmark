@@ -7,6 +7,11 @@ namespace CRDT.Sets.Bases
     {
         public IImmutableSet<T> Values { get; protected set; }
 
+        protected G_SetBase()
+        {
+            Values = ImmutableHashSet<T>.Empty;
+        }
+
         protected G_SetBase(IImmutableSet<T> values)
         {
             Values = values;

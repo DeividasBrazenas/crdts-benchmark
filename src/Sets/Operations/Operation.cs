@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 
-namespace CRDT.Sets
+namespace CRDT.Sets.Operations
 {
     public sealed class Operation
     {

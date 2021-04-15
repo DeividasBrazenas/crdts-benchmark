@@ -9,6 +9,10 @@ namespace CRDT.Sets.Convergent
     // 2P-Set
     public sealed class P_Set<T> : P_SetBase<T> where T : DistributedEntity
     {
+        public P_Set()
+        {
+        }
+
         public P_Set(IImmutableSet<T> adds, IImmutableSet<T> removes) : base(adds, removes)
         {
         }
@@ -22,7 +26,7 @@ namespace CRDT.Sets.Convergent
 
         public P_Set<T> Remove(T value)
         {
-            if (Adds.Any(e => e.Id == value.Id))
+            if (Adds.Any(e => Equals(e, value)))
             {
                 Removes = Removes.Add(value);
             }

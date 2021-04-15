@@ -6,6 +6,10 @@ namespace CRDT.Sets.Convergent
 {
     public sealed class G_Set<T> : G_SetBase<T> where T : DistributedEntity
     {
+        public G_Set()
+        {
+        }
+
         public G_Set(IImmutableSet<T> values) : base(values)
         {
             Values = values;

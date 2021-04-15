@@ -3,6 +3,7 @@ using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Commutative;
 using CRDT.Sets.Entities;
+using CRDT.Sets.Operations;
 using CRDT.UnitTestHelpers.TestTypes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -37,9 +38,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToAddsSet(LWW_SetElement<TestType>[] adds, TestType value, long timestamp)
+        public void Add_AddsElementToAddsSet(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
             lwwSet = lwwSet.Add(new LWW_SetOperation(JToken.Parse(valueJson), timestamp));
@@ -50,10 +51,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_AddSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(LWW_SetElement<TestType>[] adds, TestType value, 
-            long timestamp)
+        public void Add_AddSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -72,10 +72,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_AddSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(LWW_SetElement<TestType>[] adds, TestType value,
-            long timestamp)
+        public void Add_AddSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -92,10 +91,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_ConcurrentElements_AddsOnlyOneElement(LWW_SetElement<TestType>[] adds, TestType value,
-            long timestamp)
+        public void Add_ConcurrentElements_AddsOnlyOneElement(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -110,10 +108,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_WithoutId_DoesNotDoAnything(LWW_SetElement<TestType>[] adds, TestType value,
-            long timestamp)
+        public void Add_WithoutId_DoesNotDoAnything(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+            var lwwSet = new LWW_Set<TestType>();
 
             var newValue = new
             {
@@ -138,10 +135,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_BeforeAdd_HasNoEffect(LWW_SetElement<TestType>[] adds, 
-            LWW_SetElement<TestType>[] removes, TestType value, long timestamp)
+        public void Remove_BeforeAdd_HasNoEffect(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -154,10 +150,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_RemovesElementToRemovesSet(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value, long timestamp)
+        public void Remove_RemovesElementToRemovesSet(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -167,7 +162,6 @@ namespace CRDT.Sets.UnitTests.Commutative
             lwwSet = lwwSet.Add(add);
             lwwSet = lwwSet.Remove(remove);
 
-            var expectedAddElement = new LWW_SetElement<TestType>(value, timestamp);
             var expectedRemoveElement = new LWW_SetElement<TestType>(value, timestamp + 100);
 
             Assert.Contains(expectedRemoveElement, lwwSet.Removes);
@@ -175,10 +169,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value, long timestamp)
+        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_UpdatesTimestamp(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -190,7 +183,6 @@ namespace CRDT.Sets.UnitTests.Commutative
             lwwSet = lwwSet.Remove(firstRemove);
             lwwSet = lwwSet.Remove(secondRemove);
 
-            var expectedAddElement = new LWW_SetElement<TestType>(value, timestamp);
             var expectedRemoveElement = new LWW_SetElement<TestType>(value, timestamp + 1000);
 
             Assert.True(lwwSet.Removes.Count(e => Equals(e.Value, value)) == 1);
@@ -199,10 +191,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_RemoveSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value, long timestamp)
+        public void Remove_RemoveSameElementTwiceWithLowerTimestamp_DoesNotDoAnything(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -221,10 +212,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_WithoutId_DoesNotDoAnything(LWW_SetElement<TestType>[] adds, TestType value,
-            long timestamp)
+        public void Remove_WithoutId_DoesNotDoAnything(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
+            var lwwSet = new LWW_Set<TestType>();
 
             var newValue = new
             {
@@ -251,10 +241,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_ConcurrentTimestamps_AddsOnlyOneObjectToRemoveSet(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value, long timestamp)
+        public void Remove_ConcurrentTimestamps_AddsOnlyOneObjectToRemoveSet(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -271,10 +260,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndNotRemoved_ReturnsAddedElement(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value, long timestamp)
+        public void Value_AddedAndNotRemoved_ReturnsAddedElement(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -289,10 +277,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Value_RemoveBeforeAdd_ReturnsAddedElement(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value, long timestamp)
+        public void Value_RemoveBeforeAdd_ReturnsAddedElement(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -311,10 +298,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Value_RemoveAfterAdd_ReturnsNull(LWW_SetElement<TestType>[] adds,
-            LWW_SetElement<TestType>[] removes, TestType value, long timestamp)
+        public void Value_RemoveAfterAdd_ReturnsNull(TestType value, long timestamp)
         {
-            var lwwSet = new LWW_Set<TestType>(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 

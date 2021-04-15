@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Commutative;
+using CRDT.Sets.Operations;
 using CRDT.UnitTestHelpers.TestTypes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -36,9 +37,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToAddsSet(TestType[] adds, TestType value)
+        public void Add_AddsElementToAddsSet(TestType value)
         {
-            var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+            var pSet = new P_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -49,9 +50,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_Concurrent_AddsOnlyOneElement(TestType[] adds, TestType value)
+        public void Add_Concurrent_AddsOnlyOneElement(TestType value)
         {
-            var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+            var pSet = new P_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -63,9 +64,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_BeforeAdd_HasNoEffect(TestType[] removes, TestType value)
+        public void Remove_BeforeAdd_HasNoEffect(TestType value)
         {
-            var pSet = new P_Set<TestType>(ImmutableHashSet<TestType>.Empty, removes.ToImmutableHashSet());
+            var pSet = new P_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -76,9 +77,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_AddsElementToRemovesSet(TestType[] removes, TestType value)
+        public void Remove_AddsElementToRemovesSet(TestType value)
         {
-            var pSet = new P_Set<TestType>(ImmutableHashSet<TestType>.Empty, removes.ToImmutableHashSet());
+            var pSet = new P_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -90,9 +91,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_Concurrent_AddsOnlyOneElementToRemoveSet(TestType[] removes, TestType value)
+        public void Remove_Concurrent_AddsOnlyOneElementToRemoveSet(TestType value)
         {
-            var pSet = new P_Set<TestType>(ImmutableHashSet<TestType>.Empty, removes.ToImmutableHashSet());
+            var pSet = new P_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -105,9 +106,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Value_ReturnsAddedElementIfItWasNotRemoved(TestType[] adds, TestType value)
+        public void Value_ReturnsAddedElementIfItWasNotRemoved(TestType value)
         {
-            var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+            var pSet = new P_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -120,9 +121,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Value_ReturnsNullIfItWasRemoved(TestType[] adds, TestType value)
+        public void Value_ReturnsNullIfItWasRemoved(TestType value)
         {
-            var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+            var pSet = new P_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 

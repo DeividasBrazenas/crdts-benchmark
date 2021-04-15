@@ -3,12 +3,17 @@ using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
+using CRDT.Sets.Operations;
 
 namespace CRDT.Sets.Commutative 
 {
     // 2P-Set
     public sealed class P_Set<T> : P_SetBase<T> where T : DistributedEntity
     {
+        public P_Set()
+        {
+        }
+
         public P_Set(IImmutableSet<T> adds, IImmutableSet<T> removes) : base(adds, removes)
         {
         }
@@ -26,7 +31,10 @@ namespace CRDT.Sets.Commutative
         {
             var value = operation.Value.ToObject<T>();
 
-            Removes = Removes.Add(value);
+            if (Adds.Any(e => Equals(e, value)))
+            {
+                Removes = Removes.Add(value);
+            }
 
             return this;
         }

@@ -12,6 +12,12 @@ namespace CRDT.Sets.Bases
 
         public IImmutableSet<LWW_SetElement<T>> Removes { get; protected set; }
 
+        protected LWW_SetBase()
+        {
+            Adds = ImmutableHashSet<LWW_SetElement<T>>.Empty;
+            Removes = ImmutableHashSet<LWW_SetElement<T>>.Empty;
+        }
+
         protected LWW_SetBase(IImmutableSet<LWW_SetElement<T>> adds, 
             IImmutableSet<LWW_SetElement<T>> removes)
         {

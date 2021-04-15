@@ -34,9 +34,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToAddsSet(TestType[] adds, TestType value)
+        public void Add_AddsElementToAddsSet(TestType value)
         {
-            var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+            var pSet = new P_Set<TestType>();
 
             pSet = pSet.Add(value);
 
@@ -45,9 +45,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_Concurrent_AddsOnlyOneElement(TestType[] adds, TestType value)
+        public void Add_Concurrent_AddsOnlyOneElement(TestType value)
         {
-            var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+            var pSet = new P_Set<TestType>();
 
             pSet = pSet.Add(value);
             pSet = pSet.Add(value);
@@ -57,9 +57,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Remove_BeforeAdd_HasNoEffect(TestType[] removes, TestType value)
+        public void Remove_BeforeAdd_HasNoEffect(TestType value)
         {
-            var pSet = new P_Set<TestType>(ImmutableHashSet<TestType>.Empty, removes.ToImmutableHashSet());
+            var pSet = new P_Set<TestType>();
 
             var newPSet = pSet.Remove(value);
 
@@ -68,9 +68,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Remove_AddsElementToRemovesSet(TestType[] removes, TestType value)
+        public void Remove_AddsElementToRemovesSet(TestType value)
         {
-            var pSet = new P_Set<TestType>(ImmutableHashSet<TestType>.Empty, removes.ToImmutableHashSet());
+            var pSet = new P_Set<TestType>();
 
             pSet = pSet.Add(value);
             pSet = pSet.Remove(value);
@@ -80,9 +80,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Remove_Concurrent_AddsOnlyOneElementToRemoveSet(TestType[] removes, TestType value)
+        public void Remove_Concurrent_AddsOnlyOneElementToRemoveSet(TestType value)
         {
-            var pSet = new P_Set<TestType>(ImmutableHashSet<TestType>.Empty, removes.ToImmutableHashSet());
+            var pSet = new P_Set<TestType>();
 
             pSet = pSet.Add(value);
             pSet = pSet.Remove(value);
@@ -93,9 +93,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndNotRemoved_ReturnsAddedElement(TestType[] adds, TestType value)
+        public void Value_AddedAndNotRemoved_ReturnsAddedElement(TestType value)
         {
-            var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+            var pSet = new P_Set<TestType>();
 
             pSet = pSet.Add(value);
 
@@ -106,9 +106,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndRemoved_ReturnsNull(TestType[] adds, TestType value)
+        public void Value_AddedAndRemoved_ReturnsNull(TestType value)
         {
-            var pSet = new P_Set<TestType>(adds.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+            var pSet = new P_Set<TestType>();
 
             pSet = pSet.Add(value);
             pSet = pSet.Remove(value);

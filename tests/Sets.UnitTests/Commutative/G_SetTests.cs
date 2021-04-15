@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Commutative;
+using CRDT.Sets.Operations;
 using CRDT.UnitTestHelpers.TestTypes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -29,9 +30,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToTheSet(TestType[] existingElements, TestType value)
+        public void Add_AddsElementToTheSet(TestType value)
         {
-            var gSet = new G_Set<TestType>(existingElements.ToImmutableHashSet());
+            var gSet = new G_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 
@@ -42,9 +43,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_Concurrent_AddsOnlyOneElement(TestType[] existingElements, TestType value)
+        public void Add_Concurrent_AddsOnlyOneElement(TestType value)
         {
-            var gSet = new G_Set<TestType>(existingElements.ToImmutableHashSet());
+            var gSet = new G_Set<TestType>();
 
             var valueJson = JsonConvert.SerializeObject(value);
 

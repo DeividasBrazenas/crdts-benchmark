@@ -27,9 +27,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToTheSet(TestType[] existingElements, TestType value)
+        public void Add_AddsElementToTheSet(TestType value)
         {
-            var gSet = new G_Set<TestType>(existingElements.ToImmutableHashSet());
+            var gSet = new G_Set<TestType>();
 
             gSet = gSet.Add(value);
 
@@ -38,9 +38,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_Concurrent_AddsOnlyOneElement(TestType[] existingElements, TestType value)
+        public void Add_Concurrent_AddsOnlyOneElement(TestType value)
         {
-            var gSet = new G_Set<TestType>(existingElements.ToImmutableHashSet());
+            var gSet = new G_Set<TestType>();
 
             gSet = gSet.Add(value);
             gSet = gSet.Add(value);
