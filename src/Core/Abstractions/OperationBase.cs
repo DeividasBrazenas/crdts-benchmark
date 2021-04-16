@@ -9,16 +9,13 @@ namespace CRDT.Core.Abstractions
     {
         public Guid OperationId { get; }
 
-        public Guid ElementId { get; protected set; }
-
         public JToken Value { get; protected set; }
 
         public Node UpdatedBy { get; }
 
-        protected OperationBase(Guid elementId, JToken value, Node updatedBy)
+        protected OperationBase(JToken value, Node updatedBy)
         {
             OperationId = Guid.NewGuid();
-            ElementId = elementId;
             Value = value;
             UpdatedBy = updatedBy;
         }

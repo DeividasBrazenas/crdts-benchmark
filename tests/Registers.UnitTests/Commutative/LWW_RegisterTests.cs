@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using AutoFixture.Xunit2;
 using CRDT.Core.Cluster;
 using CRDT.Registers.Commutative;
@@ -17,116 +15,159 @@ namespace CRDT.Registers.UnitTests.Commutative
     {
         [Theory]
         [AutoData]
-        public void Create_DifferentElementIds_ThrowsException(TestType value, Node node, long timestamp)
+        public void Update_PrimitiveValues_SetsNewValues(TestType value, Node node, Node otherNode,
+            string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
-            var operations = new List<Operation>
-            {
-                new(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)),timestamp, node),
-                new(Guid.NewGuid(), JToken.Parse($"{{\"StringValue\": \"{value.GuidValue}\"}}"),timestamp + 100, node),
-            };
+            var lww = new LWW_Register<TestType>(value, node, 0);
 
-            Assert.Throws<ArgumentException>(() => new LWW_Register<TestType>(operations.ToImmutableHashSet()));
+            var result = lww.Update(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), 1, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"IntValue\": {intValue}}}"), 2, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"DecimalValue\": {decimalValue}}}"), 3, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), 4, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), 5, otherNode));
+
+            Assert.Same(otherNode, result.UpdatedBy);
+            Assert.Equal(5, result.Timestamp.Value);
+            Assert.Equal(stringValue, result.Value.StringValue);
+            Assert.Equal(intValue, result.Value.IntValue);
+            Assert.Equal(decimalValue, result.Value.DecimalValue);
+            Assert.Equal(longValue, result.Value.NullableLongValue);
+            Assert.Equal(guidValue, result.Value.GuidValue);
         }
-
         [Theory]
         [AutoData]
-        public void Value_ConstructIdenticalObject(TestType value, Node node, long timestamp)
+        public void Update_OperationsWithLowerTimestamp_DoNotTakeEffect(TestType value, Node node,
+            string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
-            var operations = new List<Operation>
-            {
-                new(value.Id, JToken.Parse($"{{\"StringValue\": \"{value.StringValue}\"}}"),timestamp, node),
-                new(value.Id, JToken.Parse($"{{\"IntValue\": {value.IntValue}}}"),timestamp + 1, node),
-                new(value.Id, JToken.Parse($"{{\"DecimalValue\": {value.DecimalValue}}}"),timestamp + 2, node),
-                new(value.Id, JToken.Parse($"{{\"NullableLongValue\": {value.NullableLongValue}}}"),timestamp + 3, node),
-                new(value.Id, JToken.Parse($"{{\"GuidValue\": \"{value.GuidValue}\"}}"),timestamp + 4, node),
-                new(value.Id, JToken.Parse($"{{\"IntArray\": {JsonConvert.SerializeObject(value.IntArray)}}}"),timestamp + 5, node),
-                new(value.Id, JToken.Parse($"{{\"LongList\": {JsonConvert.SerializeObject(value.LongList)}}}"),timestamp + 6, node),
-                new(value.Id, JToken.Parse($"{{\"ObjectValue\": {JsonConvert.SerializeObject(value.ObjectValue)}}}"),timestamp + 7, node),
-            };
+            var lww = new LWW_Register<TestType>(value, node, 10);
 
-            var lww = new LWW_Register<TestType>(operations.ToImmutableHashSet());
+            var result = lww.Update(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), 1, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"IntValue\": {intValue}}}"), 2, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"DecimalValue\": {decimalValue}}}"), 3, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), 4, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), 5, node));
 
-            var actualValue = lww.Value();
-
-            Assert.Equal(value, actualValue);
+            Assert.Equal(result, lww);
+            Assert.Equal(value, result.Value);
         }
-
         [Theory]
         [AutoData]
-        public void Value_OperationsWithLowerTimestamp_DoNotTakeEffect(TestType value, Node node, long timestamp)
+        public void Update_PrimitiveValuesWithMixedTimestamps_SetsNewValues(TestType value, Node node, Node otherNode,
+            string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
-            var operations = new List<Operation>
-            {
-                new(value.Id, JToken.Parse($"{{\"StringValue\": \"{value.StringValue}\"}}"),timestamp, node),
-                new(value.Id, JToken.Parse($"{{\"StringValue\": null}}"),timestamp - 100, node),
-            };
+            var lww = new LWW_Register<TestType>(value, node, 5);
 
-            var lww = new LWW_Register<TestType>(operations.ToImmutableHashSet());
+            var result = lww.Update(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), 1, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"IntValue\": {intValue}}}"), 2, otherNode));
+            result = result.Update(new Operation(JToken.Parse($"{{\"DecimalValue\": {decimalValue}}}"), 3, otherNode));
+            result = result.Update(new Operation(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), 8, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), 9, node));
 
-            var actualValue = lww.Value();
-
-            Assert.Equal(value.StringValue, actualValue.StringValue);
+            Assert.Same(node, result.UpdatedBy);
+            Assert.Equal(9, result.Timestamp.Value);
+            Assert.Equal(value.StringValue, result.Value.StringValue);
+            Assert.Equal(value.IntValue, result.Value.IntValue);
+            Assert.Equal(value.DecimalValue, result.Value.DecimalValue);
+            Assert.Equal(longValue, result.Value.NullableLongValue);
+            Assert.Equal(guidValue, result.Value.GuidValue);
         }
-
         [Theory]
         [AutoData]
-        public void Value_NonExistingValues_DoNotTakeEffect(TestType value, Node node, long timestamp)
+        public void Update_NullableValues_SetsNulls(TestType value, Node node)
         {
-            var operations = new List<Operation>
-            {
-                new(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)),timestamp, node),
-                new(value.Id, JToken.Parse("{\"FooStringValue\": null}"),timestamp - 100, node),
-                new(value.Id, JToken.Parse("{\"FooIntValue\": 999}"),timestamp - 100, node),
-            };
+            var lww = new LWW_Register<TestType>(value, node, 0);
 
-            var lww = new LWW_Register<TestType>(operations.ToImmutableHashSet());
+            var result = lww.Update(new Operation(JToken.Parse("{\"StringValue\": null}"), 1, node));
+            result = result.Update(new Operation(JToken.Parse("{\"NullableLongValue\": null}"), 2, node));
+            result = result.Update(new Operation(JToken.Parse("{\"ObjectValue\": null}"), 3, node));
 
-            var actualValue = lww.Value();
-
-            Assert.Equal(value, actualValue);
+            Assert.Null(result.Value.StringValue);
+            Assert.Null(result.Value.NullableLongValue);
+            Assert.Null(result.Value.ObjectValue);
         }
-
         [Theory]
         [AutoData]
-        public void Value_ConcurrentTimestamps_NodeWithLowerIdWins(TestType value, long timestamp)
+        public void Update_InnerObjectValues_SetsNewValues(TestType value, Node node,
+            string stringValue, int intValue, decimal decimalValue)
         {
-            var firstNode = new Node(GenerateGuid('a'));
-            var secondNode = new Node(GenerateGuid('b'));
+            var lww = new LWW_Register<TestType>(value, node, 0);
 
-            var firstStringValue = Guid.NewGuid().ToString();
-            var secondStringValue = Guid.NewGuid().ToString();
+            var result = lww.Update(new Operation(JToken.Parse($"{{\"ObjectValue\": {{ \"StringValue\": \"{stringValue}\", " +
+                                                              $"\"DecimalValue\": {decimalValue}, \"IntValue\": {intValue}," +
+                                                              $"\"NullableLongValue\": null }}}}"), 1, node));
 
-            var operations = new List<Operation>
-            {
-                new(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)),timestamp, firstNode),
-                new(value.Id, JToken.Parse($"{{\"StringValue\": \"{firstStringValue}\"}}"),timestamp + 100, firstNode),
-                new(value.Id, JToken.Parse($"{{\"StringValue\": \"{secondStringValue}\"}}"),timestamp + 100, secondNode),
-            };
-
-            var lww = new LWW_Register<TestType>(operations.ToImmutableHashSet());
-
-            var actualValue = lww.Value();
-
-            Assert.Equal(firstStringValue, actualValue.StringValue);
+            Assert.Equal(stringValue, result.Value.ObjectValue.StringValue);
+            Assert.Equal(decimalValue, result.Value.ObjectValue.DecimalValue);
+            Assert.Equal(intValue, result.Value.ObjectValue.IntValue);
+            Assert.Null(result.Value.ObjectValue.NullableLongValue);
         }
-
         [Theory]
         [AutoData]
-        public void Merge_MergesOperations(Guid id, long timestamp, Node node, JToken oneJToken, JToken twoJToken, JToken threeJToken)
+        public void Update_NonExistingValues_DoNotTakeEffect(TestType value, Node node,
+            string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
-            var one = new Operation(id, oneJToken, timestamp, node);
-            var two = new Operation(id, twoJToken, timestamp + 100, node);
-            var three = new Operation(id, threeJToken, timestamp + 1000, node);
+            var lww = new LWW_Register<TestType>(value, node, 0);
 
-            var firstLww = new LWW_Register<TestType>(new[] { one, two }.ToImmutableHashSet());
-            var secondLww = new LWW_Register<TestType>(new[] { two, three }.ToImmutableHashSet());
+            var result = lww.Update(new Operation(JToken.Parse($"{{\"FooStringValue\": \"{stringValue}\"}}"), 1, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"FooIntValue\": {intValue}}}"), 2, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"FooDecimalValue\": {decimalValue}}}"), 3, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"FooNullableLongValue\": {longValue}}}"), 4, node));
+            result = result.Update(new Operation(JToken.Parse($"{{\"FooGuidValue\": \"{guidValue}\"}}"), 5, node));
 
-            var lww = firstLww.Merge(secondLww);
+            Assert.Equal(result, lww);
+            Assert.Equal(value, result.Value);
+        }
+        [Theory]
+        [AutoData]
+        public void Update_ArrayValues_SetsNewValues(TestType value, Node node)
+        {
+            var lww = new LWW_Register<TestType>(value, node, 0);
 
-            Assert.Equal(3, lww.Operations.Count);
-            Assert.Contains(one, lww.Operations);
-            Assert.Contains(two, lww.Operations);
-            Assert.Contains(three, lww.Operations);
+            var result = lww.Update(new Operation(JToken.Parse("{\"IntArray\": [1, 2, 3, 4, 5]}"), 1, node));
+            result = result.Update(new Operation(JToken.Parse("{\"LongList\": []}"), 2, node));
+
+            Assert.Equal(5, result.Value.IntArray.Length);
+            Assert.Empty(result.Value.LongList);
+        }
+        [Theory]
+        [AutoData]
+        public void Update_ListValues_SetsNewValues(TestType value, Node node)
+        {
+            var lww = new LWW_Register<TestType>(value, node, 0);
+
+            var result = lww.Update(new Operation(JToken.Parse("{\"IntArray\": []}"), 1, node));
+            result = result.Update(new Operation(JToken.Parse("{\"LongList\": [-1000, 100, 200, 300, 400, 500]}"), 2, node));
+
+            Assert.Equal(6, result.Value.LongList.Count);
+            Assert.Empty(result.Value.IntArray);
+        }
+        [Theory]
+        [AutoData]
+        public void Update_NodeWithSmallerId_DoesNotTakeEffect(TestType value, string stringValue)
+        {
+            var node = new Node(GenerateGuid('a', Guid.Empty));
+            var otherNode = new Node(GenerateGuid('b', Guid.Empty));
+
+            var lww = new LWW_Register<TestType>(value, node, 1);
+
+            var result = lww.Update(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), 1, otherNode));
+
+            Assert.Same(result, lww);
+            Assert.Same(value, result.Value);
+        }
+        [Theory]
+        [AutoData]
+        public void Update_OtherNodeWithSmallerId_SetsNewValue(TestType value, string stringValue)
+        {
+            var node = new Node(GenerateGuid('b', Guid.Empty));
+            var otherNode = new Node(GenerateGuid('a', Guid.Empty));
+
+            var lww = new LWW_Register<TestType>(value, node, 1);
+
+            var result = lww.Update(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), 1, otherNode));
+
+            Assert.Equal(otherNode, result.UpdatedBy);
+            Assert.Equal(stringValue, result.Value.StringValue);
         }
     }
 }

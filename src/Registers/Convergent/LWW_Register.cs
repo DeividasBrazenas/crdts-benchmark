@@ -1,21 +1,21 @@
-﻿using CRDT.Core.Abstractions;
+﻿using System.Collections.Generic;
+using CRDT.Core.Abstractions;
 using CRDT.Core.Cluster;
 using CRDT.Core.DistributedTime;
 
 namespace CRDT.Registers.Convergent
 {
-    public sealed class LWW_Register<T> where T : DistributedEntity
+    public sealed class LWW_Register<T> : Bases.LWW_RegisterBase<T> where T : DistributedEntity
     {
-        public T Value { get; }
-
-        public Node UpdatedBy { get; }
-
         public Timestamp Timestamp { get; }
 
-        public LWW_Register(T value, Node updatedBy, long timestamp)
+        public LWW_Register(T value, Node updatedBy) : base(value, updatedBy)
         {
-            Value = value;
-            UpdatedBy = updatedBy;
+            Timestamp = new Timestamp();
+        }
+
+        public LWW_Register(T value, Node updatedBy, long timestamp) : base(value, updatedBy)
+        {
             Timestamp = new Timestamp(timestamp);
         }
 
@@ -37,6 +37,13 @@ namespace CRDT.Registers.Convergent
             }
 
             return other;
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return Value;
+            yield return Timestamp;
+            yield return UpdatedBy;
         }
     }
 }

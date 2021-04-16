@@ -10,18 +10,10 @@ namespace CRDT.Registers.Operations
     {
         public Timestamp Timestamp { get; }
 
-        public Operation(Guid elementId, JToken value, long timestamp, Node updatedBy) 
-            : base(elementId, value, updatedBy)
+        public Operation(JToken value, long timestamp, Node updatedBy) 
+            : base(value, updatedBy)
         {
             Timestamp = new Timestamp(timestamp);
-        }
-
-        public static Operation Parse(string valueJson, long timestamp, Node updatedBy)
-        {
-            var jToken = JToken.Parse(valueJson);
-            var idToken = jToken["Id"];
-
-            return idToken is null ? null : new Operation(idToken.ToObject<Guid>(), jToken, timestamp, updatedBy);
         }
     }
 }
