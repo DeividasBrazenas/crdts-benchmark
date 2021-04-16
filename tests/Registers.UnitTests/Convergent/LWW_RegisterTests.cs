@@ -16,7 +16,7 @@ namespace CRDT.Registers.UnitTests.Convergent
             TestType leftValue, TestType rightValue, Node leftNode, Node rightNode)
         {
             var leftLww = new LWW_Register<TestType>(leftValue, leftNode, 0);
-            var rightLww = new LWW_Register<TestType>(rightValue, rightNode);
+            var rightLww = new LWW_Register<TestType>(rightValue, rightNode, 1);
 
             var result = leftLww.Merge(rightLww);
 
@@ -30,7 +30,7 @@ namespace CRDT.Registers.UnitTests.Convergent
         public void Merge_LeftClockWithHigherTimestamp_ReturnsLeftObject(
             TestType leftValue, TestType rightValue, Node leftNode, Node rightNode)
         {
-            var leftLww = new LWW_Register<TestType>(leftValue, leftNode);
+            var leftLww = new LWW_Register<TestType>(leftValue, leftNode, 1);
             var rightLww = new LWW_Register<TestType>(rightValue, rightNode, 0);
 
             var result = leftLww.Merge(rightLww);
@@ -45,7 +45,7 @@ namespace CRDT.Registers.UnitTests.Convergent
         public void Merge_RightClockWithLowerTimestamp_ReturnsLeftObject(
             TestType leftValue, TestType rightValue, Node leftNode, Node rightNode)
         {
-            var leftLww = new LWW_Register<TestType>(leftValue, leftNode);
+            var leftLww = new LWW_Register<TestType>(leftValue, leftNode, 1);
             var rightLww = new LWW_Register<TestType>(rightValue, rightNode, 0);
 
             var result = leftLww.Merge(rightLww);
@@ -61,7 +61,7 @@ namespace CRDT.Registers.UnitTests.Convergent
             TestType leftValue, TestType rightValue, Node leftNode, Node rightNode)
         {
             var leftLww = new LWW_Register<TestType>(leftValue, leftNode, 0);
-            var rightLww = new LWW_Register<TestType>(rightValue, rightNode);
+            var rightLww = new LWW_Register<TestType>(rightValue, rightNode, 1);
 
             var result = leftLww.Merge(rightLww);
 

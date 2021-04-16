@@ -4,9 +4,9 @@ namespace CRDT.UnitTestHelpers
 {
     public static class GuidHelpers
     {
-        public static Guid GenerateGuid(char startsWith, Guid guid)
+        public static Guid GenerateGuid(char startsWith, Guid? guid = null)
         {
-            if (guid == Guid.Empty)
+            if (guid == null)
             {
                 guid = Guid.NewGuid();
             }

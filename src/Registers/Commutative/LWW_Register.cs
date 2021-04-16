@@ -1,60 +1,78 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using CRDT.Core.Abstractions;
-using CRDT.Core.Cluster;
 using CRDT.Core.DistributedTime;
+using CRDT.Registers.Operations;
 using Newtonsoft.Json.Linq;
 
 namespace CRDT.Registers.Commutative
 {
-    public sealed class LWW_Register<T> : Bases.LWW_RegisterBase<T>
-        where T : DistributedEntity
+    public sealed class LWW_Register<T> where T : DistributedEntity
     {
-        public Timestamp Timestamp { get; }
+        public IImmutableSet<Operation> Operations { get; }
 
-        public LWW_Register(T value, Node updatedBy) : base(value, updatedBy)
+        public LWW_Register(IImmutableSet<Operation> operations)
         {
-            Timestamp = new Timestamp();
-        }
+            var elementId = operations.First().ElementId;
 
-        public LWW_Register(T value, Node updatedBy, long timestamp) : base(value, updatedBy)
-        {
-            Timestamp = new Timestamp(timestamp);
-        }
-
-        public LWW_Register<T> Merge(Operation operation)
-        {
-            if (Timestamp > operation.Timestamp)
+            if (operations.Any(o => o.ElementId != elementId))
             {
-                return this;
+                throw new ArgumentException("All operations should have the same ElementId");
             }
 
-            if (Timestamp < operation.Timestamp)
+            var concurrentOperationsTimestamps = new HashSet<Timestamp>();
+            var validOperations = new HashSet<Operation>();
+
+            foreach (var operation in operations)
             {
-                return MergeOperation(operation);
+                if (operations.Any(o => Equals(operation.Timestamp, o.Timestamp)))
+                {
+                    concurrentOperationsTimestamps.Add(operation.Timestamp);
+                }
+                else
+                {
+                    validOperations.Add(operation);
+                }
             }
 
-            if (UpdatedBy < operation.UpdatedBy)
+            foreach (var concurrentOperationTimestamp in concurrentOperationsTimestamps)
             {
-                return this;
+                var conflictingOperations = operations.Where(o => Equals(o.Timestamp, concurrentOperationTimestamp));
+
+                var winner = conflictingOperations.OrderBy(o => o.UpdatedBy).First();
+
+                validOperations.Add(winner);
             }
 
-            return MergeOperation(operation);
+            Operations = validOperations.ToImmutableHashSet();
         }
 
-        private LWW_Register<T> MergeOperation(Operation operation)
+        public T Value()
         {
-            var valueJObject = JObject.FromObject(Value);
+            var valueJObject = new JObject();
 
-            valueJObject.Merge(operation.Value, new JsonMergeSettings
+            var orderedOperations = Operations.OrderBy(o => o.Timestamp);
+
+            foreach (var operation in orderedOperations)
             {
-                MergeArrayHandling = MergeArrayHandling.Replace,
-                MergeNullValueHandling = MergeNullValueHandling.Merge,
-                PropertyNameComparison = StringComparison.InvariantCultureIgnoreCase
-            });
+                valueJObject.Merge(operation.Value, new JsonMergeSettings
+                {
+                    MergeArrayHandling = MergeArrayHandling.Replace,
+                    MergeNullValueHandling = MergeNullValueHandling.Merge,
+                    PropertyNameComparison = StringComparison.InvariantCultureIgnoreCase
+                });
+            }
 
-            var newValue = valueJObject.ToObject<T>();
+            return valueJObject.ToObject<T>();
+        }
+            
+        public LWW_Register<T> Merge(LWW_Register<T> other)
+        {
+            var operations = Operations.Union(other.Operations).ToImmutableHashSet();
 
-            return new LWW_Register<T>(newValue, operation.UpdatedBy, operation.Timestamp.Value);
+            return new LWW_Register<T>(operations);
         }
     }
 }
