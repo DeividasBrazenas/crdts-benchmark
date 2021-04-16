@@ -54,11 +54,6 @@ namespace CRDT.Registers.Commutative
 
             var newValue = currentValue.ToObject<T>();
 
-            if(Value.Equals(newValue))
-            {
-                return this;
-            }
-
             return new LWW_Register<T>(newValue, operation.UpdatedBy, operation.Timestamp);
         }
 

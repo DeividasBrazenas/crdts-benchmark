@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>CRDT.Application</RootNamespace>
+    <AssemblyName>CRDT.Application</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Registers\Registers.csproj" />
+    <ProjectReference Include="..\Sets\Sets.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Convergent\" />
+    <Folder Include="Entities\" />
+  </ItemGroup>
+
+</Project>
