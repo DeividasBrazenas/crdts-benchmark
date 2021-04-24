@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
@@ -50,18 +51,60 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
+        public void Lookup_ValueExists_ReturnsTrue(List<TestType> values, TestType value)
+        {
+            var gSet = new G_Set<TestType>(values.ToImmutableHashSet());
+
+            gSet = gSet.Add(value);
+
+            var exists = gSet.Lookup(value);
+
+            Assert.True(exists);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Lookup_ValueDoesNotExist_ReturnsFalse(List<TestType> values, TestType value)
+        {
+            var gSet = new G_Set<TestType>(values.ToImmutableHashSet());
+
+            var exists = gSet.Lookup(value);
+
+            Assert.False(exists);
+        }
+
+        [Theory]
+        [AutoData]
         public void Merge_MergesValues(TestType one, TestType two, TestType three)
         {
-            var firstGSet = new G_Set<TestType>(new[] { one, two }.ToImmutableHashSet());
+            var gSet = new G_Set<TestType>(new[] { one, two }.ToImmutableHashSet());
 
-            var secondGSet = new G_Set<TestType>(new[] { two, three }.ToImmutableHashSet());
+            var values = new[] { two, three }.ToImmutableHashSet();
 
-            var gSet = firstGSet.Merge(secondGSet);
+            var newGSet = gSet.Merge(values);
 
-            Assert.Equal(3, gSet.Values.Count);
-            Assert.Contains(one, gSet.Values);
-            Assert.Contains(two, gSet.Values);
-            Assert.Contains(three, gSet.Values);
+            Assert.Equal(3, newGSet.Values.Count);
+            Assert.Contains(one, newGSet.Values);
+            Assert.Contains(two, newGSet.Values);
+            Assert.Contains(three, newGSet.Values);
+        } 
+        
+        [Theory]
+        [AutoData]
+        public void Merge_SameValuesMultipleTimes_MergesOnlyOnce(TestType one, TestType two, TestType three)
+        {
+            var gSet = new G_Set<TestType>(new[] { one, two }.ToImmutableHashSet());
+
+            var values = new[] { two, three }.ToImmutableHashSet();
+
+            var newGSet = gSet.Merge(values);
+            newGSet = gSet.Merge(values);
+            newGSet = gSet.Merge(values);
+
+            Assert.Equal(3, newGSet.Values.Count);
+            Assert.Contains(one, newGSet.Values);
+            Assert.Contains(two, newGSet.Values);
+            Assert.Contains(three, newGSet.Values);
         }
     }
 }

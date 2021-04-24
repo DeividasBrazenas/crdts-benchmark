@@ -1,13 +1,13 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
-using CRDT.Sets.Operations;
 
 namespace CRDT.Sets.Commutative 
 {
     public sealed class G_Set<T> : G_SetBase<T> where T : DistributedEntity
     {
-        public G_Set()
+        public G_Set() : base()
         {
         }
 
@@ -16,20 +16,8 @@ namespace CRDT.Sets.Commutative
             Values = values;
         }
 
-        public G_Set<T> Add(Operation operation)
-        {
-            var value = operation.Value.ToObject<T>();
+        public G_Set<T> Add(T value) => new(Values.Add(value));
 
-            Values = Values.Add(value);
-
-            return this;
-        }
-
-        public G_Set<T> Merge(G_Set<T> otherSet)
-        {
-            var mergedElements = Values.Union(otherSet.Values);
-
-            return new G_Set<T>(mergedElements);
-        }
+        public G_Set<T> Merge(T value) => new(Values.Add(value));
     }
 }

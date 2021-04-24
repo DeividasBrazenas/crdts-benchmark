@@ -15,6 +15,12 @@ namespace CRDT.Application.Entities
   
         public Timestamp Timestamp { get; }
 
+        public PersistenceEntity(T value)
+        {
+            Id = value.Id;
+            Value = value;
+        }
+
         public PersistenceEntity(T value, Node updatedBy, long timestamp)
         {
             Id = value.Id;

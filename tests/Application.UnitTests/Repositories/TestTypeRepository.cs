@@ -9,11 +9,11 @@ namespace CRDT.Application.UnitTests.Repositories
 {
     public class TestTypeRepository : IRepository<TestType>
     {
-        public HashSet<PersistenceEntity<TestType>> Entities { get; private set; }
+        public List<PersistenceEntity<TestType>> Entities { get; }
 
         public TestTypeRepository()
         {
-            Entities = new HashSet<PersistenceEntity<TestType>>();
+            Entities = new List<PersistenceEntity<TestType>>();
         }
 
         public PersistenceEntity<TestType> GetValue(Guid id)
@@ -21,9 +21,22 @@ namespace CRDT.Application.UnitTests.Repositories
             return Entities.FirstOrDefault(e => e.Id == id);
         }
 
-        public void AddValue(PersistenceEntity<TestType> value)
+        public IEnumerable<PersistenceEntity<TestType>> GetValues()
+        {
+            return Entities;
+        }
+
+        public void AddValues(PersistenceEntity<TestType> value)
         {
             Entities.Add(value);
+        }
+
+        public void AddValues(IEnumerable<PersistenceEntity<TestType>> values)
+        {
+            foreach (var value in values)
+            {
+                Entities.Add(value);
+            }
         }
 
         public void ReplaceValue(Guid id, PersistenceEntity<TestType> newValue)
@@ -35,7 +48,7 @@ namespace CRDT.Application.UnitTests.Repositories
                 Entities.Remove(entityToDelete);
             }
 
-            AddValue(newValue);
+            AddValues(newValue);
         }
     }
 }

@@ -1,11 +1,9 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Commutative;
-using CRDT.Sets.Operations;
 using CRDT.UnitTestHelpers.TestTypes;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace CRDT.Sets.UnitTests.Commutative
@@ -34,9 +32,7 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var gSet = new G_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            gSet = gSet.Add(new Operation(JToken.Parse(valueJson)));
+            gSet = gSet.Add(value);
 
             Assert.Contains(value, gSet.Values);
         }
@@ -47,23 +43,60 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var gSet = new G_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            gSet = gSet.Add(new Operation(JToken.Parse(valueJson)));
-            gSet = gSet.Add(new Operation(JToken.Parse(valueJson)));
+            gSet = gSet.Add(value);
+            gSet = gSet.Add(value);
 
             Assert.Equal(1, gSet.Values.Count(v => Equals(v, value)));
         }
 
         [Theory]
         [AutoData]
-        public void Merge_MergesValues(TestType one, TestType two, TestType three)
+        public void Lookup_ValueExists_ReturnsTrue(List<TestType> values, TestType value)
         {
-            var firstGSet = new G_Set<TestType>(new[] { one, two }.ToImmutableHashSet());
+            var gSet = new G_Set<TestType>(values.ToImmutableHashSet());
 
-            var secondGSet = new G_Set<TestType>(new[] { two, three }.ToImmutableHashSet());
+            gSet = gSet.Add(value);
 
-            var newGSet = firstGSet.Merge(secondGSet);
+            var exists = gSet.Lookup(value);
+
+            Assert.True(exists);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Lookup_ValueDoesNotExist_ReturnsFalse(List<TestType> values, TestType value)
+        {
+            var gSet = new G_Set<TestType>(values.ToImmutableHashSet());
+
+            var exists = gSet.Lookup(value);
+
+            Assert.False(exists);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Merge_MergesValue(TestType one, TestType two, TestType three)
+        {
+            var gSet = new G_Set<TestType>(new[] { one, two }.ToImmutableHashSet());
+
+            var newGSet = gSet.Merge(three);
+
+            Assert.Equal(3, newGSet.Values.Count);
+            Assert.Contains(one, newGSet.Values);
+            Assert.Contains(two, newGSet.Values);
+            Assert.Contains(three, newGSet.Values);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Merge_SameValueMultipleTimes_MergesOnlyOnce(TestType one, TestType two, TestType three)
+        {
+            var gSet = new G_Set<TestType>(new[] { one, two }.ToImmutableHashSet());
+
+            var newGSet = gSet.Merge(three);
+            newGSet = gSet.Merge(three);
+            newGSet = gSet.Merge(three);
+            newGSet = gSet.Merge(three);
 
             Assert.Equal(3, newGSet.Values.Count);
             Assert.Contains(one, newGSet.Values);

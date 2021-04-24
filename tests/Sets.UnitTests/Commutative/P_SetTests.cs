@@ -114,9 +114,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
             pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
 
-            var actualValue = pSet.Value(value.Id);
+            var lookup = pSet.Lookup(value);
 
-            Assert.Equal(value, actualValue);
+            Assert.True(lookup);
         }
 
         [Theory]
@@ -130,9 +130,9 @@ namespace CRDT.Sets.UnitTests.Commutative
             pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
             pSet = pSet.Remove(new Operation(JToken.Parse(valueJson))); ;
 
-            var actualValue = pSet.Value(value.Id);
+            var lookup = pSet.Lookup(value);
 
-            Assert.Null(actualValue);
+            Assert.False(lookup);
         }
 
         [Theory]

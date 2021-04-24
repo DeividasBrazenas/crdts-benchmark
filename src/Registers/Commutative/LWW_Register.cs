@@ -23,7 +23,7 @@ namespace CRDT.Registers.Commutative
             Timestamp = timestamp;
         }
 
-        public LWW_Register<T> Update(Operation operation)
+        public LWW_Register<T> Merge(Operation operation)
         {
             if (Timestamp > operation.Timestamp)
             {
@@ -53,6 +53,11 @@ namespace CRDT.Registers.Commutative
             });
 
             var newValue = currentValue.ToObject<T>();
+
+            if (Value.Equals(newValue))
+            {
+                return this;
+            }
 
             return new LWW_Register<T>(newValue, operation.UpdatedBy, operation.Timestamp);
         }

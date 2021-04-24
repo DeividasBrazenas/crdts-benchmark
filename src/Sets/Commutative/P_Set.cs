@@ -22,9 +22,7 @@ namespace CRDT.Sets.Commutative
         {
             var value = operation.Value.ToObject<T>();
 
-            Adds = Adds.Add(value);
-
-            return this;
+            return new(Adds.Add(value), Removes);
         }
 
         public P_Set<T> Remove(Operation operation)
@@ -33,20 +31,20 @@ namespace CRDT.Sets.Commutative
 
             if (Adds.Any(e => Equals(e, value)))
             {
-                Removes = Removes.Add(value);
+                return new(Adds, Removes.Add(value));
             }
 
             return this;
         }
 
-        public T Value(Guid id)
+        public bool Lookup(T value)
         {
-            if (Removes.Any(e => e.Id == id))
+            if (Removes.Any(e => Equals(e, value)))
             {
-                return null;
+                return false;
             }
 
-            return Adds.FirstOrDefault(e => e.Id == id);
+            return Adds.Any(e => Equals(e, value));
         }
 
         public P_Set<T> Merge(P_Set<T> otherSet)

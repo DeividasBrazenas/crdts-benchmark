@@ -22,16 +22,14 @@ namespace CRDT.Application.Convergent
 
             if(existingEntity is null)
             {
-                _repository.AddValue(new PersistenceEntity<T>(value, updatedBy, timestamp));
+                _repository.AddValues(new PersistenceEntity<T>(value, updatedBy, timestamp));
 
                 return;
             }
 
             var existingRegister = new LWW_Register<T>(existingEntity.Value, existingEntity.UpdatedBy, existingEntity.Timestamp);
 
-            var newRegister = new LWW_Register<T>(value, updatedBy, timestamp);
-
-            var mergedRegister = existingRegister.Merge(newRegister);
+            var mergedRegister = existingRegister.Merge(value, updatedBy, timestamp);
 
             if(Equals(existingRegister, mergedRegister))
             {

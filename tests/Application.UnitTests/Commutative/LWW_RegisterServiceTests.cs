@@ -39,22 +39,22 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Update_SameValueExistsWithLowerTimestamp_UpdatesTimestamp(TestType value, Node node, long timestamp)
+        public void Update_SameValueExistsWithLowerTimestamp_DoesNotDoAnything(TestType value, Node node, long timestamp)
         {
-            _repository.AddValue(new PersistenceEntity<TestType>(value, node, timestamp - 100));
+            _repository.AddValues(new PersistenceEntity<TestType>(value, node, timestamp - 100));
 
             var operation = new Operation(JToken.Parse(JsonConvert.SerializeObject(value)), node, timestamp);
 
             _service.Update(value.Id, operation);
 
-            AssertExistsInRepository(value, node, timestamp);
+            AssertExistsInRepository(value, node, timestamp - 100);
         }
 
         [Theory]
         [AutoData]
         public void Update_SameValueExistsWithHigherTimestamp_DoesNotDoAnything(TestType value, Node node, long timestamp)
         {
-            _repository.AddValue(new PersistenceEntity<TestType>(value, node, timestamp));
+            _repository.AddValues(new PersistenceEntity<TestType>(value, node, timestamp));
 
             var operation = new Operation(JToken.Parse(JsonConvert.SerializeObject(value)), node, timestamp - 100);
 
@@ -70,7 +70,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var value = TestTypeBuilder.Build(id);
             var newValue = TestTypeBuilder.Build(id);
 
-            _repository.AddValue(new PersistenceEntity<TestType>(value, node, timestamp));
+            _repository.AddValues(new PersistenceEntity<TestType>(value, node, timestamp));
 
             var operation = new Operation(JToken.Parse(JsonConvert.SerializeObject(newValue)), node, timestamp + 100);
 
@@ -87,7 +87,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var value = TestTypeBuilder.Build(id);
             var newValue = TestTypeBuilder.Build(id);
 
-            _repository.AddValue(new PersistenceEntity<TestType>(value, node, timestamp + 100));
+            _repository.AddValues(new PersistenceEntity<TestType>(value, node, timestamp + 100));
 
             var operation = new Operation(JToken.Parse(JsonConvert.SerializeObject(newValue)), node, timestamp);
 

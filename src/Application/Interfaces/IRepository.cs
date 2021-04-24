@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using CRDT.Application.Entities;
 using CRDT.Core.Abstractions;
 
@@ -8,7 +9,11 @@ namespace CRDT.Application.Interfaces
     {
         PersistenceEntity<T> GetValue(Guid id);
 
-        void AddValue(PersistenceEntity<T> value);
+        IEnumerable<PersistenceEntity<T>> GetValues();
+
+        void AddValues(PersistenceEntity<T> value);
+
+        void AddValues(IEnumerable<PersistenceEntity<T>> values);
 
         void ReplaceValue(Guid id, PersistenceEntity<T> newValue);
     }

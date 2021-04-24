@@ -15,18 +15,8 @@ namespace CRDT.Sets.Convergent
             Values = values;
         }
 
-        public G_Set<T> Add(T value)
-        {
-            Values = Values.Add(value);
+        public G_Set<T> Add(T value) => new(Values.Add(value));
 
-            return this;
-        }
-
-        public G_Set<T> Merge(G_Set<T> otherSet)
-        {
-            var mergedElements = Values.Union(otherSet.Values);
-
-            return new G_Set<T>(mergedElements);
-        }
+        public G_Set<T> Merge(IImmutableSet<T> values) => new(Values.Union(values));
     }
 }

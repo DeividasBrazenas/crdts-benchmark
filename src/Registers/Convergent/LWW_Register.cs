@@ -19,24 +19,31 @@ namespace CRDT.Registers.Convergent
             Timestamp = timestamp;
         }
 
-        public LWW_Register<T> Merge(LWW_Register<T> other)
+        public LWW_Register<T> Merge(T value, Node updatedBy, long timestamp)
         {
-            if (Timestamp > other.Timestamp)
+            if (Equals(Value, value))
             {
                 return this;
             }
 
-            if (Timestamp < other.Timestamp)
-            {
-                return other;
-            }
+            var timestampObject = new Timestamp(timestamp);
 
-            if (UpdatedBy < other.UpdatedBy)
+            if (Timestamp > timestampObject)
             {
                 return this;
             }
 
-            return other;
+            if (Timestamp < timestampObject)
+            {
+                return new LWW_Register<T>(value, updatedBy, timestamp);
+            }
+
+            if (UpdatedBy < updatedBy)
+            {
+                return this;
+            }
+
+            return new LWW_Register<T>(value, updatedBy, timestamp);
         }
 
         protected override IEnumerable<object> GetEqualityComponents()

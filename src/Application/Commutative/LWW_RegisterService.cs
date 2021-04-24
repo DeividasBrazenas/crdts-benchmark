@@ -31,7 +31,7 @@ namespace CRDT.Application.Commutative
                 register = new LWW_Register<T>(existingEntity.Value, existingEntity.UpdatedBy, existingEntity.Timestamp);
             }
 
-            var newRegister = register.Update(operation);
+            var newRegister = register.Merge(operation);
 
             if (Equals(register, newRegister))
             {

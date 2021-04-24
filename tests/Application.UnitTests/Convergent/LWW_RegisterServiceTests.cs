@@ -33,20 +33,20 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Update_SameValueExistsWithLowerTimestamp_UpdatesTimestamp(TestType value, Node node, long timestamp)
+        public void Update_SameValueExistsWithLowerTimestamp_DoesNotDoAnything(TestType value, Node node, long timestamp)
         {
-            _repository.AddValue(new PersistenceEntity<TestType>(value, node, timestamp - 100));
+            _repository.AddValues(new PersistenceEntity<TestType>(value, node, timestamp - 100));
 
             _service.Update(value.Id, value, node, timestamp);
 
-            AssertExistsInRepository(value, node, timestamp);
+            AssertExistsInRepository(value, node, timestamp - 100);
         }
 
         [Theory]
         [AutoData]
         public void Update_SameValueExistsWithHigherTimestamp_DoesNotDoAnything(TestType value, Node node, long timestamp)
         {
-            _repository.AddValue(new PersistenceEntity<TestType>(value, node, timestamp));
+            _repository.AddValues(new PersistenceEntity<TestType>(value, node, timestamp));
 
             _service.Update(value.Id, value, node, timestamp - 100);
 
@@ -60,7 +60,7 @@ namespace CRDT.Application.UnitTests.Convergent
             var value = TestTypeBuilder.Build(id);
             var newValue = TestTypeBuilder.Build(id);
 
-            _repository.AddValue(new PersistenceEntity<TestType>(value, node, timestamp));
+            _repository.AddValues(new PersistenceEntity<TestType>(value, node, timestamp));
 
             _service.Update(id, newValue, node, timestamp + 100);
 
@@ -75,7 +75,7 @@ namespace CRDT.Application.UnitTests.Convergent
             var value = TestTypeBuilder.Build(id);
             var newValue = TestTypeBuilder.Build(id);
 
-            _repository.AddValue(new PersistenceEntity<TestType>(value, node, timestamp + 100));
+            _repository.AddValues(new PersistenceEntity<TestType>(value, node, timestamp + 100));
 
             _service.Update(value.Id, newValue, node, timestamp);
 

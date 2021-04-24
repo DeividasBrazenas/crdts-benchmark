@@ -20,11 +20,11 @@ namespace CRDT.Registers.UnitTests.Commutative
         {
             var lww = new LWW_Register<TestType>(value, node, 0);
 
-            var result = lww.Update(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), node, 1));
-            result = result.Update(new Operation(JToken.Parse($"{{\"IntValue\": {intValue}}}"), node, 2));
-            result = result.Update(new Operation(JToken.Parse($"{{\"DecimalValue\": {decimalValue}}}"), node, 3));
-            result = result.Update(new Operation(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), node, 4));
-            result = result.Update(new Operation(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), otherNode, 5));
+            var result = lww.Merge(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), node, 1));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"IntValue\": {intValue}}}"), node, 2));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"DecimalValue\": {decimalValue}}}"), node, 3));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), node, 4));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), otherNode, 5));
 
             Assert.Same(otherNode, result.UpdatedBy);
             Assert.Equal(5, result.Timestamp.Value);
@@ -42,11 +42,11 @@ namespace CRDT.Registers.UnitTests.Commutative
         {
             var lww = new LWW_Register<TestType>(value, node, 10);
 
-            var result = lww.Update(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), node, 1));
-            result = result.Update(new Operation(JToken.Parse($"{{\"IntValue\": {intValue}}}"), node, 2));
-            result = result.Update(new Operation(JToken.Parse($"{{\"DecimalValue\": {decimalValue}}}"), node, 3));
-            result = result.Update(new Operation(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), node, 4));
-            result = result.Update(new Operation(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), node, 5));
+            var result = lww.Merge(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), node, 1));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"IntValue\": {intValue}}}"), node, 2));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"DecimalValue\": {decimalValue}}}"), node, 3));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), node, 4));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), node, 5));
 
             Assert.Equal(result, lww);
             Assert.Equal(value, result.Value);
@@ -59,11 +59,11 @@ namespace CRDT.Registers.UnitTests.Commutative
         {
             var lww = new LWW_Register<TestType>(value, node, 5);
 
-            var result = lww.Update(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), node, 1));
-            result = result.Update(new Operation(JToken.Parse($"{{\"IntValue\": {intValue}}}"), otherNode, 2));
-            result = result.Update(new Operation(JToken.Parse($"{{\"DecimalValue\": {decimalValue}}}"), otherNode, 3));
-            result = result.Update(new Operation(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), node, 8));
-            result = result.Update(new Operation(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), node, 9));
+            var result = lww.Merge(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), node, 1));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"IntValue\": {intValue}}}"), otherNode, 2));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"DecimalValue\": {decimalValue}}}"), otherNode, 3));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), node, 8));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), node, 9));
 
             Assert.Same(node, result.UpdatedBy);
             Assert.Equal(9, result.Timestamp.Value);
@@ -80,9 +80,9 @@ namespace CRDT.Registers.UnitTests.Commutative
         {
             var lww = new LWW_Register<TestType>(value, node, 0);
 
-            var result = lww.Update(new Operation(JToken.Parse("{\"StringValue\": null}"), node, 1));
-            result = result.Update(new Operation(JToken.Parse("{\"NullableLongValue\": null}"), node, 2));
-            result = result.Update(new Operation(JToken.Parse("{\"ObjectValue\": null}"), node, 3));
+            var result = lww.Merge(new Operation(JToken.Parse("{\"StringValue\": null}"), node, 1));
+            result = result.Merge(new Operation(JToken.Parse("{\"NullableLongValue\": null}"), node, 2));
+            result = result.Merge(new Operation(JToken.Parse("{\"ObjectValue\": null}"), node, 3));
 
             Assert.Null(result.Value.StringValue);
             Assert.Null(result.Value.NullableLongValue);
@@ -96,7 +96,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         {
             var lww = new LWW_Register<TestType>(value, node, 0);
 
-            var result = lww.Update(new Operation(JToken.Parse($"{{\"ObjectValue\": {{ \"StringValue\": \"{stringValue}\", " +
+            var result = lww.Merge(new Operation(JToken.Parse($"{{\"ObjectValue\": {{ \"StringValue\": \"{stringValue}\", " +
                                                               $"\"DecimalValue\": {decimalValue}, \"IntValue\": {intValue}," +
                                                               $"\"NullableLongValue\": null }}}}"), node, 1));
 
@@ -108,16 +108,16 @@ namespace CRDT.Registers.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Update_NonExistingValues_DoNotTakeEffect(TestType value, Node node,
+        public void Update_NonExistingValues_DoNotTakeEffectForValues(TestType value, Node node,
             string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
             var lww = new LWW_Register<TestType>(value, node, 0);
 
-            var result = lww.Update(new Operation(JToken.Parse($"{{\"FooStringValue\": \"{stringValue}\"}}"), node, 1));
-            result = result.Update(new Operation(JToken.Parse($"{{\"FooIntValue\": {intValue}}}"), node, 2));
-            result = result.Update(new Operation(JToken.Parse($"{{\"FooDecimalValue\": {decimalValue}}}"), node, 3));
-            result = result.Update(new Operation(JToken.Parse($"{{\"FooNullableLongValue\": {longValue}}}"), node, 4));
-            result = result.Update(new Operation(JToken.Parse($"{{\"FooGuidValue\": \"{guidValue}\"}}"), node, 5));
+            var result = lww.Merge(new Operation(JToken.Parse($"{{\"FooStringValue\": \"{stringValue}\"}}"), node, 1));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"FooIntValue\": {intValue}}}"), node, 2));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"FooDecimalValue\": {decimalValue}}}"), node, 3));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"FooNullableLongValue\": {longValue}}}"), node, 4));
+            result = result.Merge(new Operation(JToken.Parse($"{{\"FooGuidValue\": \"{guidValue}\"}}"), node, 5));
 
             Assert.Equal(result, lww);
             Assert.Equal(value, result.Value);
@@ -129,8 +129,8 @@ namespace CRDT.Registers.UnitTests.Commutative
         {
             var lww = new LWW_Register<TestType>(value, node, 0);
 
-            var result = lww.Update(new Operation(JToken.Parse("{\"IntArray\": [1, 2, 3, 4, 5]}"), node, 1));
-            result = result.Update(new Operation(JToken.Parse("{\"LongList\": []}"), node, 2));
+            var result = lww.Merge(new Operation(JToken.Parse("{\"IntArray\": [1, 2, 3, 4, 5]}"), node, 1));
+            result = result.Merge(new Operation(JToken.Parse("{\"LongList\": []}"), node, 2));
 
             Assert.Equal(5, result.Value.IntArray.Length);
             Assert.Empty(result.Value.LongList);
@@ -142,8 +142,8 @@ namespace CRDT.Registers.UnitTests.Commutative
         {
             var lww = new LWW_Register<TestType>(value, node, 0);
 
-            var result = lww.Update(new Operation(JToken.Parse("{\"IntArray\": []}"), node, 1));
-            result = result.Update(new Operation(JToken.Parse("{\"LongList\": [-1000, 100, 200, 300, 400, 500]}"), node, 2));
+            var result = lww.Merge(new Operation(JToken.Parse("{\"IntArray\": []}"), node, 1));
+            result = result.Merge(new Operation(JToken.Parse("{\"LongList\": [-1000, 100, 200, 300, 400, 500]}"), node, 2));
 
             Assert.Equal(6, result.Value.LongList.Count);
             Assert.Empty(result.Value.IntArray);
@@ -158,7 +158,7 @@ namespace CRDT.Registers.UnitTests.Commutative
 
             var lww = new LWW_Register<TestType>(value, node, 1);
 
-            var result = lww.Update(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), otherNode, 1));
+            var result = lww.Merge(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), otherNode, 1));
 
             Assert.Same(result, lww);
             Assert.Same(value, result.Value);
@@ -173,7 +173,7 @@ namespace CRDT.Registers.UnitTests.Commutative
 
             var lww = new LWW_Register<TestType>(value, node, 1);
 
-            var result = lww.Update(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), otherNode, 1));
+            var result = lww.Merge(new Operation(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), otherNode, 1));
 
             Assert.Equal(otherNode, result.UpdatedBy);
             Assert.Equal(stringValue, result.Value.StringValue);
