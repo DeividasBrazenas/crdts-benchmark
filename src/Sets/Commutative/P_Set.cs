@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
-using CRDT.Sets.Operations;
 
 namespace CRDT.Sets.Commutative 
 {
@@ -18,17 +16,10 @@ namespace CRDT.Sets.Commutative
         {
         }
 
-        public P_Set<T> Add(Operation operation)
+        public P_Set<T> Add(T value) => new(Adds.Add(value), Removes);
+
+        public P_Set<T> Remove(T value)
         {
-            var value = operation.Value.ToObject<T>();
-
-            return new(Adds.Add(value), Removes);
-        }
-
-        public P_Set<T> Remove(Operation operation)
-        {
-            var value = operation.Value.ToObject<T>();
-
             if (Adds.Any(e => Equals(e, value)))
             {
                 return new(Adds, Removes.Add(value));
@@ -39,20 +30,12 @@ namespace CRDT.Sets.Commutative
 
         public bool Lookup(T value)
         {
-            if (Removes.Any(e => Equals(e, value)))
+            if (Removes.Any(r => Equals(r, value)))
             {
                 return false;
             }
 
-            return Adds.Any(e => Equals(e, value));
-        }
-
-        public P_Set<T> Merge(P_Set<T> otherSet)
-        {
-            var adds = Adds.Union(otherSet.Adds);
-            var removes = Removes.Union(otherSet.Removes);
-
-            return new P_Set<T>(adds, removes);
+            return Adds.Any(r => Equals(r, value));
         }
     }
 }

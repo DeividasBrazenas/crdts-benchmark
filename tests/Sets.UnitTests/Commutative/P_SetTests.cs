@@ -2,10 +2,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Commutative;
-using CRDT.Sets.Operations;
 using CRDT.UnitTestHelpers.TestTypes;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace CRDT.Sets.UnitTests.Commutative
@@ -41,9 +38,7 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var pSet = new P_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
+            pSet = pSet.Add(value);
 
             Assert.Contains(value, pSet.Adds);
         }
@@ -54,10 +49,8 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var pSet = new P_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
-            pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
+            pSet = pSet.Add(value);
+            pSet = pSet.Add(value);
 
             Assert.Equal(1, pSet.Adds.Count(v => Equals(v, value)));
         }
@@ -68,11 +61,9 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var pSet = new P_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
+            var newPSet = pSet.Remove(value);
 
-            var newPSet = pSet.Remove(new Operation(JToken.Parse(valueJson)));
-
-            Assert.Same(pSet, newPSet);
+            Assert.Equal(pSet, newPSet);
         }
 
         [Theory]
@@ -81,10 +72,8 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var pSet = new P_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
-            pSet = pSet.Remove(new Operation(JToken.Parse(valueJson)));
+            pSet = pSet.Add(value);
+            pSet = pSet.Remove(value);
 
             Assert.Contains(value, pSet.Removes);
         }
@@ -95,24 +84,20 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var pSet = new P_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
-            pSet = pSet.Remove(new Operation(JToken.Parse(valueJson)));
-            pSet = pSet.Remove(new Operation(JToken.Parse(valueJson)));
+            pSet = pSet.Add(value);
+            pSet = pSet.Remove(value);
+            pSet = pSet.Remove(value);
 
             Assert.Equal(1, pSet.Removes.Count(v => Equals(v, value)));
         }
 
         [Theory]
         [AutoData]
-        public void Value_ReturnsAddedElementIfItWasNotRemoved(TestType value)
+        public void Lookup_AddedAndNotRemoved_ReturnsTrue(TestType value)
         {
             var pSet = new P_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
+            pSet = pSet.Add(value);
 
             var lookup = pSet.Lookup(value);
 
@@ -121,39 +106,16 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Value_ReturnsNullIfItWasRemoved(TestType value)
+        public void Lookup_AddedAndRemoved_ReturnsFalse(TestType value)
         {
             var pSet = new P_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            pSet = pSet.Add(new Operation(JToken.Parse(valueJson)));
-            pSet = pSet.Remove(new Operation(JToken.Parse(valueJson))); ;
+            pSet = pSet.Add(value);
+            pSet = pSet.Remove(value);
 
             var lookup = pSet.Lookup(value);
 
             Assert.False(lookup);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Merge_MergesAddsAndRemoves(TestType one, TestType two, TestType three, TestType four, TestType five)
-        {
-            var firstPSet = new P_Set<TestType>(new[] { one, two }.ToImmutableHashSet(), new[] { three }.ToImmutableHashSet());
-
-            var secondPSet = new P_Set<TestType>(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
-
-            var pSet = firstPSet.Merge(secondPSet);
-
-            Assert.Equal(4, pSet.Adds.Count);
-            Assert.Equal(2, pSet.Removes.Count);
-            Assert.Contains(one, pSet.Adds);
-            Assert.Contains(two, pSet.Adds);
-            Assert.Contains(three, pSet.Adds);
-            Assert.Contains(four, pSet.Adds);
-            Assert.Contains(three, pSet.Removes);
-            Assert.Contains(five, pSet.Removes);
-            Assert.Contains(five, pSet.Removes);
         }
     }
 }

@@ -6,26 +6,25 @@ using CRDT.Application.Interfaces;
 using CRDT.Application.UnitTests.Repositories;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
-using static CRDT.UnitTestHelpers.TestTypes.TestTypeBuilder;
 
 namespace CRDT.Application.UnitTests.Commutative
 {
     public class G_SetServiceTests
     {
-        private readonly INewRepository<TestType> _repository;
+        private readonly IG_SetRepository<TestType> _repository;
         private readonly G_SetService<TestType> _gSetService;
 
         public G_SetServiceTests()
         {
-            _repository = new NewTestTypeRepository();
+            _repository = new G_SetRepository();
             _gSetService = new G_SetService<TestType>(_repository);
         }
 
         [Theory]
         [AutoData]
-        public void Merge_NoExistingValues_AddsElementsToTheRepository(TestType value)
+        public void Add_NoExistingValues_AddsElementsToTheRepository(TestType value)
         {
-            _gSetService.Merge(value);
+            _gSetService.Add(value);
 
             var repositoryValues = _repository.GetValues();
             Assert.Equal(1, repositoryValues.Count(v => Equals(v, value)));
@@ -33,11 +32,11 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Merge_WithExistingValues_AddsElementsToTheRepository(List<TestType> existingValues, TestType value)
+        public void Add_WithExistingValues_AddsElementsToTheRepository(List<TestType> existingValues, TestType value)
         {
-            _repository.AddValues(existingValues);
+            _repository.PersistValues(existingValues);
 
-            _gSetService.Merge(value);
+            _gSetService.Add(value);
 
             var repositoryValues = _repository.GetValues();
             Assert.Equal(1, repositoryValues.Count(v => Equals(v, value)));
@@ -45,13 +44,13 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Merge_IsIdempotent(List<TestType> existingValues, TestType value)
+        public void Add_IsIdempotent(List<TestType> existingValues, TestType value)
         {
-            _repository.AddValues(existingValues);
+            _repository.PersistValues(existingValues);
 
-            _gSetService.Merge(value);
-            _gSetService.Merge(value);
-            _gSetService.Merge(value);
+            _gSetService.Add(value);
+            _gSetService.Add(value);
+            _gSetService.Add(value);
 
             var repositoryValues = _repository.GetValues();
             Assert.Equal(1, repositoryValues.Count(v => Equals(v, value)));
@@ -61,9 +60,9 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_ReturnsTrue(List<TestType> existingValues, TestType value)
         {
-            _repository.AddValues(existingValues);
+            _repository.PersistValues(existingValues);
 
-            _gSetService.Merge(value);
+            _gSetService.Add(value);
 
             var lookup = _gSetService.Lookup(value);
 
@@ -74,7 +73,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_ReturnsFalse(List<TestType> existingValues, TestType value)
         {
-            _repository.AddValues(existingValues);
+            _repository.PersistValues(existingValues);
 
             var lookup = _gSetService.Lookup(value);
 

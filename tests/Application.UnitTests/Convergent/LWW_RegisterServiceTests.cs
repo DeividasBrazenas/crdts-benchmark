@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using AutoFixture;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent;
 using CRDT.Application.Entities;

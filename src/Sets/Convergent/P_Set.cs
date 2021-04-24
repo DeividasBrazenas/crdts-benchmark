@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
@@ -17,39 +16,29 @@ namespace CRDT.Sets.Convergent
         {
         }
 
-        public P_Set<T> Add(T value)
-        {
-            Adds = Adds.Add(value);
-
-            return this;
-        }
+        public P_Set<T> Add(T value) => new(Adds.Add(value), Removes);
 
         public P_Set<T> Remove(T value)
         {
             if (Adds.Any(e => Equals(e, value)))
             {
-                Removes = Removes.Add(value);
+                return new(Adds, Removes.Add(value));
             }
 
             return this;
         }
 
-        public T Value(Guid id)
+        public bool Lookup(T value)
         {
-            if (Removes.Any(e => e.Id == id))
+            if (Removes.Any(r => Equals(r, value)))
             {
-                return null;
+                return false;
             }
 
-            return Adds.FirstOrDefault(e => e.Id == id);
+            return Adds.Any(r => Equals(r, value));
         }
 
-        public P_Set<T> Merge(P_Set<T> otherSet)
-        {
-            var adds = Adds.Union(otherSet.Adds);
-            var removes = Removes.Union(otherSet.Removes);
-
-            return new P_Set<T>(adds, removes);
-        }
+        public P_Set<T> Merge(IImmutableSet<T> adds, IImmutableSet<T> removes) => 
+            new(Adds.Union(adds), Removes.Union(removes));
     }
 }

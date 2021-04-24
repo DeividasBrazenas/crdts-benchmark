@@ -26,8 +26,4 @@
     <ProjectReference Include="..\UnitTestHelpers\UnitTestHelpers.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Convergent\" />
-  </ItemGroup>
-
 </Project>

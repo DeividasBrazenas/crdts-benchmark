@@ -72,36 +72,5 @@ namespace CRDT.Sets.UnitTests.Commutative
 
             Assert.False(exists);
         }
-
-        [Theory]
-        [AutoData]
-        public void Merge_MergesValue(TestType one, TestType two, TestType three)
-        {
-            var gSet = new G_Set<TestType>(new[] { one, two }.ToImmutableHashSet());
-
-            var newGSet = gSet.Merge(three);
-
-            Assert.Equal(3, newGSet.Values.Count);
-            Assert.Contains(one, newGSet.Values);
-            Assert.Contains(two, newGSet.Values);
-            Assert.Contains(three, newGSet.Values);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Merge_SameValueMultipleTimes_MergesOnlyOnce(TestType one, TestType two, TestType three)
-        {
-            var gSet = new G_Set<TestType>(new[] { one, two }.ToImmutableHashSet());
-
-            var newGSet = gSet.Merge(three);
-            newGSet = gSet.Merge(three);
-            newGSet = gSet.Merge(three);
-            newGSet = gSet.Merge(three);
-
-            Assert.Equal(3, newGSet.Values.Count);
-            Assert.Contains(one, newGSet.Values);
-            Assert.Contains(two, newGSet.Values);
-            Assert.Contains(three, newGSet.Values);
-        }
     }
 }

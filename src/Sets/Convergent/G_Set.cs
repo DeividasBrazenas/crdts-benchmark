@@ -12,7 +12,6 @@ namespace CRDT.Sets.Convergent
 
         public G_Set(IImmutableSet<T> values) : base(values)
         {
-            Values = values;
         }
 
         public G_Set<T> Add(T value) => new(Values.Add(value));

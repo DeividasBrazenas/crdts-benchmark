@@ -93,50 +93,48 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndNotRemoved_ReturnsAddedElement(TestType value)
+        public void Lookup_AddedAndNotRemoved_ReturnsTrue(TestType value)
         {
             var pSet = new P_Set<TestType>();
 
             pSet = pSet.Add(value);
 
-            var actualValue = pSet.Value(value.Id);
+            var lookup = pSet.Lookup(value);
 
-            Assert.Equal(value, actualValue);
+            Assert.True(lookup);
         }
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndRemoved_ReturnsNull(TestType value)
+        public void Lookup_AddedAndRemoved_ReturnsFalse(TestType value)
         {
             var pSet = new P_Set<TestType>();
 
             pSet = pSet.Add(value);
             pSet = pSet.Remove(value);
 
-            var actualValue = pSet.Value(value.Id);
+            var lookup = pSet.Lookup(value);
 
-            Assert.Null(actualValue);
+            Assert.False(lookup);
         }
 
         [Theory]
         [AutoData]
         public void Merge_MergesAddsAndRemoves(TestType one, TestType two, TestType three, TestType four, TestType five)
         {
-            var firstPSet = new P_Set<TestType>(new[] { one, two }.ToImmutableHashSet(), new[] { three }.ToImmutableHashSet());
+            var pSet = new P_Set<TestType>(new[] { one, two }.ToImmutableHashSet(), new[] { three }.ToImmutableHashSet());
 
-            var secondPSet = new P_Set<TestType>(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
+            var newPSet = pSet.Merge(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
 
-            var pSet = firstPSet.Merge(secondPSet);
-
-            Assert.Equal(4, pSet.Adds.Count);
-            Assert.Equal(2, pSet.Removes.Count);
-            Assert.Contains(one, pSet.Adds);
-            Assert.Contains(two, pSet.Adds);
-            Assert.Contains(three, pSet.Adds);
-            Assert.Contains(four, pSet.Adds);
-            Assert.Contains(three, pSet.Removes);
-            Assert.Contains(five, pSet.Removes);
-            Assert.Contains(five, pSet.Removes);
+            Assert.Equal(4, newPSet.Adds.Count);
+            Assert.Equal(2, newPSet.Removes.Count);
+            Assert.Contains(one, newPSet.Adds);
+            Assert.Contains(two, newPSet.Adds);
+            Assert.Contains(three, newPSet.Adds);
+            Assert.Contains(four, newPSet.Adds);
+            Assert.Contains(three, newPSet.Removes);
+            Assert.Contains(five, newPSet.Removes);
+            Assert.Contains(five, newPSet.Removes);
         }
     }
 }

@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using CRDT.Application.Interfaces;
 using CRDT.UnitTestHelpers.TestTypes;
 
 namespace CRDT.Application.UnitTests.Repositories
 {
-    public class NewTestTypeRepository : INewRepository<TestType>
+    public class G_SetRepository : IG_SetRepository<TestType>
     {
         public List<TestType> Entities { get; }
 
-        public NewTestTypeRepository()
+        public G_SetRepository()
         {
             Entities = new List<TestType>();
         }
@@ -20,12 +19,7 @@ namespace CRDT.Application.UnitTests.Repositories
             return Entities;
         }
 
-        public void AddValue(TestType value)
-        {
-            Entities.Add(value);
-        }
-
-        public void AddValues(IEnumerable<TestType> values)
+        public void PersistValues(IEnumerable<TestType> values)
         {
             foreach (var value in values)
             {

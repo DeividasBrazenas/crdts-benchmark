@@ -11,12 +11,12 @@ namespace CRDT.Application.UnitTests.Convergent
 {
     public class G_SetServiceTests
     {
-        private readonly INewRepository<TestType> _repository;
+        private readonly IG_SetRepository<TestType> _repository;
         private readonly G_SetService<TestType> _gSetService;
 
         public G_SetServiceTests()
         {
-            _repository = new NewTestTypeRepository();
+            _repository = new G_SetRepository();
             _gSetService = new G_SetService<TestType>(_repository);
         }
 
@@ -34,7 +34,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Add_WithExistingValues_AddsElementToTheRepository(List<TestType> values, TestType value)
         {
-            _repository.AddValues(values);
+            _repository.PersistValues(values);
 
             _gSetService.Add(value);
 
@@ -56,7 +56,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Merge_WithExistingValues_AddsElementsToTheRepository(List<TestType> existingValues, List<TestType> values)
         {
-            _repository.AddValues(existingValues);
+            _repository.PersistValues(existingValues);
 
             _gSetService.Merge(values);
 
@@ -68,7 +68,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Merge_IsIdempotent(List<TestType> values, TestType value)
         {
-            _repository.AddValues(values);
+            _repository.PersistValues(values);
 
             values.Add(value);
 
@@ -84,7 +84,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_ReturnsTrue(List<TestType> values, TestType value)
         {
-            _repository.AddValues(values);
+            _repository.PersistValues(values);
 
             _gSetService.Add(value);
 
@@ -97,7 +97,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_ReturnsFalse(List<TestType> values, TestType value)
         {
-            _repository.AddValues(values);
+            _repository.PersistValues(values);
 
             var lookup = _gSetService.Lookup(value);
 

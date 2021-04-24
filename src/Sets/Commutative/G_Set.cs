@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
 
@@ -13,11 +12,8 @@ namespace CRDT.Sets.Commutative
 
         public G_Set(IImmutableSet<T> values) : base(values)
         {
-            Values = values;
         }
 
         public G_Set<T> Add(T value) => new(Values.Add(value));
-
-        public G_Set<T> Merge(T value) => new(Values.Add(value));
     }
 }

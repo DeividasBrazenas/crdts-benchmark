@@ -4,7 +4,6 @@ using CRDT.Core.Cluster;
 using CRDT.Registers.Commutative;
 using CRDT.Registers.Operations;
 using CRDT.UnitTestHelpers.TestTypes;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using static CRDT.UnitTestHelpers.GuidHelpers;

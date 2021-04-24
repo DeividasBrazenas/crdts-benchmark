@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
-using CRDT.Application.Entities;
 using CRDT.Application.Interfaces;
 using CRDT.Core.Abstractions;
-using CRDT.Core.Cluster;
 using CRDT.Sets.Convergent;
 
 namespace CRDT.Application.Convergent
 {
     public class G_SetService<T> where T : DistributedEntity
     {
-        private readonly INewRepository<T> _repository;
+        private readonly IG_SetRepository<T> _repository;
 
-        public G_SetService(INewRepository<T> repository)
+        public G_SetService(IG_SetRepository<T> repository)
         {
             _repository = repository;
         }
@@ -27,7 +23,7 @@ namespace CRDT.Application.Convergent
 
             set = set.Add(value);
 
-            _repository.AddValues(set.Values);
+            _repository.PersistValues(set.Values);
         }
 
         public void Merge(IEnumerable<T> values)
@@ -38,7 +34,7 @@ namespace CRDT.Application.Convergent
 
             set = set.Merge(values.ToImmutableHashSet());
 
-            _repository.AddValues(set.Values);
+            _repository.PersistValues(set.Values);
         }
 
         public bool Lookup(T value)

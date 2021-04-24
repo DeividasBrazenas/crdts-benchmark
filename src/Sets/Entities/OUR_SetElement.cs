@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CRDT.Core.Abstractions;
 using CRDT.Core.DistributedTime;
 
