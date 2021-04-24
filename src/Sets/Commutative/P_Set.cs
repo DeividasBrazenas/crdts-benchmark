@@ -27,15 +27,5 @@ namespace CRDT.Sets.Commutative
 
             return this;
         }
-
-        public bool Lookup(T value)
-        {
-            if (Removes.Any(r => Equals(r, value)))
-            {
-                return false;
-            }
-
-            return Adds.Any(r => Equals(r, value));
-        }
     }
 }

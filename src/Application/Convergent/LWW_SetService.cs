@@ -3,48 +3,51 @@ using System.Collections.Immutable;
 using CRDT.Application.Interfaces;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Convergent;
+using CRDT.Sets.Entities;
 
 namespace CRDT.Application.Convergent
 {
-    public class P_SetService<T> where T : DistributedEntity
+    public class LWW_SetService<T> where T : DistributedEntity
     {
-        private readonly IP_SetRepository<T> _repository;
+        private readonly ILWW_SetRepository<T> _repository;
 
-        public P_SetService(IP_SetRepository<T> repository)
+        public LWW_SetService(ILWW_SetRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Add(T value)
+        public void Add(T value, long timestamp)
         {
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            set = set.Add(value);
+            var element = new LWW_SetElement<T>(value, timestamp);
+            set = set.Add(element);
 
             _repository.PersistAdds(set.Adds);
         }
 
-        public void Remove(T value)
+        public void Remove(T value, long timestamp)
         {
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            set = set.Remove(value);
+            var element = new LWW_SetElement<T>(value, timestamp);
+            set = set.Remove(element);
 
             _repository.PersistRemoves(set.Removes);
         }
 
-        public void Merge(IEnumerable<T> adds, IEnumerable<T> removes)
+        public void Merge(IEnumerable<LWW_SetElement<T>> adds, IEnumerable<LWW_SetElement<T>> removes)
         {
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
             set = set.Merge(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
 
@@ -57,7 +60,7 @@ namespace CRDT.Application.Convergent
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
             var lookup = set.Lookup(value);
 

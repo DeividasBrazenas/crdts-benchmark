@@ -1,12 +1,10 @@
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Commutative;
 using CRDT.Sets.Entities;
-using CRDT.Sets.Operations;
 using CRDT.UnitTestHelpers.TestTypes;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace CRDT.Sets.UnitTests.Commutative
@@ -38,27 +36,23 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToAddsSet(TestType value, long timestamp)
+        public void Add_AddsElementToAddsSet(LWW_SetElement<TestType> element)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-            lwwSet = lwwSet.Add(new LWW_SetOperation(JToken.Parse(valueJson), timestamp));
+            lwwSet = lwwSet.Add(element);
 
-            var expectedElement = new LWW_SetElement<TestType>(value, timestamp);
-            Assert.Contains(expectedElement, lwwSet.Adds);
+            Assert.Contains(element, lwwSet.Adds);
         }
 
         [Theory]
         [AutoData]
-        public void Add_AddSameElementTwiceWithDifferentTimestamps_AddsTwoValues(TestType value, long timestamp)
+        public void Add_AddSameElementTwiceWithDifferentTimestamp_AddsTwoElements(TestType value)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            var firstAdd = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 100);
-            var secondAdd = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
+            var firstAdd = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
+            var secondAdd = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
 
             lwwSet = lwwSet.Add(firstAdd);
             lwwSet = lwwSet.Add(secondAdd);
@@ -68,14 +62,12 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_ConcurrentElements_AddsOnlyOneElement(TestType value, long timestamp)
+        public void Add_ConcurrentAdds_AddsOnlyOne(TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            var firstAdd = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-            var secondAdd = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
+            var firstAdd = new LWW_SetElement<TestType>(value, timestamp);
+            var secondAdd = new LWW_SetElement<TestType>(value, timestamp);
 
             lwwSet = lwwSet.Add(firstAdd);
             lwwSet = lwwSet.Add(secondAdd);
@@ -85,78 +77,39 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_WithoutId_DoesNotDoAnything(TestType value, long timestamp)
+        public void Remove_BeforeAdd_HasNoEffect(LWW_SetElement<TestType> element)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var newValue = new
-            {
-                StringValue = value.StringValue,
-                IntValue = value.IntValue,
-                DecimalValue = value.DecimalValue,
-                NullableLongValue = value.NullableLongValue,
-                GuidValue = value.GuidValue,
-                IntArray = value.IntArray,
-                LongList = value.LongList,
-                ObjectValue = value.ObjectValue
-            };
-
-            var valueJson = JsonConvert.SerializeObject(newValue);
-
-            var add = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-
-            var newLwwSet = lwwSet.Add(add);
+            var newLwwSet = lwwSet.Remove(element);
 
             Assert.Same(lwwSet, newLwwSet);
         }
 
         [Theory]
         [AutoData]
-        public void Remove_BeforeAdd_HasNoEffect(TestType value, long timestamp)
+        public void Remove_RemovesElementToRemovesSet(TestType value)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            var remove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-
-            var newLwwSet = lwwSet.Remove(remove);
-
-            Assert.Same(lwwSet, newLwwSet);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_RemovesElementToRemovesSet(
-            TestType value, long timestamp)
-        {
-            var lwwSet = new LWW_Set<TestType>();
-
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            var add = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-            var remove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 100);
+            var add = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
+            var remove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
 
             lwwSet = lwwSet.Add(add);
             lwwSet = lwwSet.Remove(remove);
 
-            var expectedRemoveElement = new LWW_SetElement<TestType>(value, timestamp + 100);
-
-            Assert.Contains(expectedRemoveElement, lwwSet.Removes);
+            Assert.Contains(remove, lwwSet.Removes);
         }
 
         [Theory]
         [AutoData]
-        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_AddsTwoElements(
-            TestType value, long timestamp)
+        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_AddsTwoElements(TestType value)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            var add = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-            var firstRemove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 100);
-            var secondRemove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 1000);
+            var add = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
+            var firstRemove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
+            var secondRemove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(2).Ticks);
 
             lwwSet = lwwSet.Add(add);
             lwwSet = lwwSet.Remove(firstRemove);
@@ -167,46 +120,13 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_WithoutId_DoesNotDoAnything(TestType value,
-            long timestamp)
+        public void Remove_ConcurrentRemoves_AddsOnlyOne(TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var newValue = new
-            {
-                StringValue = value.StringValue,
-                IntValue = value.IntValue,
-                DecimalValue = value.DecimalValue,
-                NullableLongValue = value.NullableLongValue,
-                GuidValue = value.GuidValue,
-                IntArray = value.IntArray,
-                LongList = value.LongList,
-                ObjectValue = value.ObjectValue
-            };
-
-            var valueJson = JsonConvert.SerializeObject(newValue);
-
-            var add = new LWW_SetOperation(JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
-            var remove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-
-            lwwSet = lwwSet.Add(add);
-            var newLwwSet = lwwSet.Remove(remove);
-
-            Assert.Same(lwwSet, newLwwSet);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_ConcurrentTimestamps_AddsOnlyOneObjectToRemoveSet(
-            TestType value, long timestamp)
-        {
-            var lwwSet = new LWW_Set<TestType>();
-
-            var valueJson = JsonConvert.SerializeObject(value);
-
-            var add = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-            var firstRemove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 100);
-            var secondRemove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 100);
+            var add = new LWW_SetElement<TestType>(value, timestamp);
+            var firstRemove = new LWW_SetElement<TestType>(value, timestamp + 100);
+            var secondRemove = new LWW_SetElement<TestType>(value, timestamp + 100);
 
             lwwSet = lwwSet.Add(add);
             lwwSet = lwwSet.Remove(firstRemove);
@@ -217,84 +137,51 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndNotRemoved_ReturnsAddedElement(
-            TestType value, long timestamp)
+        public void Lookup_AddedAndNotRemoved_ReturnsTrue(LWW_SetElement<TestType> element)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
+            lwwSet = lwwSet.Add(element);
 
-            var add = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
+            var lookup = lwwSet.Lookup(element.Value);
 
-            lwwSet = lwwSet.Add(add);
-
-            var actualValue = lwwSet.Value(value.Id);
-
-            Assert.Equal(value, actualValue);
+            Assert.True(lookup);
         }
 
         [Theory]
         [AutoData]
-        public void Value_RemoveBeforeAdd_ReturnsAddedElement(
-            TestType value, long timestamp)
+        public void Lookup_AddedAndRemoved_ReturnsFalse(TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
+            var addElement = new LWW_SetElement<TestType>(value, timestamp);
+            var removeElement = new LWW_SetElement<TestType>(value, timestamp + 10);
 
-            var firstAdd = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-            var secondAdd = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 1000);
-            var remove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 100);
+            lwwSet = lwwSet.Add(addElement);
+            lwwSet = lwwSet.Remove(removeElement);
 
-            lwwSet = lwwSet.Add(firstAdd);
-            lwwSet = lwwSet.Remove(remove);
-            lwwSet = lwwSet.Add(secondAdd);
+            var lookup = lwwSet.Lookup(value);
 
-            var actualValue = lwwSet.Value(value.Id);
-
-            Assert.Equal(value, actualValue);
+            Assert.False(lookup);
         }
 
         [Theory]
         [AutoData]
-        public void Value_RemoveAfterAdd_ReturnsNull(
-            TestType value, long timestamp)
+        public void Lookup_ReAdded_ReturnsTrue(TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var valueJson = JsonConvert.SerializeObject(value);
+            var addElement = new LWW_SetElement<TestType>(value, timestamp);
+            var removeElement = new LWW_SetElement<TestType>(value, timestamp + 10);
+            var reAddElement = new LWW_SetElement<TestType>(value, timestamp + 100);
 
-            var add = new LWW_SetOperation(JToken.Parse(valueJson), timestamp);
-            var remove = new LWW_SetOperation(JToken.Parse(valueJson), timestamp + 100);
+            lwwSet = lwwSet.Add(addElement);
+            lwwSet = lwwSet.Remove(removeElement);
+            lwwSet = lwwSet.Add(reAddElement);
 
-            lwwSet = lwwSet.Add(add);
-            lwwSet = lwwSet.Remove(remove);
+            var lookup = lwwSet.Lookup(value);
 
-            var actualValue = lwwSet.Value(value.Id);
-
-            Assert.Null(actualValue);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Merge_MergesAddsAndRemoves(LWW_SetElement<TestType> one, LWW_SetElement<TestType> two,
-            LWW_SetElement<TestType> three, LWW_SetElement<TestType> four, LWW_SetElement<TestType> five)
-        {
-            var firstLwwSet = new LWW_Set<TestType>(new[] { one, two }.ToImmutableHashSet(), new[] { three }.ToImmutableHashSet());
-
-            var secondPSet = new LWW_Set<TestType>(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
-
-            var lwwSet = firstLwwSet.Merge(secondPSet);
-
-            Assert.Equal(4, lwwSet.Adds.Count);
-            Assert.Equal(2, lwwSet.Removes.Count);
-            Assert.Contains(one, lwwSet.Adds);
-            Assert.Contains(two, lwwSet.Adds);
-            Assert.Contains(three, lwwSet.Adds);
-            Assert.Contains(four, lwwSet.Adds);
-            Assert.Contains(three, lwwSet.Removes);
-            Assert.Contains(five, lwwSet.Removes);
-            Assert.Contains(five, lwwSet.Removes);
+            Assert.True(lookup);
         }
     }
 }

@@ -12,19 +12,19 @@ namespace CRDT.Application.UnitTests.Convergent
     public class P_SetServiceTests
     {
         private readonly IP_SetRepository<TestType> _repository;
-        private readonly P_SetService<TestType> _gSetService;
+        private readonly P_SetService<TestType> _pSetService;
 
         public P_SetServiceTests()
         {
             _repository = new P_SetRepository();
-            _gSetService = new P_SetService<TestType>(_repository);
+            _pSetService = new P_SetService<TestType>(_repository);
         }
 
         [Theory]
         [AutoData]
         public void Add_NoExistingValues_AddsElementToTheRepository(TestType value)
         {
-            _gSetService.Add(value);
+            _pSetService.Add(value);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(value, repositoryValues);
@@ -36,7 +36,7 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             _repository.PersistAdds(adds);
 
-            _gSetService.Add(value);
+            _pSetService.Add(value);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(value, repositoryValues);
@@ -46,7 +46,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value)
         {
-            _gSetService.Remove(value);
+            _pSetService.Remove(value);
 
             var repositoryValues = _repository.GetRemoves();
             Assert.DoesNotContain(value, repositoryValues);
@@ -56,8 +56,8 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Remove_AddExists_AddsElementToTheRepository(TestType value)
         {
-            _gSetService.Add(value);
-            _gSetService.Remove(value);
+            _pSetService.Add(value);
+            _pSetService.Remove(value);
 
             var repositoryValues = _repository.GetRemoves();
             Assert.Contains(value, repositoryValues);
@@ -67,7 +67,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Merge_NoExistingValues_AddsElementsToTheRepository(List<TestType> adds, List<TestType> removes)
         {
-            _gSetService.Merge(adds, removes);
+            _pSetService.Merge(adds, removes);
 
             var repositoryAdds = _repository.GetAdds();
             var repositoryRemoves = _repository.GetRemoves();
@@ -83,7 +83,7 @@ namespace CRDT.Application.UnitTests.Convergent
             _repository.PersistAdds(existingAdds);
             _repository.PersistRemoves(existingRemoves);
 
-            _gSetService.Merge(adds, removes);
+            _pSetService.Merge(adds, removes);
 
             var repositoryAdds = _repository.GetAdds();
             var repositoryRemoves = _repository.GetRemoves();
@@ -99,9 +99,9 @@ namespace CRDT.Application.UnitTests.Convergent
             _repository.PersistAdds(existingAdds);
             _repository.PersistRemoves(existingRemoves);
 
-            _gSetService.Merge(adds, removes);
-            _gSetService.Merge(adds, removes);
-            _gSetService.Merge(adds, removes);
+            _pSetService.Merge(adds, removes);
+            _pSetService.Merge(adds, removes);
+            _pSetService.Merge(adds, removes);
 
             var repositoryAdds = _repository.GetAdds();
             var repositoryRemoves = _repository.GetRemoves();
@@ -117,9 +117,9 @@ namespace CRDT.Application.UnitTests.Convergent
             _repository.PersistAdds(existingAdds);
             _repository.PersistRemoves(existingRemoves);
 
-            _gSetService.Add(value);
+            _pSetService.Add(value);
 
-            var lookup = _gSetService.Lookup(value);
+            var lookup = _pSetService.Lookup(value);
 
             Assert.True(lookup);
         }
@@ -131,10 +131,10 @@ namespace CRDT.Application.UnitTests.Convergent
             _repository.PersistAdds(existingAdds);
             _repository.PersistRemoves(existingRemoves);
 
-            _gSetService.Add(value);
-            _gSetService.Remove(value);
+            _pSetService.Add(value);
+            _pSetService.Remove(value);
 
-            var lookup = _gSetService.Lookup(value);
+            var lookup = _pSetService.Lookup(value);
 
             Assert.False(lookup);
         }

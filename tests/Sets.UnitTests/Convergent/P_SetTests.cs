@@ -120,6 +120,21 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
+        public void Lookup_ReAdded_ReturnsFalse(TestType value)
+        {
+            var pSet = new P_Set<TestType>();
+
+            pSet = pSet.Add(value);
+            pSet = pSet.Remove(value);
+            pSet = pSet.Add(value);
+
+            var lookup = pSet.Lookup(value);
+
+            Assert.False(lookup);
+        }
+
+        [Theory]
+        [AutoData]
         public void Merge_MergesAddsAndRemoves(TestType one, TestType two, TestType three, TestType four, TestType five)
         {
             var pSet = new P_Set<TestType>(new[] { one, two }.ToImmutableHashSet(), new[] { three }.ToImmutableHashSet());

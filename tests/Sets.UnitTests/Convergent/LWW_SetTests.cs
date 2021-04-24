@@ -137,73 +137,70 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndNotRemoved_ReturnsAddedElement(LWW_SetElement<TestType> element)
+        public void Lookup_AddedAndNotRemoved_ReturnsTrue(LWW_SetElement<TestType> element)
         {
             var lwwSet = new LWW_Set<TestType>();
 
             lwwSet = lwwSet.Add(element);
 
-            var actualValue = lwwSet.Value(element.Value.Id);
+            var lookup = lwwSet.Lookup(element.Value);
 
-            Assert.Equal(element.Value, actualValue);
+            Assert.True(lookup);
         }
 
         [Theory]
         [AutoData]
-        public void Value_RemoveBeforeAdd_ReturnsAddedElement(TestType value)
+        public void Lookup_AddedAndRemoved_ReturnsFalse(TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var firstAdd = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
-            var secondAdd = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(2).Ticks);
-            var remove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
+            var addElement = new LWW_SetElement<TestType>(value, timestamp);
+            var removeElement = new LWW_SetElement<TestType>(value, timestamp + 10);
 
-            lwwSet = lwwSet.Add(firstAdd);
-            lwwSet = lwwSet.Remove(remove);
-            lwwSet = lwwSet.Add(secondAdd);
+            lwwSet = lwwSet.Add(addElement);
+            lwwSet = lwwSet.Remove(removeElement);
 
-            var actualValue = lwwSet.Value(value.Id);
+            var lookup = lwwSet.Lookup(value);
 
-            Assert.Equal(value, actualValue);
+            Assert.False(lookup);
         }
 
         [Theory]
         [AutoData]
-        public void Value_RemoveAfterAdd_ReturnsNull(TestType value)
+        public void Lookup_ReAdded_ReturnsTrue(TestType value, long timestamp)
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var add = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
-            var remove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
+            var addElement = new LWW_SetElement<TestType>(value, timestamp);
+            var removeElement = new LWW_SetElement<TestType>(value, timestamp + 10);
+            var reAddElement = new LWW_SetElement<TestType>(value, timestamp + 100);
 
-            lwwSet = lwwSet.Add(add);
-            lwwSet = lwwSet.Remove(remove);
+            lwwSet = lwwSet.Add(addElement);
+            lwwSet = lwwSet.Remove(removeElement);
+            lwwSet = lwwSet.Add(reAddElement);
 
-            var actualValue = lwwSet.Value(value.Id);
+            var lookup = lwwSet.Lookup(value);
 
-            Assert.Null(actualValue);
+            Assert.True(lookup);
         }
 
         [Theory]
         [AutoData]
-        public void Merge_MergesAddsAndRemoves(LWW_SetElement<TestType> one, LWW_SetElement<TestType> two, 
-            LWW_SetElement<TestType> three, LWW_SetElement<TestType> four, LWW_SetElement<TestType> five)
+        public void Merge_MergesAddsAndRemoves(LWW_SetElement<TestType> one, LWW_SetElement<TestType> two, LWW_SetElement<TestType> three, LWW_SetElement<TestType> four, LWW_SetElement<TestType> five)
         {
-            var firstLwwSet = new LWW_Set<TestType>(new[] { one, two }.ToImmutableHashSet(), new[] { three }.ToImmutableHashSet());
+            var lwwSet = new LWW_Set<TestType>(new[] { one, two }.ToImmutableHashSet(), new[] { three }.ToImmutableHashSet());
 
-            var secondPSet = new LWW_Set<TestType>(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
+            var newLwwSet = lwwSet.Merge(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
 
-            var lwwSet = firstLwwSet.Merge(secondPSet);
-
-            Assert.Equal(4, lwwSet.Adds.Count);
-            Assert.Equal(2, lwwSet.Removes.Count);
-            Assert.Contains(one, lwwSet.Adds);
-            Assert.Contains(two, lwwSet.Adds);
-            Assert.Contains(three, lwwSet.Adds);
-            Assert.Contains(four, lwwSet.Adds);
-            Assert.Contains(three, lwwSet.Removes);
-            Assert.Contains(five, lwwSet.Removes);
-            Assert.Contains(five, lwwSet.Removes);
+            Assert.Equal(4, newLwwSet.Adds.Count);
+            Assert.Equal(2, newLwwSet.Removes.Count);
+            Assert.Contains(one, newLwwSet.Adds);
+            Assert.Contains(two, newLwwSet.Adds);
+            Assert.Contains(three, newLwwSet.Adds);
+            Assert.Contains(four, newLwwSet.Adds);
+            Assert.Contains(three, newLwwSet.Removes);
+            Assert.Contains(five, newLwwSet.Removes);
+            Assert.Contains(five, newLwwSet.Removes);
         }
     }
 }

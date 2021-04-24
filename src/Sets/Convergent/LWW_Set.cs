@@ -16,37 +16,20 @@ namespace CRDT.Sets.Convergent
         {
         }
 
-        public LWW_Set<T> Add(LWW_SetElement<T> element)
-        {
-            if (!Adds.Contains(element))
-            {
-                Adds = Adds.Add(element);
-            }
-
-            return this;
-        }
+        public LWW_Set<T> Add(LWW_SetElement<T> element) => new(Adds.Add(element), Removes);
 
         public LWW_Set<T> Remove(LWW_SetElement<T> element)
         {
-            var addedElement = Adds.FirstOrDefault(e => Equals(e.Value, element.Value));
-
-            if (addedElement is not null)
+            if (Adds.Any(a => Equals(a.Value, element.Value)))
             {
-                if (!Removes.Contains(element))
-                {
-                    Removes = Removes.Add(element);
-                }
+                return new(Adds, Removes.Add(element));
             }
 
             return this;
         }
 
-        public LWW_Set<T> Merge(LWW_Set<T> otherSet)
-        {
-            var adds = Adds.Union(otherSet.Adds);
-            var removes = Removes.Union(otherSet.Removes);
-
-            return new LWW_Set<T>(adds, removes);
-        }
+        public LWW_Set<T> Merge(IImmutableSet<LWW_SetElement<T>> adds,
+            IImmutableSet<LWW_SetElement<T>> removes) 
+            => new(Adds.Union(adds), Removes.Union(removes));
     }
 }

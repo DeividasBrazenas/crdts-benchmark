@@ -117,5 +117,20 @@ namespace CRDT.Sets.UnitTests.Commutative
 
             Assert.False(lookup);
         }
+
+        [Theory]
+        [AutoData]
+        public void Lookup_ReAdded_ReturnsFalse(TestType value)
+        {
+            var pSet = new P_Set<TestType>();
+
+            pSet = pSet.Add(value);
+            pSet = pSet.Remove(value);
+            pSet = pSet.Add(value);
+
+            var lookup = pSet.Lookup(value);
+
+            Assert.False(lookup);
+        }
     }
 }

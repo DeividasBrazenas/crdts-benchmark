@@ -25,17 +25,17 @@ namespace CRDT.Sets.Bases
             Removes = removes;
         }
 
-        public T Value(Guid id)
+        public bool Lookup(T value)
         {
-            var added = Adds.Where(e => e.Value.Id == id).OrderBy(a => a.Timestamp).LastOrDefault();
-            var removed = Removes.Where(e => e.Value.Id == id).OrderBy(a => a.Timestamp).LastOrDefault();
+            var added = Adds.Where(a => Equals(a.Value, value)).OrderBy(a => a.Timestamp).LastOrDefault();
+            var removed = Removes.Where(r => Equals(r.Value, value)).OrderBy(r => r.Timestamp).LastOrDefault();
 
             if (added is not null && added?.Timestamp > removed?.Timestamp)
             {
-                return added.Value;
+                return true;
             }
 
-            return null;
+            return false;
         }
     }
 }

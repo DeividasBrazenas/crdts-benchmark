@@ -12,19 +12,19 @@ namespace CRDT.Application.UnitTests.Commutative
     public class P_SetServiceTests
     {
         private readonly IP_SetRepository<TestType> _repository;
-        private readonly P_SetService<TestType> _gSetService;
+        private readonly P_SetService<TestType> _pSetService;
 
         public P_SetServiceTests()
         {
             _repository = new P_SetRepository();
-            _gSetService = new P_SetService<TestType>(_repository);
+            _pSetService = new P_SetService<TestType>(_repository);
         }
 
         [Theory]
         [AutoData]
         public void Add_NoExistingValues_AddsElementToTheRepository(TestType value)
         {
-            _gSetService.Add(value);
+            _pSetService.Add(value);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(value, repositoryValues);
@@ -36,7 +36,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             _repository.PersistAdds(adds);
 
-            _gSetService.Add(value);
+            _pSetService.Add(value);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(value, repositoryValues);
@@ -48,9 +48,9 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             _repository.PersistAdds(adds);
 
-            _gSetService.Add(value);
-            _gSetService.Add(value);
-            _gSetService.Add(value);
+            _pSetService.Add(value);
+            _pSetService.Add(value);
+            _pSetService.Add(value);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Equal(1, repositoryValues.Count(v => Equals(v, value)));
@@ -60,7 +60,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value)
         {
-            _gSetService.Remove(value);
+            _pSetService.Remove(value);
 
             var repositoryValues = _repository.GetRemoves();
             Assert.DoesNotContain(value, repositoryValues);
@@ -70,8 +70,8 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_AddExists_AddsElementToTheRepository(TestType value)
         {
-            _gSetService.Add(value);
-            _gSetService.Remove(value);
+            _pSetService.Add(value);
+            _pSetService.Remove(value);
 
             var repositoryValues = _repository.GetRemoves();
             Assert.Contains(value, repositoryValues);
@@ -81,10 +81,10 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_IsIdempotent(TestType value)
         {
-            _gSetService.Add(value);
-            _gSetService.Remove(value);
-            _gSetService.Remove(value);
-            _gSetService.Remove(value);
+            _pSetService.Add(value);
+            _pSetService.Remove(value);
+            _pSetService.Remove(value);
+            _pSetService.Remove(value);
 
             var repositoryValues = _repository.GetRemoves();
             Assert.Equal(1, repositoryValues.Count(v => Equals(v, value)));
@@ -97,9 +97,9 @@ namespace CRDT.Application.UnitTests.Commutative
             _repository.PersistAdds(existingAdds);
             _repository.PersistRemoves(existingRemoves);
 
-            _gSetService.Add(value);
+            _pSetService.Add(value);
 
-            var lookup = _gSetService.Lookup(value);
+            var lookup = _pSetService.Lookup(value);
 
             Assert.True(lookup);
         }
@@ -111,10 +111,10 @@ namespace CRDT.Application.UnitTests.Commutative
             _repository.PersistAdds(existingAdds);
             _repository.PersistRemoves(existingRemoves);
 
-            _gSetService.Add(value);
-            _gSetService.Remove(value);
+            _pSetService.Add(value);
+            _pSetService.Remove(value);
 
-            var lookup = _gSetService.Lookup(value);
+            var lookup = _pSetService.Lookup(value);
 
             Assert.False(lookup);
         }

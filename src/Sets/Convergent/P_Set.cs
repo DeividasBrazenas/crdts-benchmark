@@ -28,16 +28,6 @@ namespace CRDT.Sets.Convergent
             return this;
         }
 
-        public bool Lookup(T value)
-        {
-            if (Removes.Any(r => Equals(r, value)))
-            {
-                return false;
-            }
-
-            return Adds.Any(r => Equals(r, value));
-        }
-
         public P_Set<T> Merge(IImmutableSet<T> adds, IImmutableSet<T> removes) => 
             new(Adds.Union(adds), Removes.Union(removes));
     }

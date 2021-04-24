@@ -35,7 +35,7 @@ namespace CRDT.Application.Commutative
 
             set = set.Remove(value);
 
-            _repository.PersistRemoves(set.Adds);
+            _repository.PersistRemoves(set.Removes);
         }
 
         public bool Lookup(T value)

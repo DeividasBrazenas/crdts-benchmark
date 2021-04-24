@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using CRDT.Core.Abstractions;
 
 namespace CRDT.Sets.Bases
@@ -19,6 +20,16 @@ namespace CRDT.Sets.Bases
         {
             Adds = adds;
             Removes = removes;
+        }
+
+        public bool Lookup(T value)
+        {
+            if (Removes.Any(r => Equals(r, value)))
+            {
+                return false;
+            }
+
+            return Adds.Any(r => Equals(r, value));
         }
     }
 }
