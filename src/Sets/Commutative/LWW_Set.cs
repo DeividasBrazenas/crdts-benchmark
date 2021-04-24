@@ -3,7 +3,6 @@ using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
 using CRDT.Sets.Entities;
-using CRDT.Sets.Operations;
 
 namespace CRDT.Sets.Commutative 
 {

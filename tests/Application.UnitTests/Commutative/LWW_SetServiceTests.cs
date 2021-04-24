@@ -108,13 +108,5 @@ namespace CRDT.Application.UnitTests.Commutative
 
             Assert.True(lookup);
         }
-
-        private void AssertContains(List<LWW_SetElement<TestType>> expectedValues, IEnumerable<LWW_SetElement<TestType>> actualValues)
-        {
-            foreach (var value in expectedValues)
-            {
-                Assert.Equal(1, actualValues.Count(v => Equals(v, value)));
-            }
-        }
     }
 }

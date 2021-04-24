@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
 using CRDT.Sets.Entities;
-using CRDT.Sets.Operations;
 
 namespace CRDT.Sets.Commutative
 {
@@ -19,48 +17,16 @@ namespace CRDT.Sets.Commutative
         {
         }
 
-        public OR_Set<T> Add(OR_SetOperation operation)
+        public OR_Set<T> Add(OR_SetElement<T> element) => new(Adds.Add(element), Removes);
+
+        public OR_Set<T> Remove(OR_SetElement<T> element)
         {
-            var value = operation.Value.ToObject<T>();
-            var element = new OR_SetElement<T>(value, operation.Tag);
-
-            Adds = Adds.Add(element);
-
-            return this;
-        }
-
-        public OR_Set<T> Remove(OR_SetOperation operation)
-        {
-            var value = operation.Value.ToObject<T>();
-
-            if (Adds.Any(e => e.Tag == operation.Tag && Equals(e.Value, value)))
+            if (Adds.Any(e => Equals(e, element)))
             {
-                var element = new OR_SetElement<T>(value, operation.Tag);
-
-                Removes = Removes.Add(element);
+                return new(Adds, Removes.Add(element));
             }
 
             return this;
-        }
-
-        public IImmutableSet<T> Values =>
-                Adds
-                .Where(a => !Removes.Any(r => r.Tag == a.Tag && Equals(r.Value, a.Value)))
-                .Select(e => e.Value)
-                .Distinct()
-                .ToImmutableHashSet();
-
-        public T Value(Guid id)
-        {
-            return Values.FirstOrDefault(v => v.Id == id);
-        }
-
-        public OR_Set<T> Merge(OR_Set<T> otherSet)
-        {
-            var adds = Adds.Union(otherSet.Adds);
-            var removes = Removes.Union(otherSet.Removes);
-
-            return new OR_Set<T>(adds, removes);
         }
     }
 }

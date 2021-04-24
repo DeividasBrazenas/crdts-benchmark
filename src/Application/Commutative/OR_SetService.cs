@@ -1,41 +1,44 @@
 ﻿using System.Collections.Immutable;
 using CRDT.Application.Interfaces;
 using CRDT.Core.Abstractions;
+using CRDT.Core.Cluster;
 using CRDT.Sets.Commutative;
 using CRDT.Sets.Entities;
 
 namespace CRDT.Application.Commutative
 {
-    public class LWW_SetService<T> where T : DistributedEntity
+    public class OR_SetService<T> where T : DistributedEntity
     {
-        private readonly ILWW_SetRepository<T> _repository;
+        private readonly IOR_SetRepository<T> _repository;
 
-        public LWW_SetService(ILWW_SetRepository<T> repository)
+        public OR_SetService(IOR_SetRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Add(T value, long timestamp)
+        public void Add(T value, Node node)
         {
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new OR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            var element = new LWW_SetElement<T>(value, timestamp);
+            var element = new OR_SetElement<T>(value, node.Id);
+
             set = set.Add(element);
 
             _repository.PersistAdds(set.Adds);
         }
 
-        public void Remove(T value, long timestamp)
+        public void Remove(T value, Node node)
         {
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new OR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            var element = new LWW_SetElement<T>(value, timestamp);
+            var element = new OR_SetElement<T>(value, node.Id);
+
             set = set.Remove(element);
 
             _repository.PersistRemoves(set.Removes);
@@ -46,7 +49,7 @@ namespace CRDT.Application.Commutative
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new OR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
             var lookup = set.Lookup(value);
 

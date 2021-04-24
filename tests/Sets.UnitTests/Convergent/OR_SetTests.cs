@@ -96,7 +96,7 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndNotRemoved_ReturnsAddedElement(TestType value)
+        public void Lookup_AddedAndNotRemoved_ReturnsTrue(TestType value)
         {
             var orSet = new OR_Set<TestType>();
 
@@ -104,14 +104,14 @@ namespace CRDT.Sets.UnitTests.Convergent
 
             orSet = orSet.Add(element);
 
-            var actualValue = orSet.Value(value.Id);
+            var lookup = orSet.Lookup(value);
 
-            Assert.Equal(value, actualValue);
+            Assert.True(lookup);
         }
 
         [Theory]
         [AutoData]
-        public void Value_AddedAndRemoved_ReturnsNull(TestType value)
+        public void Lookup_AddedAndRemoved_ReturnsFalse(TestType value)
         {
             var orSet = new OR_Set<TestType>();
 
@@ -120,14 +120,14 @@ namespace CRDT.Sets.UnitTests.Convergent
             orSet = orSet.Add(element);
             orSet = orSet.Remove(element);
 
-            var actualValue = orSet.Value(value.Id);
+            var lookup = orSet.Lookup(value);
 
-            Assert.Null(actualValue);
+            Assert.False(lookup);
         }
 
         [Theory]
         [AutoData]
-        public void Value_SameValueWithSeveralTags_ReturnsAddedValue(TestType value)
+        public void Lookup_SameValueWithSeveralTags_ReturnsTrue(TestType value)
         {
             var orSet = new OR_Set<TestType>();
 
@@ -138,9 +138,9 @@ namespace CRDT.Sets.UnitTests.Convergent
             orSet = orSet.Add(elementTwo);
             orSet = orSet.Remove(elementOne);
 
-            var actualValue = orSet.Value(value.Id);
+            var lookup = orSet.Lookup(value);
 
-            Assert.Equal(value, actualValue);
+            Assert.True(lookup);
         }
 
         [Theory]
@@ -174,21 +174,19 @@ namespace CRDT.Sets.UnitTests.Convergent
         public void Merge_MergesAddsAndRemoves(OR_SetElement<TestType> one, OR_SetElement<TestType> two, 
             OR_SetElement<TestType> three, OR_SetElement<TestType> four, OR_SetElement<TestType> five)
         {
-            var firstPSet = new OR_Set<TestType>(new[] { one, two }.ToImmutableHashSet(), new[] { three }.ToImmutableHashSet());
+            var orSet = new OR_Set<TestType>(new[] { one, two }.ToImmutableHashSet(), new[] { three }.ToImmutableHashSet());
 
-            var secondPSet = new OR_Set<TestType>(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
+            var newOrSet = orSet.Merge(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
 
-            var orSet = firstPSet.Merge(secondPSet);
-
-            Assert.Equal(4, orSet.Adds.Count);
-            Assert.Equal(2, orSet.Removes.Count);
-            Assert.Contains(one, orSet.Adds);
-            Assert.Contains(two, orSet.Adds);
-            Assert.Contains(three, orSet.Adds);
-            Assert.Contains(four, orSet.Adds);
-            Assert.Contains(three, orSet.Removes);
-            Assert.Contains(five, orSet.Removes);
-            Assert.Contains(five, orSet.Removes);
+            Assert.Equal(4, newOrSet.Adds.Count);
+            Assert.Equal(2, newOrSet.Removes.Count);
+            Assert.Contains(one, newOrSet.Adds);
+            Assert.Contains(two, newOrSet.Adds);
+            Assert.Contains(three, newOrSet.Adds);
+            Assert.Contains(four, newOrSet.Adds);
+            Assert.Contains(three, newOrSet.Removes);
+            Assert.Contains(five, newOrSet.Removes);
+            Assert.Contains(five, newOrSet.Removes);
         }
     }
 }
