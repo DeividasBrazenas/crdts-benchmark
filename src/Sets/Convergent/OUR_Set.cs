@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
@@ -17,16 +18,23 @@ namespace CRDT.Sets.Convergent
         {
         }
 
-        public OUR_Set<T> Add(OUR_SetElement<T> element) => new(Adds.Add(element), Removes);
+        public OUR_Set<T> Add(OUR_SetElement<T> element)
+        {
+            var existingElement = Adds.FirstOrDefault(a => a.Value.Id == element.Value.Id && a.Tag == element.Tag);
+
+            if (existingElement is not null)
+            {
+                return Update(element);
+            }
+
+            return new(Adds.Add(element), Removes);
+        } 
 
         public OUR_Set<T> Update(OUR_SetElement<T> element)
         {
-            var elementToUpdate = Adds
-                .Where(a => a.Value.Id == element.Value.Id && a.Tag == element.Tag)
-                .OrderBy(a => a.Timestamp)
-                .LastOrDefault();
+            var elementToUpdate = Adds.FirstOrDefault(a => a.Value.Id == element.Value.Id && a.Tag == element.Tag);
 
-            if(elementToUpdate is null || elementToUpdate?.Timestamp > element.Timestamp)
+            if (elementToUpdate is null || elementToUpdate?.Timestamp > element.Timestamp)
             {
                 return this;
             }
@@ -39,10 +47,7 @@ namespace CRDT.Sets.Convergent
 
         public OUR_Set<T> Remove(OUR_SetElement<T> element)
         {
-            var elementToRemove = Adds
-                .Where(a => Equals(a.Value, element.Value) && a.Tag == element.Tag)
-                .OrderBy(a => a.Timestamp)
-                .LastOrDefault();
+            var elementToRemove = Adds.FirstOrDefault(a => Equals(a.Value, element.Value) && a.Tag == element.Tag);
 
             if (elementToRemove is null || elementToRemove?.Timestamp > element.Timestamp)
             {
@@ -52,6 +57,18 @@ namespace CRDT.Sets.Convergent
             return new(Adds, Removes.Add(element));
         }
 
-        public OUR_Set<T> Merge(IImmutableSet<OUR_SetElement<T>> adds, IImmutableSet<OUR_SetElement<T>> removes) => new(Adds.Union(adds), Removes.Union(removes));
+        public OUR_Set<T> Merge(IImmutableSet<OUR_SetElement<T>> adds, IImmutableSet<OUR_SetElement<T>> removes)
+        {
+            var addsUnion = Adds.Union(adds);
+            var removesUnion = Removes.Union(removes);
+
+            var filteredAdds = addsUnion
+                .Where(a => !addsUnion.Any(oa => a.Value.Id == oa.Value.Id && a.Tag == oa.Tag && a.Timestamp < oa.Timestamp));
+            var filteredRemoves = removesUnion
+                .Where(r => filteredAdds.Any(a => Equals(a.Value, r.Value)))
+                .Where(a => !removesUnion.Any(oa => a.Value.Id == oa.Value.Id && a.Tag == oa.Tag && a.Timestamp < oa.Timestamp));
+
+            return new(filteredAdds.ToImmutableHashSet(), filteredRemoves.ToImmutableHashSet());
+        }
     }
 }

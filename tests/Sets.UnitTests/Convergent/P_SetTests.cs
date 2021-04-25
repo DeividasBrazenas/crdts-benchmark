@@ -142,14 +142,12 @@ namespace CRDT.Sets.UnitTests.Convergent
             var newPSet = pSet.Merge(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
 
             Assert.Equal(4, newPSet.Adds.Count);
-            Assert.Equal(2, newPSet.Removes.Count);
+            Assert.Equal(1, newPSet.Removes.Count);
             Assert.Contains(one, newPSet.Adds);
             Assert.Contains(two, newPSet.Adds);
             Assert.Contains(three, newPSet.Adds);
             Assert.Contains(four, newPSet.Adds);
             Assert.Contains(three, newPSet.Removes);
-            Assert.Contains(five, newPSet.Removes);
-            Assert.Contains(five, newPSet.Removes);
         }
     }
 }

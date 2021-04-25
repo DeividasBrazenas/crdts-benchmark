@@ -21,140 +21,152 @@ namespace CRDT.Application.UnitTests.Convergent
             _lwwSetService = new LWW_SetService<TestType>(_repository);
         }
 
-        //[Theory]
-        //[AutoData]
-        //public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, long timestamp)
-        //{
-        //    _lwwSetService.Add(value, timestamp);
-
-        //    var repositoryValues = _repository.GetAdds();
-        //    Assert.Contains(value, repositoryValues.Select(v => v.Value));
-        //}
-
-        //[Theory]
-        //[AutoData]
-        //public void Add_WithExistingValues_AddsElementToTheRepository(List<LWW_SetElement<TestType>> adds, TestType value, long timestamp)
-        //{
-        //    _repository.PersistAdds(adds);
-
-        //    _lwwSetService.Add(value, timestamp);
-
-        //    var repositoryValues = _repository.GetAdds();
-        //    Assert.Contains(value, repositoryValues.Select(v => v.Value));
-        //}
-
-        //[Theory]
-        //[AutoData]
-        //public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value, long timestamp)
-        //{
-        //    _lwwSetService.Remove(value, timestamp);
-
-        //    var repositoryValues = _repository.GetRemoves();
-        //    Assert.DoesNotContain(value, repositoryValues.Select(v => v.Value));
-        //}
-
-        //[Theory]
-        //[AutoData]
-        //public void Remove_AddExistsWithLowerTimestamp_AddsElementToTheRepository(TestType value, long timestamp)
-        //{
-        //    _lwwSetService.Add(value, timestamp);
-        //    _lwwSetService.Remove(value, timestamp + 10);
-
-        //    var repositoryValues = _repository.GetRemoves();
-        //    Assert.Contains(value, repositoryValues.Select(v => v.Value));
-        //}
-
         [Theory]
         [AutoData]
-        public void Merge_NoExistingValues_AddsElementsToTheRepository(List<LWW_SetElement<TestType>> adds, List<LWW_SetElement<TestType>> removes)
+        public void Add_NoExistingValues_AddsElementToTheRepository(LWW_SetElement<TestType> element)
         {
-            _lwwSetService.Merge(adds, removes);
+            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { element }, new List<LWW_SetElement<TestType>>());
 
-            var repositoryAdds = _repository.GetAdds();
-            var repositoryRemoves = _repository.GetRemoves();
-
-            AssertContains(adds, repositoryAdds);
-            AssertContains(removes, repositoryRemoves);
+            var repositoryValues = _repository.GetAdds();
+            Assert.Contains(element, repositoryValues);
         }
 
         [Theory]
         [AutoData]
-        public void Merge_WithExistingValues_AddsElementsToTheRepository(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, List<LWW_SetElement<TestType>> adds, List<LWW_SetElement<TestType>> removes)
+        public void Add_WithExistingValues_AddsElementToTheRepository(List<LWW_SetElement<TestType>> adds, LWW_SetElement<TestType> element)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(adds);
 
-            _lwwSetService.Merge(adds, removes);
+            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { element }, new List<LWW_SetElement<TestType>>());
 
-            var repositoryAdds = _repository.GetAdds();
-            var repositoryRemoves = _repository.GetRemoves();
-
-            AssertContains(adds, repositoryAdds);
-            AssertContains(removes, repositoryRemoves);
+            var repositoryValues = _repository.GetAdds();
+            Assert.Contains(element, repositoryValues);
         }
 
         [Theory]
         [AutoData]
-        public void Merge_IsIdempotent(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, List<LWW_SetElement<TestType>> adds, List<LWW_SetElement<TestType>> removes)
+        public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(LWW_SetElement<TestType> element)
+        {
+            _lwwSetService.Merge(new List<LWW_SetElement<TestType>>(), new List<LWW_SetElement<TestType>> { element });
+
+            var repositoryValues = _repository.GetRemoves();
+            Assert.DoesNotContain(element, repositoryValues);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Remove_AddExistsWithLowerTimestamp_AddsElementToTheRepository(TestType value, long timestamp)
+        {
+            var addElement = new LWW_SetElement<TestType>(value, timestamp);
+            var removeElement = new LWW_SetElement<TestType>(value, timestamp + 10);
+
+            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { addElement }, new List<LWW_SetElement<TestType>> { removeElement });
+
+            var repositoryValues = _repository.GetRemoves();
+            Assert.Contains(value, repositoryValues.Select(v => v.Value));
+        }
+
+        [Theory]
+        [AutoData]
+        public void Merge_NoExistingValues_AddsElementsToTheRepository(List<LWW_SetElement<TestType>> values)
+        {
+            _lwwSetService.Merge(values, values);
+
+            var repositoryAdds = _repository.GetAdds();
+            var repositoryRemoves = _repository.GetRemoves();
+
+            AssertContains(values, repositoryAdds);
+            AssertContains(values, repositoryRemoves);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Merge_WithExistingValues_AddsElementsToTheRepository(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, List<LWW_SetElement<TestType>> values)
         {
             _repository.PersistAdds(existingAdds);
             _repository.PersistRemoves(existingRemoves);
 
-            _lwwSetService.Merge(adds, removes);
-            _lwwSetService.Merge(adds, removes);
-            _lwwSetService.Merge(adds, removes);
+            _lwwSetService.Merge(values, values);
 
             var repositoryAdds = _repository.GetAdds();
             var repositoryRemoves = _repository.GetRemoves();
 
-            AssertContains(adds, repositoryAdds);
-            AssertContains(removes, repositoryRemoves);
+            AssertContains(values, repositoryAdds);
+            AssertContains(values, repositoryRemoves);
         }
 
-        //[Theory]
-        //[AutoData]
-        //public void Lookup_Added_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
-        //{
-        //    _repository.PersistAdds(existingAdds);
-        //    _repository.PersistRemoves(existingRemoves);
+        [Theory]
+        [AutoData]
+        public void Merge_IsIdempotent(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, List<LWW_SetElement<TestType>> values)
+        {
+            _repository.PersistAdds(existingAdds);
+            _repository.PersistRemoves(existingRemoves);
 
-        //    _lwwSetService.Add(value, timestamp);
+            _lwwSetService.Merge(values, values);
+            _lwwSetService.Merge(values, values);
+            _lwwSetService.Merge(values, values);
 
-        //    var lookup = _lwwSetService.Lookup(value);
+            var repositoryAdds = _repository.GetAdds();
+            var repositoryRemoves = _repository.GetRemoves();
 
-        //    Assert.True(lookup);
-        //}
+            AssertContains(values, repositoryAdds);
+            AssertContains(values, repositoryRemoves);
+        }
 
-        //[Theory]
-        //[AutoData]
-        //public void Lookup_Removed_ReturnsFalse(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
-        //{
-        //    _repository.PersistAdds(existingAdds);
-        //    _repository.PersistRemoves(existingRemoves);
+        [Theory]
+        [AutoData]
+        public void Lookup_Added_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, LWW_SetElement<TestType> element)
+        {
+            _repository.PersistAdds(existingAdds);
+            _repository.PersistRemoves(existingRemoves);
 
-        //    _lwwSetService.Add(value, timestamp);
-        //    _lwwSetService.Remove(value, timestamp + 100);
+            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { element }, new List<LWW_SetElement<TestType>>());
 
-        //    var lookup = _lwwSetService.Lookup(value);
+            var lookup = _lwwSetService.Lookup(element.Value);
 
-        //    Assert.False(lookup);
-        //}
+            Assert.True(lookup);
+        }
 
-        //[Theory]
-        //[AutoData]
-        //public void Lookup_ReAdded_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
-        //{
-        //    _repository.PersistAdds(existingAdds);
-        //    _repository.PersistRemoves(existingRemoves);
+        [Theory]
+        [AutoData]
+        public void Lookup_Removed_ReturnsFalse(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
+        {
+            _repository.PersistAdds(existingAdds);
+            _repository.PersistRemoves(existingRemoves);
 
-        //    _lwwSetService.Add(value, timestamp);
-        //    _lwwSetService.Remove(value, timestamp + 100);
-        //    _lwwSetService.Add(value, timestamp + 200);
+            var addElement = new LWW_SetElement<TestType>(value, timestamp);
+            var removeElement = new LWW_SetElement<TestType>(value, timestamp + 100);
 
-        //    var lookup = _lwwSetService.Lookup(value);
+            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { addElement }, new List<LWW_SetElement<TestType>> { removeElement });
 
-        //    Assert.True(lookup);
-        //}
+            var lookup = _lwwSetService.Lookup(value);
+
+            Assert.False(lookup);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Lookup_ReAdded_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
+        {
+            _repository.PersistAdds(existingAdds);
+            _repository.PersistRemoves(existingRemoves);
+
+            var addElement = new LWW_SetElement<TestType>(value, timestamp);
+            var removeElement = new LWW_SetElement<TestType>(value, timestamp + 100);
+            var reAddElement = new LWW_SetElement<TestType>(value, timestamp + 200);
+
+            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { addElement }, new List<LWW_SetElement<TestType>> { removeElement });
+
+            var lookup = _lwwSetService.Lookup(value);
+
+            Assert.False(lookup);
+
+            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { reAddElement }, new List<LWW_SetElement<TestType>>());
+
+            lookup = _lwwSetService.Lookup(value);
+
+            Assert.True(lookup);
+        }
 
         private void AssertContains(List<LWW_SetElement<TestType>> expectedValues, IEnumerable<LWW_SetElement<TestType>> actualValues)
         {

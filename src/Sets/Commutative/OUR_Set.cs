@@ -17,14 +17,21 @@ namespace CRDT.Sets.Commutative
         {
         }
 
-        public OUR_Set<T> Add(OUR_SetElement<T> element) => new(Adds.Add(element), Removes);
+        public OUR_Set<T> Add(OUR_SetElement<T> element)
+        {
+            var existingElement = Adds.FirstOrDefault(a => a.Value.Id == element.Value.Id && a.Tag == element.Tag);
+
+            if (existingElement is not null)
+            {
+                return Update(element);
+            }
+
+            return new(Adds.Add(element), Removes);
+        }
 
         public OUR_Set<T> Update(OUR_SetElement<T> element)
         {
-            var elementToUpdate = Adds
-                .Where(a => a.Value.Id == element.Value.Id && a.Tag == element.Tag)
-                .OrderBy(a => a.Timestamp)
-                .LastOrDefault();
+            var elementToUpdate = Adds.FirstOrDefault(a => a.Value.Id == element.Value.Id && a.Tag == element.Tag);
 
             if (elementToUpdate is null || elementToUpdate?.Timestamp > element.Timestamp)
             {
@@ -39,10 +46,7 @@ namespace CRDT.Sets.Commutative
 
         public OUR_Set<T> Remove(OUR_SetElement<T> element)
         {
-            var elementToRemove = Adds
-                .Where(a => Equals(a.Value, element.Value) && a.Tag == element.Tag)
-                .OrderBy(a => a.Timestamp)
-                .LastOrDefault();
+            var elementToRemove = Adds.FirstOrDefault(a => Equals(a.Value, element.Value) && a.Tag == element.Tag);
 
             if (elementToRemove is null || elementToRemove?.Timestamp > element.Timestamp)
             {

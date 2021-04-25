@@ -29,6 +29,15 @@ namespace CRDT.Sets.Convergent
             return this;
         }
 
-        public OR_Set<T> Merge(IImmutableSet<OR_SetElement<T>> adds, IImmutableSet<OR_SetElement<T>> removes) => new(Adds.Union(adds), Removes.Union(removes));
+        public OR_Set<T> Merge(IImmutableSet<OR_SetElement<T>> adds, IImmutableSet<OR_SetElement<T>> removes)
+        {
+            var addsUnion = Adds.Union(adds);
+
+            var removesUnion = Removes.Union(removes);
+
+            var validRemoves = removesUnion.Where(r => addsUnion.Any(a => Equals(a, r)));
+
+            return new(addsUnion.ToImmutableHashSet(), validRemoves.ToImmutableHashSet());
+        }
     }
 }

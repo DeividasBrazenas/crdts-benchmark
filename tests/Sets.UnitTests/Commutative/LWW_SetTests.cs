@@ -6,6 +6,7 @@ using CRDT.Sets.Commutative;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
+using static CRDT.UnitTestHelpers.TestTypes.TestTypeBuilder;
 
 namespace CRDT.Sets.UnitTests.Commutative
 {
@@ -47,7 +48,7 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_AddSameElementTwiceWithDifferentTimestamp_AddsTwoElements(TestType value)
+        public void Add_AddSameElementTwiceWithDifferentTimestamp_UpdatesExistingElement(TestType value)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -57,7 +58,8 @@ namespace CRDT.Sets.UnitTests.Commutative
             lwwSet = lwwSet.Add(firstAdd);
             lwwSet = lwwSet.Add(secondAdd);
 
-            Assert.True(lwwSet.Adds.Count(e => Equals(e.Value, value)) == 2);
+            Assert.True(lwwSet.Adds.Count(e => Equals(e, secondAdd)) == 1);
+            Assert.True(lwwSet.Adds.Count(e => Equals(e, firstAdd)) == 0);
         }
 
         [Theory]
@@ -73,6 +75,38 @@ namespace CRDT.Sets.UnitTests.Commutative
             lwwSet = lwwSet.Add(secondAdd);
 
             Assert.Equal(1, lwwSet.Adds.Count(e => Equals(e.Value, value)));
+        }
+
+        [Theory]
+        [AutoData]
+        public void Add_CallsUpdateIfSameElementExists(TestType value, long timestamp)
+        {
+            var lwwSet = new LWW_Set<TestType>();
+
+            var addElement = new LWW_SetElement<TestType>(value, timestamp);
+            var updateElement = new LWW_SetElement<TestType>(Build(value.Id), timestamp + 10);
+
+            lwwSet = lwwSet.Add(addElement);
+            lwwSet = lwwSet.Update(updateElement);
+
+            Assert.Contains(updateElement, lwwSet.Adds);
+            Assert.DoesNotContain(addElement, lwwSet.Adds);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Update_UpdatesElementInAddsSet(TestType value, long timestamp)
+        {
+            var lwwSet = new LWW_Set<TestType>();
+
+            var addElement = new LWW_SetElement<TestType>(value, timestamp);
+            var updateElement = new LWW_SetElement<TestType>(Build(value.Id), timestamp + 10);
+
+            lwwSet = lwwSet.Add(addElement);
+            lwwSet = lwwSet.Update(updateElement);
+
+            Assert.Contains(updateElement, lwwSet.Adds);
+            Assert.DoesNotContain(addElement, lwwSet.Adds);
         }
 
         [Theory]

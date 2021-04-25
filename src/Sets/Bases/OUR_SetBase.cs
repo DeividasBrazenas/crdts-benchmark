@@ -27,7 +27,6 @@ namespace CRDT.Sets.Bases
             Adds
                 .Where(a => !Removes.Any(r => Equals(r, a) && a.Tag == r.Tag))
                 .Select(e => e.Value)
-                .Distinct()
                 .ToImmutableHashSet();
 
         public bool Lookup(T value) => Values.Any(v => Equals(v, value));

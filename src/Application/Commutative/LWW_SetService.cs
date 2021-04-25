@@ -28,6 +28,20 @@ namespace CRDT.Application.Commutative
             _repository.PersistAdds(set.Adds);
         }
 
+        public void Update(T value, long timestamp)
+        {
+            var existingAdds = _repository.GetAdds();
+            var existingRemoves = _repository.GetRemoves();
+
+            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+
+            var element = new LWW_SetElement<T>(value, timestamp);
+
+            set = set.Update(element);
+
+            _repository.PersistAdds(set.Adds);
+        }
+
         public void Remove(T value, long timestamp)
         {
             var existingAdds = _repository.GetAdds();

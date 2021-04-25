@@ -25,10 +25,14 @@ namespace CRDT.Application.UnitTests.Repositories
         {
             foreach (var value in values)
             {
-                if (!Adds.Any(e => Equals(e, value)))
+                var entity = Adds.FirstOrDefault(a => a.Value.Id == value.Value.Id);
+
+                if (entity is not null)
                 {
-                    Adds.Add(value);
+                    Adds.Remove(entity);
                 }
+
+                Adds.Add(value);
             }
         }
 

@@ -6,6 +6,7 @@ using CRDT.Application.Interfaces;
 using CRDT.Application.UnitTests.Repositories;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
+using static CRDT.UnitTestHelpers.TestTypes.TestTypeBuilder;
 
 namespace CRDT.Application.UnitTests.Convergent
 {
@@ -20,31 +21,19 @@ namespace CRDT.Application.UnitTests.Convergent
             _gSetService = new G_SetService<TestType>(_repository);
         }
 
-        //[Theory]
-        //[AutoData]
-        //public void Add_NoExistingValues_AddsElementToTheRepository(TestType value)
-        //{
-        //    _gSetService.Add(value);
+        [Theory]
+        [AutoData]
+        public void Merge_SingleValueWithEmptyRepository_AddsElementsToTheRepository(TestType value)
+        {
+            _gSetService.Merge(new List<TestType> { value });
 
-        //    var repositoryValues = _repository.GetValues();
-        //    Assert.Contains(value, repositoryValues);
-        //}
-
-        //[Theory]
-        //[AutoData]
-        //public void Add_WithExistingValues_AddsElementToTheRepository(List<TestType> values, TestType value)
-        //{
-        //    _repository.PersistValues(values);
-
-        //    _gSetService.Add(value);
-
-        //    var repositoryValues = _repository.GetValues();
-        //    Assert.Contains(value, repositoryValues);
-        //}
+            var repositoryValues = _repository.GetValues();
+            Assert.Equal(1, repositoryValues.Count(x => Equals(x, value)));
+        }
 
         [Theory]
         [AutoData]
-        public void Merge_NoExistingValues_AddsElementsToTheRepository(List<TestType> values)
+        public void Merge_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(List<TestType> values)
         {
             _gSetService.Merge(values);
 
@@ -54,7 +43,19 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_WithExistingValues_AddsElementsToTheRepository(List<TestType> existingValues, List<TestType> values)
+        public void Merge_SingleElement_AddsElementsToTheRepository(List<TestType> existingValues, TestType value)
+        {
+            _repository.PersistValues(existingValues);
+
+            _gSetService.Merge(new List<TestType> { value });
+
+            var repositoryValues = _repository.GetValues();
+            Assert.Equal(1, repositoryValues.Count(x => Equals(x, value)));
+        }
+
+        [Theory]
+        [AutoData]
+        public void Merge_SeveralElements_AddsElementsToTheRepository(List<TestType> existingValues, List<TestType> values)
         {
             _repository.PersistValues(existingValues);
 
@@ -80,18 +81,46 @@ namespace CRDT.Application.UnitTests.Convergent
             AssertContains(values, repositoryValues);
         }
 
-        //[Theory]
-        //[AutoData]
-        //public void Lookup_ReturnsTrue(List<TestType> values, TestType value)
-        //{
-        //    _repository.PersistValues(values);
+        [Fact]
+        public void Merge_IsCommutative()
+        {
+            var firstValue = Build();
+            var secondValue = Build();
+            var thirdValue = Build();
+            var fourthValue = Build();
+            var fifthValue = Build();
 
-        //    _gSetService.Add(value);
+            var firstRepository = new G_SetRepository();
+            var firstService = new G_SetService<TestType>(firstRepository);
 
-        //    var lookup = _gSetService.Lookup(value);
+            firstRepository.PersistValues(new List<TestType> { firstValue, secondValue, thirdValue });
+            firstService.Merge(new List<TestType> { fourthValue, fifthValue });
 
-        //    Assert.True(lookup);
-        //}
+            var firstRepositoryValues = firstRepository.GetValues();
+
+            var secondRepository = new G_SetRepository();
+            var secondService = new G_SetService<TestType>(secondRepository);
+
+            secondRepository.PersistValues(new List<TestType> { fourthValue, fifthValue });
+            secondService.Merge(new List<TestType> { firstValue, secondValue, thirdValue });
+
+            var secondRepositoryValues = firstRepository.GetValues();
+
+            Assert.Equal(firstRepositoryValues, secondRepositoryValues);
+        }
+
+        [Theory]
+        [AutoData]
+        public void Lookup_ReturnsTrue(List<TestType> values, TestType value)
+        {
+            _repository.PersistValues(values);
+
+            _gSetService.Merge(new List<TestType> { value });
+
+            var lookup = _gSetService.Lookup(value);
+
+            Assert.True(lookup);
+        }
 
         [Theory]
         [AutoData]

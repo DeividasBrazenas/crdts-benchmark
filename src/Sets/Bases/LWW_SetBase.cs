@@ -26,8 +26,8 @@ namespace CRDT.Sets.Bases
 
         public bool Lookup(T value)
         {
-            var added = Adds.Where(a => Equals(a.Value, value)).OrderBy(a => a.Timestamp).LastOrDefault();
-            var removed = Removes.Where(r => Equals(r.Value, value)).OrderBy(r => r.Timestamp).LastOrDefault();
+            var added = Adds.FirstOrDefault(a => Equals(a.Value, value));
+            var removed = Removes.FirstOrDefault(r => Equals(r.Value, value));
 
             if (added is not null && added?.Timestamp > removed?.Timestamp)
             {
