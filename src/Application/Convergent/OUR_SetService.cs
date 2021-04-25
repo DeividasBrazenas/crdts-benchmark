@@ -1,27 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using CRDT.Application.Interfaces;
 using CRDT.Core.Abstractions;
+using CRDT.Core.Cluster;
 using CRDT.Sets.Convergent;
 using CRDT.Sets.Entities;
 
 namespace CRDT.Application.Convergent
 {
-    public class LWW_SetService<T> where T : DistributedEntity
+    public class OUR_SetService<T> where T : DistributedEntity
     {
-        private readonly ILWW_SetRepository<T> _repository;
+        private readonly IOUR_SetRepository<T> _repository;
 
-        public LWW_SetService(ILWW_SetRepository<T> repository)
+        public OUR_SetService(IOUR_SetRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Merge(IEnumerable<LWW_SetElement<T>> adds, IEnumerable<LWW_SetElement<T>> removes)
+        public void Merge(IEnumerable<OUR_SetElement<T>> adds, IEnumerable<OUR_SetElement<T>> removes)
         {
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new OUR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
             set = set.Merge(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
 
@@ -34,7 +36,7 @@ namespace CRDT.Application.Convergent
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new OUR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
             var lookup = set.Lookup(value);
 

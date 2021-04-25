@@ -11,15 +11,15 @@ using Xunit;
 
 namespace CRDT.Application.UnitTests.Convergent
 {
-    public class OR_SetServiceTests
+    public class OUR_SetServiceTests
     {
-        private readonly IOR_SetRepository<TestType> _repository;
-        private readonly OR_SetService<TestType> _orSetService;
+        private readonly IOUR_SetRepository<TestType> _repository;
+        private readonly OUR_SetService<TestType> _orSetService;
 
-        public OR_SetServiceTests()
+        public OUR_SetServiceTests()
         {
-            _repository = new OR_SetRepository();
-            _orSetService = new OR_SetService<TestType>(_repository);
+            _repository = new OUR_SetRepository();
+            _orSetService = new OUR_SetService<TestType>(_repository);
         }
 
         //[Theory]
@@ -36,7 +36,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
         //[Theory]
         //[AutoData]
-        //public void Add_WithExistingValues_AddsElementToTheRepository(List<OR_SetElement<TestType>> adds, TestType value, Node node)
+        //public void Add_WithExistingValues_AddsElementToTheRepository(List<OUR_SetElement<TestType>> adds, TestType value, Node node)
         //{
         //    _repository.PersistAdds(adds);
 
@@ -50,7 +50,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
         //[Theory]
         //[AutoData]
-        //public void Add_WithDifferentTag_AddsElementToTheRepository(List<OR_SetElement<TestType>> adds, TestType value, Node node, Node otherNode)
+        //public void Add_WithDifferentTag_AddsElementToTheRepository(List<OUR_SetElement<TestType>> adds, TestType value, Node node, Node otherNode)
         //{
         //    _repository.PersistAdds(adds);
 
@@ -165,7 +165,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_NoExistingValues_AddsElementsToTheRepository(List<OR_SetElement<TestType>> adds, List<OR_SetElement<TestType>> removes)
+        public void Merge_NoExistingValues_AddsElementsToTheRepository(List<OUR_SetElement<TestType>> adds, List<OUR_SetElement<TestType>> removes)
         {
             _orSetService.Merge(adds, removes);
 
@@ -178,7 +178,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_WithExistingValues_AddsElementsToTheRepository(List<OR_SetElement<TestType>> existingAdds, List<OR_SetElement<TestType>> existingRemoves, List<OR_SetElement<TestType>> adds, List<OR_SetElement<TestType>> removes)
+        public void Merge_WithExistingValues_AddsElementsToTheRepository(List<OUR_SetElement<TestType>> existingAdds, List<OUR_SetElement<TestType>> existingRemoves, List<OUR_SetElement<TestType>> adds, List<OUR_SetElement<TestType>> removes)
         {
             _repository.PersistAdds(existingAdds);
             _repository.PersistRemoves(existingRemoves);
@@ -194,7 +194,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_IsIdempotent(List<OR_SetElement<TestType>> existingAdds, List<OR_SetElement<TestType>> existingRemoves, List<OR_SetElement<TestType>> adds, List<OR_SetElement<TestType>> removes)
+        public void Merge_IsIdempotent(List<OUR_SetElement<TestType>> existingAdds, List<OUR_SetElement<TestType>> existingRemoves, List<OUR_SetElement<TestType>> adds, List<OUR_SetElement<TestType>> removes)
         {
             _repository.PersistAdds(existingAdds);
             _repository.PersistRemoves(existingRemoves);
@@ -210,7 +210,7 @@ namespace CRDT.Application.UnitTests.Convergent
             AssertContains(removes, repositoryRemoves);
         }
 
-        private void AssertContains(List<OR_SetElement<TestType>> expectedValues, IEnumerable<OR_SetElement<TestType>> actualValues)
+        private void AssertContains(List<OUR_SetElement<TestType>> expectedValues, IEnumerable<OUR_SetElement<TestType>> actualValues)
         {
             foreach (var value in expectedValues)
             {

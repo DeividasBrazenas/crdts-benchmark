@@ -15,17 +15,6 @@ namespace CRDT.Application.Convergent
             _repository = repository;
         }
 
-        public void Add(T value)
-        {
-            var existingEntities = _repository.GetValues();
-
-            var set = new G_Set<T>(existingEntities.ToImmutableHashSet());
-
-            set = set.Add(value);
-
-            _repository.PersistValues(set.Values);
-        }
-
         public void Merge(IEnumerable<T> values)
         {
             var existingEntities = _repository.GetValues();

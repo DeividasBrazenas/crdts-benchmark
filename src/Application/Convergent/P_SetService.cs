@@ -15,30 +15,6 @@ namespace CRDT.Application.Convergent
             _repository = repository;
         }
 
-        public void Add(T value)
-        {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
-
-            var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
-
-            set = set.Add(value);
-
-            _repository.PersistAdds(set.Adds);
-        }
-
-        public void Remove(T value)
-        {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
-
-            var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
-
-            set = set.Remove(value);
-
-            _repository.PersistRemoves(set.Removes);
-        }
-
         public void Merge(IEnumerable<T> adds, IEnumerable<T> removes)
         {
             var existingAdds = _repository.GetAdds();

@@ -20,27 +20,27 @@ namespace CRDT.Application.UnitTests.Convergent
             _gSetService = new G_SetService<TestType>(_repository);
         }
 
-        [Theory]
-        [AutoData]
-        public void Add_NoExistingValues_AddsElementToTheRepository(TestType value)
-        {
-            _gSetService.Add(value);
+        //[Theory]
+        //[AutoData]
+        //public void Add_NoExistingValues_AddsElementToTheRepository(TestType value)
+        //{
+        //    _gSetService.Add(value);
 
-            var repositoryValues = _repository.GetValues();
-            Assert.Contains(value, repositoryValues);
-        }
+        //    var repositoryValues = _repository.GetValues();
+        //    Assert.Contains(value, repositoryValues);
+        //}
 
-        [Theory]
-        [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<TestType> values, TestType value)
-        {
-            _repository.PersistValues(values);
+        //[Theory]
+        //[AutoData]
+        //public void Add_WithExistingValues_AddsElementToTheRepository(List<TestType> values, TestType value)
+        //{
+        //    _repository.PersistValues(values);
 
-            _gSetService.Add(value);
+        //    _gSetService.Add(value);
 
-            var repositoryValues = _repository.GetValues();
-            Assert.Contains(value, repositoryValues);
-        }
+        //    var repositoryValues = _repository.GetValues();
+        //    Assert.Contains(value, repositoryValues);
+        //}
 
         [Theory]
         [AutoData]
@@ -80,18 +80,18 @@ namespace CRDT.Application.UnitTests.Convergent
             AssertContains(values, repositoryValues);
         }
 
-        [Theory]
-        [AutoData]
-        public void Lookup_ReturnsTrue(List<TestType> values, TestType value)
-        {
-            _repository.PersistValues(values);
+        //[Theory]
+        //[AutoData]
+        //public void Lookup_ReturnsTrue(List<TestType> values, TestType value)
+        //{
+        //    _repository.PersistValues(values);
 
-            _gSetService.Add(value);
+        //    _gSetService.Add(value);
 
-            var lookup = _gSetService.Lookup(value);
+        //    var lookup = _gSetService.Lookup(value);
 
-            Assert.True(lookup);
-        }
+        //    Assert.True(lookup);
+        //}
 
         [Theory]
         [AutoData]

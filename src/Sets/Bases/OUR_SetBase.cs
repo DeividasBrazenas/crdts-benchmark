@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Entities;
 
@@ -21,5 +22,14 @@ namespace CRDT.Sets.Bases
             Adds = adds;
             Removes = removes;
         }
+
+        public IImmutableSet<T> Values =>
+            Adds
+                .Where(a => !Removes.Any(r => Equals(r, a) && a.Tag == r.Tag))
+                .Select(e => e.Value)
+                .Distinct()
+                .ToImmutableHashSet();
+
+        public bool Lookup(T value) => Values.Any(v => Equals(v, value));
     }
 }

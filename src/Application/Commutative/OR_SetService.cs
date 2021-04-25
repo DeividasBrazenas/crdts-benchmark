@@ -1,4 +1,6 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using CRDT.Application.Interfaces;
 using CRDT.Core.Abstractions;
 using CRDT.Core.Cluster;
@@ -30,16 +32,17 @@ namespace CRDT.Application.Commutative
             _repository.PersistAdds(set.Adds);
         }
 
-        public void Remove(T value, Node node)
+        public void Remove(T value, IEnumerable<Guid> tags)
         {
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new OR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new Sets.Convergent.OR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            var element = new OR_SetElement<T>(value, node.Id);
-
-            set = set.Remove(element);
+            foreach (var tag in tags)
+            {
+                set = set.Remove(new OR_SetElement<T>(value, tag));
+            }
 
             _repository.PersistRemoves(set.Removes);
         }

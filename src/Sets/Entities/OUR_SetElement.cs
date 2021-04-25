@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CRDT.Core.Abstractions;
 using CRDT.Core.DistributedTime;
 
@@ -8,23 +9,29 @@ namespace CRDT.Sets.Entities
     {
         public T Value { get; }
 
+        public Guid Tag { get; }
+
         public Timestamp Timestamp { get; }
 
-        public OUR_SetElement(T value, long timestamp)
+
+        public OUR_SetElement(T value, Guid tag, long timestamp)
         {
             Value = value;
+            Tag = tag;
             Timestamp = new Timestamp(timestamp);
         }
 
-        public OUR_SetElement(T value, Timestamp timestamp)
+        public OUR_SetElement(T value, Guid tag, Timestamp timestamp)
         {
             Value = value;
+            Tag = tag;
             Timestamp = timestamp;
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
+            yield return Tag;
             yield return Timestamp;
         }
 

@@ -74,14 +74,14 @@ namespace CRDT.Application.UnitTests.Commutative
             var repositoryValues = _repository.GetAdds();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value));
 
-            Assert.Equal(1, actualValues.Count());
+            Assert.Single(actualValues);
         }
 
         [Theory]
         [AutoData]
         public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value, Node node)
         {
-            _orSetService.Remove(value, node);
+            _orSetService.Remove(value, new[] { node.Id });
 
             var repositoryValues = _repository.GetRemoves();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value));
@@ -94,7 +94,7 @@ namespace CRDT.Application.UnitTests.Commutative
         public void Remove_AddExists_AddsElementToTheRepository(TestType value, Node node)
         {
             _orSetService.Add(value, node);
-            _orSetService.Remove(value, node);
+            _orSetService.Remove(value, new[] { node.Id });
 
             var repositoryValues = _repository.GetRemoves();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == node.Id);
@@ -107,9 +107,9 @@ namespace CRDT.Application.UnitTests.Commutative
         public void Remove_IsIdempotent(TestType value, Node node)
         {
             _orSetService.Add(value, node);
-            _orSetService.Remove(value, node);
-            _orSetService.Remove(value, node);
-            _orSetService.Remove(value, node);
+            _orSetService.Remove(value, new[] { node.Id });
+            _orSetService.Remove(value, new[] { node.Id });
+            _orSetService.Remove(value, new[] { node.Id });
 
             var repositoryValues = _repository.GetRemoves();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == node.Id);
@@ -155,8 +155,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             _orSetService.Add(value, node);
             _orSetService.Add(value, otherNode);
-            _orSetService.Remove(value, node);
-            _orSetService.Remove(value, otherNode);
+            _orSetService.Remove(value, new []{node.Id, otherNode.Id});
 
             var lookup = _orSetService.Lookup(value);
 

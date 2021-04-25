@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
@@ -19,82 +17,41 @@ namespace CRDT.Sets.Convergent
         {
         }
 
-        public OUR_Set<T> Add(OUR_SetElement<T> element)
+        public OUR_Set<T> Add(OUR_SetElement<T> element) => new(Adds.Add(element), Removes);
+
+        public OUR_Set<T> Update(OUR_SetElement<T> element)
         {
-            var addConflicts = new HashSet<OUR_SetElement<T>> { element };
-            var removeConflicts = new HashSet<OUR_SetElement<T>>();
+            var elementToUpdate = Adds
+                .Where(a => a.Value.Id == element.Value.Id && a.Tag == element.Tag)
+                .OrderBy(a => a.Timestamp)
+                .LastOrDefault();
 
-            var adds = new HashSet<OUR_SetElement<T>>();
-            var removes = new HashSet<OUR_SetElement<T>>();
-
-            foreach (var add in Adds)
+            if(elementToUpdate is null || elementToUpdate?.Timestamp > element.Timestamp)
             {
-                if (element.Value.Id == add.Value.Id)
-                {
-                    addConflicts.Add(add);
-                }
-                else
-                {
-                    adds.Add(add);
-                }
+                return this;
             }
 
-            foreach (var remove in Removes)
-            {
-                if (element.Value.Id == remove.Value.Id)
-                {
-                    removeConflicts.Add(remove);
-                }
-                else
-                {
-                    removes.Add(remove);
-                }
-            }
+            var adds = Adds.Remove(elementToUpdate);
+            adds = adds.Add(element);
 
-            var addWinner = addConflicts.OrderBy(e => e.Timestamp).Last();
-            var removeWinner = removeConflicts.OrderBy(e => e.Timestamp).LastOrDefault();
-
-            if (addWinner < removeWinner)
-            {
-                removes.Add(removeWinner);
-            }
-
-            adds.Add(addWinner);
-
-            Adds = adds.ToImmutableHashSet();
-            Removes = removes.ToImmutableHashSet();
-
-            return this;
+            return new(adds, Removes);
         }
 
         public OUR_Set<T> Remove(OUR_SetElement<T> element)
         {
-            if (Adds.Any(e => element.Value == e.Value))
+            var elementToRemove = Adds
+                .Where(a => Equals(a.Value, element.Value) && a.Tag == element.Tag)
+                .OrderBy(a => a.Timestamp)
+                .LastOrDefault();
+
+            if (elementToRemove is null || elementToRemove?.Timestamp > element.Timestamp)
             {
-                Removes = Removes.Add(element);
+                return this;
             }
 
-            return this;
+            return new(Adds, Removes.Add(element));
         }
 
-        public IImmutableSet<T> Values =>
-            Adds
-                .Where(a => Removes.All(r => a.Value.Id != r.Value.Id))
-                .Select(e => e.Value)
-                .Distinct()
-                .ToImmutableHashSet();
-
-        public T Value(Guid id)
-        {
-            return Values.FirstOrDefault(v => v.Id == id);
-        }
-
-        public OUR_Set<T> Merge(OUR_Set<T> otherSet)
-        {
-            var adds = Adds.Union(otherSet.Adds);
-            var removes = Removes.Union(otherSet.Removes);
-
-            return new OUR_Set<T>(adds, removes);
-        }
+        public OUR_Set<T> Merge(IImmutableSet<OUR_SetElement<T>> adds, IImmutableSet<OUR_SetElement<T>> removes) => new(Adds.Union(adds), Removes.Union(removes));
     }
 }

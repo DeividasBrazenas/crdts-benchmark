@@ -25,7 +25,7 @@ namespace CRDT.Sets.Bases
 
         public IImmutableSet<T> Values =>
             Adds
-                .Where(a => !Removes.Any(r => Equals(r, a)))
+                .Where(a => !Removes.Any(r => Equals(r, a) && a.Tag == r.Tag))
                 .Select(e => e.Value)
                 .Distinct()
                 .ToImmutableHashSet();

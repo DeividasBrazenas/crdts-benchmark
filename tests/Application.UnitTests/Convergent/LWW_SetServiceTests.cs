@@ -21,48 +21,48 @@ namespace CRDT.Application.UnitTests.Convergent
             _lwwSetService = new LWW_SetService<TestType>(_repository);
         }
 
-        [Theory]
-        [AutoData]
-        public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, long timestamp)
-        {
-            _lwwSetService.Add(value, timestamp);
+        //[Theory]
+        //[AutoData]
+        //public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, long timestamp)
+        //{
+        //    _lwwSetService.Add(value, timestamp);
 
-            var repositoryValues = _repository.GetAdds();
-            Assert.Contains(value, repositoryValues.Select(v => v.Value));
-        }
+        //    var repositoryValues = _repository.GetAdds();
+        //    Assert.Contains(value, repositoryValues.Select(v => v.Value));
+        //}
 
-        [Theory]
-        [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<LWW_SetElement<TestType>> adds, TestType value, long timestamp)
-        {
-            _repository.PersistAdds(adds);
+        //[Theory]
+        //[AutoData]
+        //public void Add_WithExistingValues_AddsElementToTheRepository(List<LWW_SetElement<TestType>> adds, TestType value, long timestamp)
+        //{
+        //    _repository.PersistAdds(adds);
 
-            _lwwSetService.Add(value, timestamp);
+        //    _lwwSetService.Add(value, timestamp);
 
-            var repositoryValues = _repository.GetAdds();
-            Assert.Contains(value, repositoryValues.Select(v => v.Value));
-        }
+        //    var repositoryValues = _repository.GetAdds();
+        //    Assert.Contains(value, repositoryValues.Select(v => v.Value));
+        //}
 
-        [Theory]
-        [AutoData]
-        public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value, long timestamp)
-        {
-            _lwwSetService.Remove(value, timestamp);
+        //[Theory]
+        //[AutoData]
+        //public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value, long timestamp)
+        //{
+        //    _lwwSetService.Remove(value, timestamp);
 
-            var repositoryValues = _repository.GetRemoves();
-            Assert.DoesNotContain(value, repositoryValues.Select(v => v.Value));
-        }
+        //    var repositoryValues = _repository.GetRemoves();
+        //    Assert.DoesNotContain(value, repositoryValues.Select(v => v.Value));
+        //}
 
-        [Theory]
-        [AutoData]
-        public void Remove_AddExistsWithLowerTimestamp_AddsElementToTheRepository(TestType value, long timestamp)
-        {
-            _lwwSetService.Add(value, timestamp);
-            _lwwSetService.Remove(value, timestamp + 10);
+        //[Theory]
+        //[AutoData]
+        //public void Remove_AddExistsWithLowerTimestamp_AddsElementToTheRepository(TestType value, long timestamp)
+        //{
+        //    _lwwSetService.Add(value, timestamp);
+        //    _lwwSetService.Remove(value, timestamp + 10);
 
-            var repositoryValues = _repository.GetRemoves();
-            Assert.Contains(value, repositoryValues.Select(v => v.Value));
-        }
+        //    var repositoryValues = _repository.GetRemoves();
+        //    Assert.Contains(value, repositoryValues.Select(v => v.Value));
+        //}
 
         [Theory]
         [AutoData]
@@ -111,50 +111,50 @@ namespace CRDT.Application.UnitTests.Convergent
             AssertContains(removes, repositoryRemoves);
         }
 
-        [Theory]
-        [AutoData]
-        public void Lookup_Added_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
-        {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+        //[Theory]
+        //[AutoData]
+        //public void Lookup_Added_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
+        //{
+        //    _repository.PersistAdds(existingAdds);
+        //    _repository.PersistRemoves(existingRemoves);
 
-            _lwwSetService.Add(value, timestamp);
+        //    _lwwSetService.Add(value, timestamp);
 
-            var lookup = _lwwSetService.Lookup(value);
+        //    var lookup = _lwwSetService.Lookup(value);
 
-            Assert.True(lookup);
-        }
+        //    Assert.True(lookup);
+        //}
 
-        [Theory]
-        [AutoData]
-        public void Lookup_Removed_ReturnsFalse(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
-        {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+        //[Theory]
+        //[AutoData]
+        //public void Lookup_Removed_ReturnsFalse(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
+        //{
+        //    _repository.PersistAdds(existingAdds);
+        //    _repository.PersistRemoves(existingRemoves);
 
-            _lwwSetService.Add(value, timestamp);
-            _lwwSetService.Remove(value, timestamp + 100);
+        //    _lwwSetService.Add(value, timestamp);
+        //    _lwwSetService.Remove(value, timestamp + 100);
 
-            var lookup = _lwwSetService.Lookup(value);
+        //    var lookup = _lwwSetService.Lookup(value);
 
-            Assert.False(lookup);
-        }
+        //    Assert.False(lookup);
+        //}
 
-        [Theory]
-        [AutoData]
-        public void Lookup_ReAdded_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
-        {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+        //[Theory]
+        //[AutoData]
+        //public void Lookup_ReAdded_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
+        //{
+        //    _repository.PersistAdds(existingAdds);
+        //    _repository.PersistRemoves(existingRemoves);
 
-            _lwwSetService.Add(value, timestamp);
-            _lwwSetService.Remove(value, timestamp + 100);
-            _lwwSetService.Add(value, timestamp + 200);
+        //    _lwwSetService.Add(value, timestamp);
+        //    _lwwSetService.Remove(value, timestamp + 100);
+        //    _lwwSetService.Add(value, timestamp + 200);
 
-            var lookup = _lwwSetService.Lookup(value);
+        //    var lookup = _lwwSetService.Lookup(value);
 
-            Assert.True(lookup);
-        }
+        //    Assert.True(lookup);
+        //}
 
         private void AssertContains(List<LWW_SetElement<TestType>> expectedValues, IEnumerable<LWW_SetElement<TestType>> actualValues)
         {
