@@ -1,56 +1,34 @@
 ﻿using System.Collections.Generic;
 using CRDT.Core.Abstractions;
-using CRDT.Core.Cluster;
 using CRDT.Core.DistributedTime;
+using CRDT.Registers.Entities;
 
 namespace CRDT.Registers.Convergent
 {
     public sealed class LWW_Register<T> : Bases.LWW_RegisterBase<T> where T : DistributedEntity
     {
-        public Timestamp Timestamp { get; }
-
-        public LWW_Register(T value, Node updatedBy, long timestamp) : base(value, updatedBy)
+        public LWW_Register(LWW_RegisterElement<T> element) : base(element)
         {
-            Timestamp = new Timestamp(timestamp);
         }
 
-        public LWW_Register(T value, Node updatedBy, Timestamp timestamp) : base(value, updatedBy)
+        public LWW_Register<T> Assign(T value, long timestamp)
         {
-            Timestamp = timestamp;
-        }
-
-        public LWW_Register<T> Merge(T value, Node updatedBy, long timestamp)
-        {
-            if (Equals(Value, value))
+            if (Equals(Element.Value, value))
             {
                 return this;
             }
 
-            var timestampObject = new Timestamp(timestamp);
-
-            if (Timestamp > timestampObject)
+            if (Element.Timestamp < new Timestamp(timestamp))
             {
-                return this;
+                return new LWW_Register<T>(new LWW_RegisterElement<T>(value, timestamp));
             }
 
-            if (Timestamp < timestampObject)
-            {
-                return new LWW_Register<T>(value, updatedBy, timestamp);
-            }
-
-            if (UpdatedBy < updatedBy)
-            {
-                return this;
-            }
-
-            return new LWW_Register<T>(value, updatedBy, timestamp);
+            return this;
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return Value;
-            yield return Timestamp;
-            yield return UpdatedBy;
+            yield return Element;
         }
     }
 }

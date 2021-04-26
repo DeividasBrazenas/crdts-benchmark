@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="Bases\" />
+    <Folder Include="Entities\" />
   </ItemGroup>
 
 </Project>

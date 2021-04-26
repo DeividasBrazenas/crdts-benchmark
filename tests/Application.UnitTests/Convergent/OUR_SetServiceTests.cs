@@ -5,7 +5,6 @@ using AutoFixture.Xunit2;
 using CRDT.Application.Convergent;
 using CRDT.Application.Interfaces;
 using CRDT.Application.UnitTests.Repositories;
-using CRDT.Core.Cluster;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;

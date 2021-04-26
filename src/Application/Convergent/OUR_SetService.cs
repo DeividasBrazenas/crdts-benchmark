@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using CRDT.Application.Interfaces;
 using CRDT.Core.Abstractions;
-using CRDT.Core.Cluster;
 using CRDT.Sets.Convergent;
 using CRDT.Sets.Entities;
 

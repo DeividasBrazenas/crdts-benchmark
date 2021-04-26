@@ -1,47 +1,42 @@
 ﻿using System;
-using CRDT.Application.Entities;
 using CRDT.Application.Interfaces;
 using CRDT.Core.Abstractions;
-using CRDT.Core.Cluster;
 using CRDT.Registers.Convergent;
+using CRDT.Registers.Entities;
 
 namespace CRDT.Application.Convergent
 {
     public class LWW_RegisterService<T> where T : DistributedEntity
     {
-        private readonly IRepository<T> _repository;
+        private readonly ILWW_RegisterRepository<T> _repository;
 
-        public LWW_RegisterService(IRepository<T> repository)
+        public LWW_RegisterService(ILWW_RegisterRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Update(Guid id, T value, Node updatedBy, long timestamp)
+        public void Assign(Guid id, T value, long timestamp)
         {
-            var existingEntity = _repository.GetValue(id);
+            var existingEntity = _repository.GetElement(id);
 
-            if(existingEntity is null)
+            LWW_Register<T> existingRegister;
+            if (existingEntity is null)
             {
-                _repository.AddValues(new PersistenceEntity<T>(value, updatedBy, timestamp));
-
-                return;
+                existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, null));
+            }
+            else
+            {
+                existingRegister = new LWW_Register<T>(existingEntity);
             }
 
-            var existingRegister = new LWW_Register<T>(existingEntity.Value, existingEntity.UpdatedBy, existingEntity.Timestamp);
+            var newRegister = existingRegister.Assign(value, timestamp);
 
-            var mergedRegister = existingRegister.Merge(value, updatedBy, timestamp);
-
-            if(Equals(existingRegister, mergedRegister))
-            {
-                return;
-            }
-
-            _repository.ReplaceValue(id, new PersistenceEntity<T>(mergedRegister.Value, mergedRegister.UpdatedBy, mergedRegister.Timestamp));
+            _repository.PersistElement(newRegister.Element);
         }
 
         public T GetValue(Guid id)
         {
-            var entity = _repository.GetValue(id);
+            var entity = _repository.GetElement(id);
 
             return entity?.Value;
         }

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using CRDT.Core.Abstractions;
-using CRDT.Core.Cluster;
 using CRDT.Core.DistributedTime;
-using CRDT.Registers.Operations;
+using CRDT.Registers.Entities;
 using Newtonsoft.Json.Linq;
 
 namespace CRDT.Registers.Commutative
@@ -11,41 +10,27 @@ namespace CRDT.Registers.Commutative
     public sealed class LWW_Register<T> : Bases.LWW_RegisterBase<T>
         where T : DistributedEntity
     {
-        public Timestamp Timestamp { get; }
-
-        public LWW_Register(T value, Node updatedBy, long timestamp) : base(value, updatedBy)
+        public LWW_Register(LWW_RegisterElement<T> element) : base(element)
         {
-            Timestamp = new Timestamp(timestamp);
         }
 
-        public LWW_Register(T value, Node updatedBy, Timestamp timestamp) : base(value, updatedBy)
+        public LWW_Register<T> Assign(JToken value, long timestamp)
         {
-            Timestamp = timestamp;
+            var timestampObject = new Timestamp(timestamp);
+
+            if (Element.Timestamp < timestampObject)
+            {
+                return AssignValue(value, timestamp);
+            }
+
+            return this;
         }
 
-        public LWW_Register<T> Merge(Operation operation)
+        private LWW_Register<T> AssignValue(JToken value, long timestamp)
         {
-            if (Timestamp > operation.Timestamp)
-            {
-                return this;
-            }
-            if (Timestamp < operation.Timestamp)
-            {
-                return UpdateValueWithOperation(operation);
-            }
-            if (UpdatedBy < operation.UpdatedBy)
-            {
-                return this;
-            }
+            var currentValue = JObject.FromObject(Element.Value);
 
-            return UpdateValueWithOperation(operation);
-        }
-
-        private LWW_Register<T> UpdateValueWithOperation(Operation operation)
-        {
-            var currentValue = JObject.FromObject(Value);
-
-            currentValue.Merge(operation.Value, new JsonMergeSettings
+            currentValue.Merge(value, new JsonMergeSettings
             {
                 MergeArrayHandling = MergeArrayHandling.Replace,
                 MergeNullValueHandling = MergeNullValueHandling.Merge,
@@ -54,19 +39,17 @@ namespace CRDT.Registers.Commutative
 
             var newValue = currentValue.ToObject<T>();
 
-            if (Value.Equals(newValue))
+            if (Element.Value.Equals(newValue))
             {
                 return this;
             }
 
-            return new LWW_Register<T>(newValue, operation.UpdatedBy, operation.Timestamp);
+            return new LWW_Register<T>(new LWW_RegisterElement<T>(newValue, timestamp));
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
-            yield return Value;
-            yield return Timestamp;
-            yield return UpdatedBy;
+            yield return Element;
         }
     }
 }

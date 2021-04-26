@@ -1,59 +1,58 @@
 ﻿using System;
-using CRDT.Application.Entities;
 using CRDT.Application.Interfaces;
 using CRDT.Core.Abstractions;
 using CRDT.Registers.Commutative;
-using CRDT.Registers.Operations;
+using CRDT.Registers.Entities;
 using Newtonsoft.Json.Linq;
 
 namespace CRDT.Application.Commutative
 {
     public class LWW_RegisterService<T> where T : DistributedEntity
     {
-        private readonly IRepository<T> _repository;
+        private readonly ILWW_RegisterRepository<T> _repository;
 
-        public LWW_RegisterService(IRepository<T> repository)
+        public LWW_RegisterService(ILWW_RegisterRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Update(Guid id, Operation operation)
+        public void Assign(Guid id, JToken value, long timestamp)
         {
-            var existingEntity = _repository.GetValue(id);
+            var existingEntity = _repository.GetElement(id);
 
             LWW_Register<T> register; 
             if (existingEntity is null)
             {
-                register = new LWW_Register<T>(BaseObject(id).ToObject<T>(), null, null);
+                var element = new LWW_RegisterElement<T>(BaseObject(id), null);
+                register = new LWW_Register<T>(element);
             }
             else
             {
-                register = new LWW_Register<T>(existingEntity.Value, existingEntity.UpdatedBy, existingEntity.Timestamp);
+                register = new LWW_Register<T>(existingEntity);
             }
 
-            var newRegister = register.Merge(operation);
+            var newRegister = register.Assign(value, timestamp);
 
             if (Equals(register, newRegister))
             {
                 return;
             }
 
-            _repository.ReplaceValue(id,
-                new PersistenceEntity<T>(newRegister.Value, newRegister.UpdatedBy, newRegister.Timestamp));
+            _repository.PersistElement(newRegister.Element);
         }
 
-        public T GetValue(Guid id)
+        public T Value(Guid id)
         {
-            var entity = _repository.GetValue(id);
+            var entity = _repository.GetElement(id);
 
             return entity?.Value;
         }
 
-        private JObject BaseObject(Guid id)
+        private T BaseObject(Guid id)
         {
             var obj = new JObject { ["Id"] = id };
 
-            return obj;
+            return obj.ToObject<T>();
         }
     }
 }
