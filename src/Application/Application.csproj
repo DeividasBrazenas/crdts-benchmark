@@ -10,6 +10,7 @@
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Registers\Registers.csproj" />
     <ProjectReference Include="..\Sets\Sets.csproj" />
+    <ProjectReference Include="..\Counters\Counters.csproj" />
   </ItemGroup>
 
 </Project>
