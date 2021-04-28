@@ -119,12 +119,20 @@ namespace CRDT.Application.UnitTests.Commutative
             Assert.False(lookup);
         }
 
-        private void AssertContains(List<TestType> expectedValues, IEnumerable<TestType> actualValues)
+        [Theory]
+        [AutoData]
+        public void Lookup_ReAdd_ReturnsFalse(List<TestType> existingAdds, List<TestType> existingRemoves, TestType value)
         {
-            foreach (var value in expectedValues)
-            {
-                Assert.Equal(1, actualValues.Count(v => Equals(v, value)));
-            }
+            _repository.PersistAdds(existingAdds);
+            _repository.PersistRemoves(existingRemoves);
+
+            _pSetService.Add(value);
+            _pSetService.Remove(value);
+            _pSetService.Add(value);
+
+            var lookup = _pSetService.Lookup(value);
+
+            Assert.False(lookup);
         }
     }
 }
