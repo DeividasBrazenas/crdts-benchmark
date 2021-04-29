@@ -2,7 +2,6 @@
 using CRDT.Application.Interfaces;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Commutative;
-using CRDT.Sets.Entities;
 
 namespace CRDT.Application.Commutative
 {
@@ -22,22 +21,7 @@ namespace CRDT.Application.Commutative
 
             var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            var element = new LWW_SetElement<T>(value, timestamp);
-            set = set.Add(element);
-
-            _repository.PersistAdds(set.Adds);
-        }
-
-        public void Update(T value, long timestamp)
-        {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
-
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
-
-            var element = new LWW_SetElement<T>(value, timestamp);
-
-            set = set.Update(element);
+            set = set.Add(value, timestamp);
 
             _repository.PersistAdds(set.Adds);
         }
@@ -49,8 +33,7 @@ namespace CRDT.Application.Commutative
 
             var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            var element = new LWW_SetElement<T>(value, timestamp);
-            set = set.Remove(element);
+            set = set.Remove(value, timestamp);
 
             _repository.PersistRemoves(set.Removes);
         }

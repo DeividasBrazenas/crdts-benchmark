@@ -6,7 +6,6 @@ using CRDT.Sets.Commutative;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
-using static CRDT.UnitTestHelpers.TestTypes.TestTypeBuilder;
 
 namespace CRDT.Sets.UnitTests.Commutative
 {
@@ -41,7 +40,7 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            lwwSet = lwwSet.Add(element);
+            lwwSet = lwwSet.Add(element.Value, element.Timestamp.Value);
 
             Assert.Contains(element, lwwSet.Adds);
         }
@@ -55,8 +54,8 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstAdd = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
             var secondAdd = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
 
-            lwwSet = lwwSet.Add(firstAdd);
-            lwwSet = lwwSet.Add(secondAdd);
+            lwwSet = lwwSet.Add(firstAdd.Value, firstAdd.Timestamp.Value);
+            lwwSet = lwwSet.Add(secondAdd.Value, secondAdd.Timestamp.Value);
 
             Assert.True(lwwSet.Adds.Count(e => Equals(e, secondAdd)) == 1);
             Assert.True(lwwSet.Adds.Count(e => Equals(e, firstAdd)) == 0);
@@ -71,42 +70,10 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstAdd = new LWW_SetElement<TestType>(value, timestamp);
             var secondAdd = new LWW_SetElement<TestType>(value, timestamp);
 
-            lwwSet = lwwSet.Add(firstAdd);
-            lwwSet = lwwSet.Add(secondAdd);
+            lwwSet = lwwSet.Add(firstAdd.Value, firstAdd.Timestamp.Value);
+            lwwSet = lwwSet.Add(secondAdd.Value, secondAdd.Timestamp.Value);
 
             Assert.Equal(1, lwwSet.Adds.Count(e => Equals(e.Value, value)));
-        }
-
-        [Theory]
-        [AutoData]
-        public void Add_CallsUpdateIfSameElementExists(TestType value, long timestamp)
-        {
-            var lwwSet = new LWW_Set<TestType>();
-
-            var addElement = new LWW_SetElement<TestType>(value, timestamp);
-            var updateElement = new LWW_SetElement<TestType>(Build(value.Id), timestamp + 10);
-
-            lwwSet = lwwSet.Add(addElement);
-            lwwSet = lwwSet.Update(updateElement);
-
-            Assert.Contains(updateElement, lwwSet.Adds);
-            Assert.DoesNotContain(addElement, lwwSet.Adds);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Update_UpdatesElementInAddsSet(TestType value, long timestamp)
-        {
-            var lwwSet = new LWW_Set<TestType>();
-
-            var addElement = new LWW_SetElement<TestType>(value, timestamp);
-            var updateElement = new LWW_SetElement<TestType>(Build(value.Id), timestamp + 10);
-
-            lwwSet = lwwSet.Add(addElement);
-            lwwSet = lwwSet.Update(updateElement);
-
-            Assert.Contains(updateElement, lwwSet.Adds);
-            Assert.DoesNotContain(addElement, lwwSet.Adds);
         }
 
         [Theory]
@@ -115,7 +82,7 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var newLwwSet = lwwSet.Remove(element);
+            var newLwwSet = lwwSet.Remove(element.Value, element.Timestamp.Value);
 
             Assert.Same(lwwSet, newLwwSet);
         }
@@ -129,15 +96,15 @@ namespace CRDT.Sets.UnitTests.Commutative
             var add = new LWW_SetElement<TestType>(value, DateTime.Now.Ticks);
             var remove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
 
-            lwwSet = lwwSet.Add(add);
-            lwwSet = lwwSet.Remove(remove);
+            lwwSet = lwwSet.Add(add.Value, add.Timestamp.Value);
+            lwwSet = lwwSet.Remove(remove.Value, remove.Timestamp.Value);
 
             Assert.Contains(remove, lwwSet.Removes);
         }
 
         [Theory]
         [AutoData]
-        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_AddsTwoElements(TestType value)
+        public void Remove_RemoveSameElementTwiceWithDifferentTimestamp_AddsOneElement(TestType value)
         {
             var lwwSet = new LWW_Set<TestType>();
 
@@ -145,11 +112,11 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstRemove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks);
             var secondRemove = new LWW_SetElement<TestType>(value, DateTime.Now.AddMinutes(2).Ticks);
 
-            lwwSet = lwwSet.Add(add);
-            lwwSet = lwwSet.Remove(firstRemove);
-            lwwSet = lwwSet.Remove(secondRemove);
+            lwwSet = lwwSet.Add(add.Value, add.Timestamp.Value);
+            lwwSet = lwwSet.Remove(firstRemove.Value, firstRemove.Timestamp.Value);
+            lwwSet = lwwSet.Remove(secondRemove.Value, secondRemove.Timestamp.Value);
 
-            Assert.True(lwwSet.Removes.Count(e => Equals(e.Value, value)) == 2);
+            Assert.True(lwwSet.Removes.Count(e => Equals(e.Value, value)) == 1);
         }
 
         [Theory]
@@ -162,9 +129,9 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstRemove = new LWW_SetElement<TestType>(value, timestamp + 100);
             var secondRemove = new LWW_SetElement<TestType>(value, timestamp + 100);
 
-            lwwSet = lwwSet.Add(add);
-            lwwSet = lwwSet.Remove(firstRemove);
-            lwwSet = lwwSet.Remove(secondRemove);
+            lwwSet = lwwSet.Add(add.Value, add.Timestamp.Value);
+            lwwSet = lwwSet.Remove(firstRemove.Value, firstRemove.Timestamp.Value);
+            lwwSet = lwwSet.Remove(secondRemove.Value, secondRemove.Timestamp.Value);
 
             Assert.Equal(1, lwwSet.Removes.Count(e => Equals(e.Value, value)));
         }
@@ -175,7 +142,7 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            lwwSet = lwwSet.Add(element);
+            lwwSet = lwwSet.Add(element.Value, element.Timestamp.Value);
 
             var lookup = lwwSet.Lookup(element.Value);
 
@@ -188,11 +155,11 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var addElement = new LWW_SetElement<TestType>(value, timestamp);
-            var removeElement = new LWW_SetElement<TestType>(value, timestamp + 10);
+            var add = new LWW_SetElement<TestType>(value, timestamp);
+            var remove = new LWW_SetElement<TestType>(value, timestamp + 10);
 
-            lwwSet = lwwSet.Add(addElement);
-            lwwSet = lwwSet.Remove(removeElement);
+            lwwSet = lwwSet.Add(add.Value, add.Timestamp.Value);
+            lwwSet = lwwSet.Remove(remove.Value, remove.Timestamp.Value);
 
             var lookup = lwwSet.Lookup(value);
 
@@ -205,13 +172,13 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var lwwSet = new LWW_Set<TestType>();
 
-            var addElement = new LWW_SetElement<TestType>(value, timestamp);
-            var removeElement = new LWW_SetElement<TestType>(value, timestamp + 10);
-            var reAddElement = new LWW_SetElement<TestType>(value, timestamp + 100);
+            var add = new LWW_SetElement<TestType>(value, timestamp);
+            var remove = new LWW_SetElement<TestType>(value, timestamp + 10);
+            var reAdd = new LWW_SetElement<TestType>(value, timestamp + 100);
 
-            lwwSet = lwwSet.Add(addElement);
-            lwwSet = lwwSet.Remove(removeElement);
-            lwwSet = lwwSet.Add(reAddElement);
+            lwwSet = lwwSet.Add(add.Value, add.Timestamp.Value);
+            lwwSet = lwwSet.Remove(remove.Value, remove.Timestamp.Value);
+            lwwSet = lwwSet.Add(reAdd.Value, reAdd.Timestamp.Value);
 
             var lookup = lwwSet.Lookup(value);
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
+using CRDT.Core.DistributedTime;
 using CRDT.Sets.Bases;
 using CRDT.Sets.Entities;
 
@@ -17,38 +18,39 @@ namespace CRDT.Sets.Commutative
         {
         }
 
-        public LWW_Set<T> Add(LWW_SetElement<T> element)
+        public LWW_Set<T> Add(T value, long timestamp)
         {
-            var existingElement = Adds.FirstOrDefault(a => a.Value.Id == element.Value.Id);
+            var existingElement = Adds.FirstOrDefault(a => a.Value.Id == value.Id);
 
-            if (existingElement is not null)
+            if (existingElement is not null && existingElement.Timestamp < new Timestamp(timestamp))
             {
-                return Update(element);
+                var elements = Adds.Remove(existingElement);
+
+                return new(elements.Add(new LWW_SetElement<T>(value, timestamp)), Removes);
             }
 
-            return new(Adds.Add(element), Removes);
-        }
-
-        public LWW_Set<T> Update(LWW_SetElement<T> element)
-        {
-            var elementToUpdate = Adds.FirstOrDefault(a => a.Value.Id == element.Value.Id);
-
-            if (elementToUpdate is null || elementToUpdate?.Timestamp > element.Timestamp)
+            if (existingElement is null)
             {
-                return this;
+                return new(Adds.Add(new LWW_SetElement<T>(value, timestamp)), Removes);
             }
 
-            var adds = Adds.Remove(elementToUpdate);
-            adds = adds.Add(element);
-
-            return new(adds, Removes);
+            return this;
         }
 
-        public LWW_Set<T> Remove(LWW_SetElement<T> element)
+        public LWW_Set<T> Remove(T value, long timestamp)
         {
-            if (Adds.Any(a => Equals(a.Value, element.Value) && a.Timestamp < element.Timestamp))
+            if (Adds.Any(a => Equals(a.Value, value) && a.Timestamp < new Timestamp(timestamp)))
             {
-                return new(Adds, Removes.Add(element));
+                var element = Removes.FirstOrDefault(r => r.Value.Id == value.Id);
+
+                IImmutableSet<LWW_SetElement<T>> elements = Removes;
+
+                if (element is not null)
+                {
+                    elements = Removes.Remove(element);
+                }
+
+                return new(Adds, elements.Add(new LWW_SetElement<T>(value, timestamp)));
             }
 
             return this;

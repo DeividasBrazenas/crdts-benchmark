@@ -7,7 +7,6 @@ using CRDT.Application.UnitTests.Repositories;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
-using static CRDT.UnitTestHelpers.TestTypes.TestTypeBuilder;
 
 namespace CRDT.Application.UnitTests.Commutative
 {
@@ -108,32 +107,6 @@ namespace CRDT.Application.UnitTests.Commutative
             var lookup = _lwwSetService.Lookup(value);
 
             Assert.True(lookup);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Lookup_UpdatedElement_ReturnsTrueForUpdatedElement(TestType value, long timestamp)
-        {
-            _lwwSetService.Add(value, timestamp);
-
-            var newValue = Build(value.Id);
-            _lwwSetService.Update(newValue, timestamp + 3);
-
-            var lookup = _lwwSetService.Lookup(newValue);
-            Assert.True(lookup);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Lookup_UpdatedElement_ReturnsFalseForOldElement(TestType value, long timestamp)
-        {
-            _lwwSetService.Add(value, timestamp);
-
-            var newValue = Build(value.Id);
-            _lwwSetService.Update(newValue, timestamp + 3);
-
-            var lookup = _lwwSetService.Lookup(value);
-            Assert.False(lookup);
         }
     }
 }
