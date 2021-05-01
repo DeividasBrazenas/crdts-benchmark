@@ -25,9 +25,7 @@ namespace CRDT.Application.Commutative
 
             var set = new OR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            var element = new OR_SetElement<T>(value, node.Id);
-
-            set = set.Add(element);
+            set = set.Add(value, node.Id);
 
             _repository.PersistAdds(set.Adds);
         }
@@ -37,11 +35,11 @@ namespace CRDT.Application.Commutative
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new Sets.Convergent.OR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new OR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
             foreach (var tag in tags)
             {
-                set = set.Remove(new OR_SetElement<T>(value, tag));
+                set = set.Remove(value, tag);
             }
 
             _repository.PersistRemoves(set.Removes);

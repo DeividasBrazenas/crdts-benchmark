@@ -9,29 +9,22 @@ using Xunit;
 
 namespace CRDT.Sets.UnitTests.Commutative
 {
-    public class OR_SetTests
+    public class OR_OptimizedSetTests
     {
         [Theory]
         [AutoData]
-        public void Create_CreatesSetWithElements(OR_SetElement<TestType> one, OR_SetElement<TestType> two,
-            OR_SetElement<TestType> three)
+        public void Create_CreatesSetWithElements(OR_OptimizedSetElement<TestType> one, OR_OptimizedSetElement<TestType> two,
+            OR_OptimizedSetElement<TestType> three)
         {
-            var adds = new[] { one, two }.ToImmutableHashSet();
-            var removes = new[] { two, three }.ToImmutableHashSet();
+            var elements = new[] { one, two, three }.ToImmutableHashSet();
 
-            var orSet = new OR_Set<TestType>(adds, removes);
+            var orSet = new OR_OptimizedSet<TestType>(elements);
 
-            Assert.Equal(adds.Count, orSet.Adds.Count);
-            Assert.Equal(removes.Count, orSet.Removes.Count);
+            Assert.Equal(3, orSet.Elements.Count);
 
-            foreach (var add in adds)
+            foreach (var element in elements)
             {
-                Assert.Contains(add, orSet.Adds);
-            }
-
-            foreach (var remove in removes)
-            {
-                Assert.Contains(remove, orSet.Removes);
+                Assert.Contains(element, orSet.Elements);
             }
         }
 
@@ -39,34 +32,34 @@ namespace CRDT.Sets.UnitTests.Commutative
         [AutoData]
         public void Add_AddsElementToAddsSet(TestType value, Guid tag)
         {
-            var orSet = new OR_Set<TestType>();
+            var orSet = new OR_OptimizedSet<TestType>();
 
             orSet = orSet.Add(value, tag);
 
-            var element = new OR_SetElement<TestType>(value, tag);
+            var element = new OR_OptimizedSetElement<TestType>(value, tag, false);
 
-            Assert.Contains(element, orSet.Adds);
+            Assert.Contains(element, orSet.Elements);
         }
 
         [Theory]
         [AutoData]
         public void Add_Concurrent_AddsOnlyOneElement(TestType value, Guid tag)
         {
-            var orSet = new OR_Set<TestType>();
+            var orSet = new OR_OptimizedSet<TestType>();
 
             orSet = orSet.Add(value, tag);
             orSet = orSet.Add(value, tag);
 
-            var element = new OR_SetElement<TestType>(value, tag);
+            var element = new OR_OptimizedSetElement<TestType>(value, tag, false);
 
-            Assert.Equal(1, orSet.Adds.Count(v => Equals(v, element)));
+            Assert.Equal(1, orSet.Elements.Count(v => Equals(v, element)));
         }
 
         [Theory]
         [AutoData]
         public void Remove_BeforeAdd_HasNoEffect(TestType value, Guid tag)
         {
-            var orSet = new OR_Set<TestType>();
+            var orSet = new OR_OptimizedSet<TestType>();
 
             var newOrSet = orSet.Remove(value, tag);
 
@@ -77,36 +70,36 @@ namespace CRDT.Sets.UnitTests.Commutative
         [AutoData]
         public void Remove_AddsElementToRemovesSet(TestType value, Guid tag)
         {
-            var orSet = new OR_Set<TestType>();
+            var orSet = new OR_OptimizedSet<TestType>();
 
             orSet = orSet.Add(value, tag);
             orSet = orSet.Remove(value, tag);
 
-            var element = new OR_SetElement<TestType>(value, tag);
+            var element = new OR_OptimizedSetElement<TestType>(value, tag, true);
 
-            Assert.Contains(element, orSet.Removes);
+            Assert.Contains(element, orSet.Elements);
         }
 
         [Theory]
         [AutoData]
         public void Remove_Concurrent_AddsOnlyOneElementToRemoveSet(TestType value, Guid tag)
         {
-            var orSet = new OR_Set<TestType>();
+            var orSet = new OR_OptimizedSet<TestType>();
 
             orSet = orSet.Add(value, tag);
             orSet = orSet.Remove(value, tag);
             orSet = orSet.Remove(value, tag);
 
-            var element = new OR_SetElement<TestType>(value, tag);
+            var element = new OR_OptimizedSetElement<TestType>(value, tag, true);
 
-            Assert.Equal(1, orSet.Removes.Count(v => Equals(v, element)));
+            Assert.Equal(1, orSet.Elements.Count(v => Equals(v, element)));
         }
 
         [Theory]
         [AutoData]
         public void Lookup_AddedAndNotRemoved_ReturnsTrue(TestType value, Guid tag)
         {
-            var orSet = new OR_Set<TestType>();
+            var orSet = new OR_OptimizedSet<TestType>();
 
             orSet = orSet.Add(value, tag);
 
@@ -119,9 +112,7 @@ namespace CRDT.Sets.UnitTests.Commutative
         [AutoData]
         public void Lookup_AddedAndRemoved_ReturnsFalse(TestType value, Guid tag)
         {
-            var orSet = new OR_Set<TestType>();
-
-            var element = new OR_SetElement<TestType>(value, Guid.NewGuid());
+            var orSet = new OR_OptimizedSet<TestType>();
 
             orSet = orSet.Add(value, tag);
             orSet = orSet.Remove(value, tag);
@@ -133,9 +124,9 @@ namespace CRDT.Sets.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_SameValueWithSeveralTags_ReturnsTrue(TestType value, Guid tag)
+        public void Lookup_OptimizedSameValueWithSeveralTags_ReturnsTrue(TestType value, Guid tag)
         {
-            var orSet = new OR_Set<TestType>();
+            var orSet = new OR_OptimizedSet<TestType>();
 
             orSet = orSet.Add(value, tag);
             orSet = orSet.Add(value, Guid.NewGuid());
@@ -150,14 +141,12 @@ namespace CRDT.Sets.UnitTests.Commutative
         [AutoData]
         public void Values_ReturnsNonRemovedValues(TestType one, TestType two, TestType three, Guid tagOne, Guid tagTwo, Guid tagThree)
         {
-            var orSet = new OR_Set<TestType>();
+            var orSet = new OR_OptimizedSet<TestType>();
 
             orSet = orSet.Add(one, tagOne);
             orSet = orSet.Add(one, tagTwo);
             orSet = orSet.Remove(one, tagTwo);
-            orSet = orSet.Add(two, tagTwo);
-            orSet = orSet.Add(two, tagOne);
-            orSet = orSet.Remove(two, tagOne);
+            orSet = orSet.Add(two, tagThree);
             orSet = orSet.Remove(three, tagThree);
             orSet = orSet.Add(three, tagThree);
             orSet = orSet.Remove(three, tagThree);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
@@ -17,13 +18,13 @@ namespace CRDT.Sets.Commutative
         {
         }
 
-        public OR_Set<T> Add(OR_SetElement<T> element) => new(Adds.Add(element), Removes);
+        public OR_Set<T> Add(T value, Guid tag) => new(Adds.Add(new OR_SetElement<T>(value, tag)), Removes);
 
-        public OR_Set<T> Remove(OR_SetElement<T> element)
+        public OR_Set<T> Remove(T value, Guid tag)
         {
-            if (Adds.Any(e => Equals(e, element)))
+            if (Adds.Any(e => Equals(e.Value, value) && e.Tag == tag))
             {
-                return new(Adds, Removes.Add(element));
+                return new(Adds, Removes.Add(new OR_SetElement<T>(value, tag)));
             }
 
             return this;
