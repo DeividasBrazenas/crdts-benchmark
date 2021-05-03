@@ -28,42 +28,6 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToTheSet(TestType value)
-        {
-            var gSet = new G_Set<TestType>();
-
-            gSet = gSet.Add(value);
-
-            Assert.Contains(value, gSet.Values);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Add_Concurrent_AddsOnlyOneElement(TestType value)
-        {
-            var gSet = new G_Set<TestType>();
-
-            gSet = gSet.Add(value);
-            gSet = gSet.Add(value);
-
-            Assert.Equal(1, gSet.Values.Count(v => Equals(v, value)));
-        }
-
-        [Theory]
-        [AutoData]
-        public void Lookup_ValueExists_ReturnsTrue(List<TestType> values, TestType value)
-        {
-            var gSet = new G_Set<TestType>(values.ToImmutableHashSet());
-
-            gSet = gSet.Add(value);
-
-            var exists = gSet.Lookup(value);
-
-            Assert.True(exists);
-        }
-
-        [Theory]
-        [AutoData]
         public void Lookup_ValueDoesNotExist_ReturnsFalse(List<TestType> values, TestType value)
         {
             var gSet = new G_Set<TestType>(values.ToImmutableHashSet());

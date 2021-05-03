@@ -5,7 +5,6 @@ using CRDT.Application.Interfaces;
 using CRDT.Core.Abstractions;
 using CRDT.Core.Cluster;
 using CRDT.Sets.Commutative;
-using CRDT.Sets.Entities;
 
 namespace CRDT.Application.Commutative
 {
@@ -18,30 +17,26 @@ namespace CRDT.Application.Commutative
             _repository = repository;
         }
 
-        public void Add(T value, Node node, long timestamp)
+        public void Add(T value, Guid tag, long timestamp)
         {
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
             var set = new OUR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            var element = new OUR_SetElement<T>(value, node.Id, timestamp);
-
-            set = set.Add(element);
+            set = set.Add(value, tag, timestamp);
 
             _repository.PersistAdds(set.Adds);
         }
 
-        public void Update(T value, Node node, long timestamp)
+        public void Update(T value, Guid tag, long timestamp)
         {
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
             var set = new OUR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            var element = new OUR_SetElement<T>(value, node.Id, timestamp);
-
-            set = set.Update(element);
+            set = set.Update(value, tag, timestamp);
 
             _repository.PersistAdds(set.Adds);
         }
@@ -55,7 +50,7 @@ namespace CRDT.Application.Commutative
 
             foreach (var tag in tags)
             {
-                set = set.Remove(new OUR_SetElement<T>(value, tag, timestamp));
+                set = set.Remove(value, tag, timestamp);
             }
 
             _repository.PersistRemoves(set.Removes);

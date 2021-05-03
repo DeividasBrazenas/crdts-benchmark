@@ -16,18 +16,6 @@ namespace CRDT.Sets.Convergent
         {
         }
 
-        public P_Set<T> Add(T value) => new(Adds.Add(value), Removes);
-
-        public P_Set<T> Remove(T value)
-        {
-            if (Adds.Any(e => Equals(e, value)))
-            {
-                return new(Adds, Removes.Add(value));
-            }
-
-            return this;
-        }
-
         public P_Set<T> Merge(IImmutableSet<T> adds, IImmutableSet<T> removes)
         {
             var addsUnion = Adds.Union(adds);

@@ -18,13 +18,13 @@ namespace CRDT.Application.Commutative
             _repository = repository;
         }
 
-        public void Add(T value, Node node)
+        public void Add(T value, Guid tag)
         {
             var existingElements = _repository.GetElements();
 
             var set = new OR_OptimizedSet<T>(existingElements.ToImmutableHashSet());
 
-            set = set.Add(value, node.Id);
+            set = set.Add(value, tag);
 
             _repository.PersistElements(set.Elements);
         }

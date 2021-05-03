@@ -18,14 +18,14 @@ namespace CRDT.Application.Commutative
             _repository = repository;
         }
 
-        public void Add(T value, Node node)
+        public void Add(T value, Guid tag)
         {
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
             var set = new OR_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            set = set.Add(value, node.Id);
+            set = set.Add(value, tag);
 
             _repository.PersistAdds(set.Adds);
         }

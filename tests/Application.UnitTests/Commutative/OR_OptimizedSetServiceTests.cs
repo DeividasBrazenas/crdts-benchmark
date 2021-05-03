@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Commutative;
@@ -24,37 +25,37 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, Node node)
+        public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, Guid tag)
         {
-            _orSetService.Add(value, node);
+            _orSetService.Add(value, tag);
 
             var repositoryValues = _repository.GetElements();
-            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == node.Id);
+            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag);
 
             Assert.Single(actualValues);
         }
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<OR_OptimizedSetElement<TestType>> adds, TestType value, Node node)
+        public void Add_WithExistingValues_AddsElementToTheRepository(List<OR_OptimizedSetElement<TestType>> adds, TestType value, Guid tag)
         {
             _repository.PersistElements(adds);
 
-            _orSetService.Add(value, node);
+            _orSetService.Add(value, tag);
 
             var repositoryValues = _repository.GetElements();
-            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == node.Id);
+            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag);
 
             Assert.Single(actualValues);
         }
 
         [Theory]
         [AutoData]
-        public void Add_WithDifferentTag_AddsElementToTheRepository(List<OR_OptimizedSetElement<TestType>> adds, TestType value, Node node, Node otherNode)
+        public void Add_WithDifferentTag_AddsElementToTheRepository(List<OR_OptimizedSetElement<TestType>> adds, TestType value, Guid tag, Guid otherNode)
         {
             _repository.PersistElements(adds);
 
-            _orSetService.Add(value, node);
+            _orSetService.Add(value, tag);
             _orSetService.Add(value, otherNode);
 
             var repositoryValues = _repository.GetElements();
@@ -65,11 +66,11 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_IsIdempotent(TestType value, Node node)
+        public void Add_IsIdempotent(TestType value, Guid tag)
         {
-            _orSetService.Add(value, node);
-            _orSetService.Add(value, node);
-            _orSetService.Add(value, node);
+            _orSetService.Add(value, tag);
+            _orSetService.Add(value, tag);
+            _orSetService.Add(value, tag);
 
             var repositoryValues = _repository.GetElements();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value));
@@ -79,9 +80,9 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value, Node node)
+        public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value, Guid tag)
         {
-            _orSetService.Remove(value, new[] { node.Id });
+            _orSetService.Remove(value, new[] { tag });
 
             var repositoryValues = _repository.GetElements();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value));
@@ -91,37 +92,37 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_AddExists_AddsElementToTheRepository(TestType value, Node node)
+        public void Remove_AddExists_AddsElementToTheRepository(TestType value, Guid tag)
         {
-            _orSetService.Add(value, node);
-            _orSetService.Remove(value, new[] { node.Id });
+            _orSetService.Add(value, tag);
+            _orSetService.Remove(value, new[] { tag });
 
             var repositoryValues = _repository.GetElements();
-            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == node.Id);
+            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag);
 
             Assert.Single(actualValues);
         }
 
         [Theory]
         [AutoData]
-        public void Remove_IsIdempotent(TestType value, Node node)
+        public void Remove_IsIdempotent(TestType value, Guid tag)
         {
-            _orSetService.Add(value, node);
-            _orSetService.Remove(value, new[] { node.Id });
-            _orSetService.Remove(value, new[] { node.Id });
-            _orSetService.Remove(value, new[] { node.Id });
+            _orSetService.Add(value, tag);
+            _orSetService.Remove(value, new[] { tag });
+            _orSetService.Remove(value, new[] { tag });
+            _orSetService.Remove(value, new[] { tag });
 
             var repositoryValues = _repository.GetElements();
-            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == node.Id);
+            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag);
 
             Assert.Single(actualValues);
         }
 
         [Theory]
         [AutoData]
-        public void Lookup_SingleElementAdded_ReturnsTrue(TestType value, Node node)
+        public void Lookup_SingleElementAdded_ReturnsTrue(TestType value, Guid tag)
         {
-            _orSetService.Add(value, node);
+            _orSetService.Add(value, tag);
 
             var lookup = _orSetService.Lookup(value);
 
@@ -130,10 +131,10 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_SeveralElementsWithDifferentTags_ReturnsTrue(TestType value, Node node, Node otherNode)
+        public void Lookup_SeveralElementsWithDifferentTags_ReturnsTrue(TestType value, Guid tag, Guid otherTag)
         {
-            _orSetService.Add(value, node);
-            _orSetService.Add(value, otherNode);
+            _orSetService.Add(value, tag);
+            _orSetService.Add(value, otherTag);
 
             var lookup = _orSetService.Lookup(value);
 
@@ -151,11 +152,11 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_AllTagsRemoved_ReturnsFalse(TestType value, Node node, Node otherNode)
+        public void Lookup_AllTagsRemoved_ReturnsFalse(TestType value, Guid tag, Guid otherTag)
         {
-            _orSetService.Add(value, node);
-            _orSetService.Add(value, otherNode);
-            _orSetService.Remove(value, new []{node.Id, otherNode.Id});
+            _orSetService.Add(value, tag);
+            _orSetService.Add(value, otherTag);
+            _orSetService.Remove(value, new []{tag, otherTag});
 
             var lookup = _orSetService.Lookup(value);
 

@@ -1,6 +1,8 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
+using CRDT.Core.DistributedTime;
 using CRDT.Sets.Bases;
 using CRDT.Sets.Entities;
 
@@ -17,43 +19,44 @@ namespace CRDT.Sets.Commutative
         {
         }
 
-        public OUR_Set<T> Add(OUR_SetElement<T> element)
+        public OUR_Set<T> Add(T value, Guid tag, long timestamp)
         {
-            var existingElement = Adds.FirstOrDefault(a => a.Value.Id == element.Value.Id && a.Tag == element.Tag);
+            var existingElement = Adds.FirstOrDefault(a => a.Value.Id == value.Id && a.Tag == tag);
 
             if (existingElement is not null)
             {
-                return Update(element);
+                return Update(value, tag, timestamp);
             }
 
-            return new(Adds.Add(element), Removes);
+            return new(Adds.Add(new OUR_SetElement<T>(value, tag, timestamp)), Removes);
         }
 
-        public OUR_Set<T> Update(OUR_SetElement<T> element)
+        public OUR_Set<T> Update(T value, Guid tag, long timestamp)
         {
-            var elementToUpdate = Adds.FirstOrDefault(a => a.Value.Id == element.Value.Id && a.Tag == element.Tag);
+            var elementToUpdate = Adds.FirstOrDefault(a => a.Value.Id == value.Id && a.Tag == tag);
 
-            if (elementToUpdate is null || elementToUpdate?.Timestamp > element.Timestamp)
+            if (elementToUpdate is null || elementToUpdate?.Timestamp > new Timestamp(timestamp))
             {
                 return this;
             }
 
             var adds = Adds.Remove(elementToUpdate);
-            adds = adds.Add(element);
+            adds = adds.Add(new OUR_SetElement<T>(value, tag, timestamp));
 
             return new(adds, Removes);
         }
 
-        public OUR_Set<T> Remove(OUR_SetElement<T> element)
+        public OUR_Set<T> Remove(T value, Guid tag, long timestamp)
         {
-            var elementToRemove = Adds.FirstOrDefault(a => Equals(a.Value, element.Value) && a.Tag == element.Tag);
+            var elementToRemove = Adds.FirstOrDefault(a => Equals(a.Value, value) && a.Tag == tag);
 
-            if (elementToRemove is null || elementToRemove?.Timestamp > element.Timestamp)
+            if (elementToRemove is null || elementToRemove?.Timestamp > new Timestamp(timestamp))
             {
                 return this;
             }
 
-            return new(Adds, Removes.Add(element));
+            return new(Adds, Removes.Add(new OUR_SetElement<T>(value, tag, timestamp)));
         }
+
     }
 }

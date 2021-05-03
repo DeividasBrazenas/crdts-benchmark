@@ -28,75 +28,11 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToAddsSet(TestType value)
-        {
-            var uSet = new U_Set<TestType>();
-
-            uSet = uSet.Add(value);
-
-            var expectedElement = new U_SetElement<TestType>(value, false);
-            Assert.Contains(expectedElement, uSet.Elements);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Add_Concurrent_AddsOnlyOneElement(TestType value)
-        {
-            var uSet = new U_Set<TestType>();
-
-            uSet = uSet.Add(value);
-            uSet = uSet.Add(value);
-
-            Assert.Equal(1, uSet.Elements.Count(v => Equals(v.Value, value)));
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_BeforeAdd_HasNoEffect(TestType value)
-        {
-            var uSet = new U_Set<TestType>();
-
-            var newPSet = uSet.Remove(value);
-
-            Assert.Same(uSet, newPSet);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_AddsRemovedFlagToElement(TestType value)
-        {
-            var uSet = new U_Set<TestType>();
-
-            uSet = uSet.Add(value);
-            uSet = uSet.Remove(value);
-
-            var expectedElement = new U_SetElement<TestType>(value, true);
-            var notExpectedElement = new U_SetElement<TestType>(value, false);
-
-            Assert.Contains(expectedElement, uSet.Elements);
-            Assert.DoesNotContain(notExpectedElement, uSet.Elements);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_Concurrent_AddsOnlyOneElementToRemoveSet(TestType value)
-        {
-            var uSet = new U_Set<TestType>();
-
-            uSet = uSet.Add(value);
-            uSet = uSet.Remove(value);
-            uSet = uSet.Remove(value);
-
-            Assert.Equal(1, uSet.Elements.Count(v => Equals(v.Value, value) && v.Removed));
-        }
-
-        [Theory]
-        [AutoData]
         public void Lookup_AddedAndNotRemoved_ReturnsTrue(TestType value)
         {
             var uSet = new U_Set<TestType>();
 
-            uSet = uSet.Add(value);
+            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, false) }.ToImmutableHashSet());
 
             var lookup = uSet.Lookup(value);
 
@@ -109,8 +45,8 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var uSet = new U_Set<TestType>();
 
-            uSet = uSet.Add(value);
-            uSet = uSet.Remove(value);
+            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, false) }.ToImmutableHashSet());
+            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, true) }.ToImmutableHashSet());
 
             var lookup = uSet.Lookup(value);
 
@@ -123,9 +59,9 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var uSet = new U_Set<TestType>();
 
-            uSet = uSet.Add(value);
-            uSet = uSet.Remove(value);
-            uSet = uSet.Add(value);
+            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, false) }.ToImmutableHashSet());
+            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, true) }.ToImmutableHashSet());
+            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, false) }.ToImmutableHashSet());
 
             var lookup = uSet.Lookup(value);
 

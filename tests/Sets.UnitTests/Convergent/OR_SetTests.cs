@@ -37,78 +37,11 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToAddsSet(TestType value, Guid tag)
-        {
-            var orSet = new OR_Set<TestType>();
-
-            orSet = orSet.Add(value, tag);
-
-            var element = new OR_SetElement<TestType>(value, tag);
-
-            Assert.Contains(element, orSet.Adds);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Add_Concurrent_AddsOnlyOneElement(TestType value, Guid tag)
-        {
-            var orSet = new OR_Set<TestType>();
-
-            orSet = orSet.Add(value, tag);
-            orSet = orSet.Add(value, tag);
-
-            var element = new OR_SetElement<TestType>(value, tag);
-
-            Assert.Equal(1, orSet.Adds.Count(v => Equals(v, element)));
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_BeforeAdd_HasNoEffect(TestType value, Guid tag)
-        {
-            var orSet = new OR_Set<TestType>();
-
-            var newOrSet = orSet.Remove(value, tag);
-
-            Assert.Same(orSet, newOrSet);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_AddsElementToRemovesSet(TestType value, Guid tag)
-        {
-            var orSet = new OR_Set<TestType>();
-
-            orSet = orSet.Add(value, tag);
-            orSet = orSet.Remove(value, tag);
-
-            var element = new OR_SetElement<TestType>(value, tag);
-
-            Assert.Contains(element, orSet.Removes);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_Concurrent_AddsOnlyOneElementToRemoveSet(TestType value, Guid tag)
-        {
-            var orSet = new OR_Set<TestType>();
-
-            orSet = orSet.Add(value, tag);
-            orSet = orSet.Remove(value, tag);
-            orSet = orSet.Remove(value, tag);
-
-            var element = new OR_SetElement<TestType>(value, tag);
-
-            Assert.Equal(1, orSet.Removes.Count(v => Equals(v, element)));
-        }
-
-        [Theory]
-        [AutoData]
         public void Lookup_AddedAndNotRemoved_ReturnsTrue(TestType value, Guid tag)
         {
             var orSet = new OR_Set<TestType>();
 
-            orSet = orSet.Add(value, tag);
+            orSet = orSet.Merge(new []{new OR_SetElement<TestType>(value, tag)}.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
 
             var lookup = orSet.Lookup(value);
 
@@ -121,10 +54,7 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var orSet = new OR_Set<TestType>();
 
-            var element = new OR_SetElement<TestType>(value, Guid.NewGuid());
-
-            orSet = orSet.Add(value, tag);
-            orSet = orSet.Remove(value, tag);
+            orSet = orSet.Merge(new[] { new OR_SetElement<TestType>(value, tag) }.ToImmutableHashSet(), new[] { new OR_SetElement<TestType>(value, tag) }.ToImmutableHashSet());
 
             var lookup = orSet.Lookup(value);
 
@@ -137,9 +67,7 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var orSet = new OR_Set<TestType>();
 
-            orSet = orSet.Add(value, tag);
-            orSet = orSet.Add(value, Guid.NewGuid());
-            orSet = orSet.Remove(value, tag);
+            orSet = orSet.Merge(new[] { new OR_SetElement<TestType>(value, tag), new OR_SetElement<TestType>(value, Guid.NewGuid()) }.ToImmutableHashSet(), new[] { new OR_SetElement<TestType>(value, tag) }.ToImmutableHashSet());
 
             var lookup = orSet.Lookup(value);
 
@@ -152,15 +80,13 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var orSet = new OR_Set<TestType>();
 
-            orSet = orSet.Add(one, tagOne);
-            orSet = orSet.Add(one, tagTwo);
-            orSet = orSet.Remove(one, tagTwo);
-            orSet = orSet.Add(two, tagTwo);
-            orSet = orSet.Add(two, tagOne);
-            orSet = orSet.Remove(two, tagOne);
-            orSet = orSet.Remove(three, tagThree);
-            orSet = orSet.Add(three, tagThree);
-            orSet = orSet.Remove(three, tagThree);
+            orSet = orSet.Merge(new[] { new OR_SetElement<TestType>(one, tagOne) }.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
+            orSet = orSet.Merge(new[] { new OR_SetElement<TestType>(one, tagOne) }.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
+            orSet = orSet.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, new[] { new OR_SetElement<TestType>(one, tagTwo) }.ToImmutableHashSet());
+            orSet = orSet.Merge(new[] { new OR_SetElement<TestType>(two, tagThree) }.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
+            orSet = orSet.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, new[] { new OR_SetElement<TestType>(three, tagThree) }.ToImmutableHashSet());
+            orSet = orSet.Merge(new[] { new OR_SetElement<TestType>(three, tagThree) }.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
+            orSet = orSet.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, new[] { new OR_SetElement<TestType>(three, tagThree) }.ToImmutableHashSet());
 
             var actualValues = orSet.Values;
 

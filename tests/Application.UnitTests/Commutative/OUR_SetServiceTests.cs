@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Commutative;
@@ -25,38 +26,38 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, Node node, long timestamp)
+        public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, Guid tag, long timestamp)
         {
-            _ourSetService.Add(value, node, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
 
             var repositoryValues = _repository.GetAdds();
-            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == node.Id && v.Timestamp.Value == timestamp);
+            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag && v.Timestamp.Value == timestamp);
 
             Assert.Single(actualValues);
         }
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<OUR_SetElement<TestType>> adds, TestType value, Node node, long timestamp)
+        public void Add_WithExistingValues_AddsElementToTheRepository(List<OUR_SetElement<TestType>> adds, TestType value, Guid tag, long timestamp)
         {
             _repository.PersistAdds(adds);
 
-            _ourSetService.Add(value, node, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
 
             var repositoryValues = _repository.GetAdds();
-            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == node.Id && v.Timestamp.Value == timestamp);
+            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag && v.Timestamp.Value == timestamp);
 
             Assert.Single(actualValues);
         }
 
         [Theory]
         [AutoData]
-        public void Add_WithDifferentTag_AddsElementToTheRepository(List<OUR_SetElement<TestType>> adds, TestType value, Node node, Node otherNode, long timestamp)
+        public void Add_WithDifferentTag_AddsElementToTheRepository(List<OUR_SetElement<TestType>> adds, TestType value, Guid tag, Guid otherTag, long timestamp)
         {
             _repository.PersistAdds(adds);
 
-            _ourSetService.Add(value, node, timestamp);
-            _ourSetService.Add(value, otherNode, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
+            _ourSetService.Add(value, otherTag, timestamp);
 
             var repositoryValues = _repository.GetAdds();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value));
@@ -66,11 +67,11 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_IsIdempotent(TestType value, Node node, long timestamp)
+        public void Add_IsIdempotent(TestType value, Guid tag, long timestamp)
         {
-            _ourSetService.Add(value, node, timestamp);
-            _ourSetService.Add(value, node, timestamp);
-            _ourSetService.Add(value, node, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
 
             var repositoryValues = _repository.GetAdds();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value));
@@ -80,9 +81,9 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value, Node node, long timestamp)
+        public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value, Guid tag, long timestamp)
         {
-            _ourSetService.Remove(value, new[] { node.Id }, timestamp);
+            _ourSetService.Remove(value, new[] { tag }, timestamp);
 
             var repositoryValues = _repository.GetRemoves();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value));
@@ -92,37 +93,37 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Remove_AddExists_AddsElementToTheRepository(TestType value, Node node, long timestamp)
+        public void Remove_AddExists_AddsElementToTheRepository(TestType value, Guid tag, long timestamp)
         {
-            _ourSetService.Add(value, node, timestamp);
-            _ourSetService.Remove(value, new[] { node.Id }, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
+            _ourSetService.Remove(value, new[] { tag }, timestamp);
 
             var repositoryValues = _repository.GetRemoves();
-            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == node.Id);
+            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag);
 
             Assert.Single(actualValues);
         }
 
         [Theory]
         [AutoData]
-        public void Remove_IsIdempotent(TestType value, Node node, long timestamp)
+        public void Remove_IsIdempotent(TestType value, Guid tag, long timestamp)
         {
-            _ourSetService.Add(value, node, timestamp);
-            _ourSetService.Remove(value, new[] { node.Id }, timestamp);
-            _ourSetService.Remove(value, new[] { node.Id }, timestamp);
-            _ourSetService.Remove(value, new[] { node.Id }, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
+            _ourSetService.Remove(value, new[] { tag }, timestamp);
+            _ourSetService.Remove(value, new[] { tag }, timestamp);
+            _ourSetService.Remove(value, new[] { tag }, timestamp);
 
             var repositoryValues = _repository.GetRemoves();
-            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == node.Id);
+            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag);
 
             Assert.Single(actualValues);
         }
 
         [Theory]
         [AutoData]
-        public void Lookup_SingleElementAdded_ReturnsTrue(TestType value, Node node, long timestamp)
+        public void Lookup_SingleElementAdded_ReturnsTrue(TestType value, Guid tag, long timestamp)
         {
-            _ourSetService.Add(value, node, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
 
             var lookup = _ourSetService.Lookup(value);
 
@@ -131,10 +132,10 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_SeveralElementsWithDifferentTags_ReturnsTrue(TestType value, Node node, Node otherNode, long timestamp)
+        public void Lookup_SeveralElementsWithDifferentTags_ReturnsTrue(TestType value, Guid tag, Guid otherTag, long timestamp)
         {
-            _ourSetService.Add(value, node, timestamp);
-            _ourSetService.Add(value, otherNode, timestamp + 5);
+            _ourSetService.Add(value, tag, timestamp);
+            _ourSetService.Add(value, otherTag, timestamp + 5);
 
             var lookup = _ourSetService.Lookup(value);
 
@@ -152,11 +153,11 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_AllTagsRemoved_ReturnsFalse(TestType value, Node node, Node otherNode, long timestamp)
+        public void Lookup_AllTagsRemoved_ReturnsFalse(TestType value, Guid tag, Guid otherTag, long timestamp)
         {
-            _ourSetService.Add(value, node, timestamp);
-            _ourSetService.Add(value, otherNode, timestamp);
-            _ourSetService.Remove(value, new []{node.Id, otherNode.Id}, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
+            _ourSetService.Add(value, otherTag, timestamp);
+            _ourSetService.Remove(value, new[] { tag, otherTag }, timestamp);
 
             var lookup = _ourSetService.Lookup(value);
 
@@ -165,12 +166,12 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_UpdatedElement_ReturnsTrueForUpdatedElement(TestType value, Node node, long timestamp)
+        public void Lookup_UpdatedElement_ReturnsTrueForUpdatedElement(TestType value, Guid tag, long timestamp)
         {
-            _ourSetService.Add(value, node, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
 
             var newValue = Build(value.Id);
-            _ourSetService.Update(newValue, node, timestamp + 3);
+            _ourSetService.Update(newValue, tag, timestamp + 3);
 
             var lookup = _ourSetService.Lookup(newValue);
             Assert.True(lookup);
@@ -178,12 +179,12 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_UpdatedElement_ReturnsFalseForOldElement(TestType value, Node node, long timestamp)
+        public void Lookup_UpdatedElement_ReturnsFalseForOldElement(TestType value, Guid tag, long timestamp)
         {
-            _ourSetService.Add(value, node, timestamp);
+            _ourSetService.Add(value, tag, timestamp);
 
             var newValue = Build(value.Id);
-            _ourSetService.Update(newValue, node, timestamp + 3);
+            _ourSetService.Update(newValue, tag, timestamp + 3);
 
             var lookup = _ourSetService.Lookup(value);
             Assert.False(lookup);

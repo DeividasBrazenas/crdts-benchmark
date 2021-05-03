@@ -34,70 +34,11 @@ namespace CRDT.Sets.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_AddsElementToAddsSet(TestType value)
-        {
-            var pSet = new P_Set<TestType>();
-
-            pSet = pSet.Add(value);
-
-            Assert.Contains(value, pSet.Adds);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Add_Concurrent_AddsOnlyOneElement(TestType value)
-        {
-            var pSet = new P_Set<TestType>();
-
-            pSet = pSet.Add(value);
-            pSet = pSet.Add(value);
-
-            Assert.Equal(1, pSet.Adds.Count(v => Equals(v, value)));
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_BeforeAdd_HasNoEffect(TestType value)
-        {
-            var pSet = new P_Set<TestType>();
-
-            var newPSet = pSet.Remove(value);
-
-            Assert.Same(pSet, newPSet);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_AddsElementToRemovesSet(TestType value)
-        {
-            var pSet = new P_Set<TestType>();
-
-            pSet = pSet.Add(value);
-            pSet = pSet.Remove(value);
-
-            Assert.Contains(value, pSet.Removes);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_Concurrent_AddsOnlyOneElementToRemoveSet(TestType value)
-        {
-            var pSet = new P_Set<TestType>();
-
-            pSet = pSet.Add(value);
-            pSet = pSet.Remove(value);
-            pSet = pSet.Remove(value);
-
-            Assert.Equal(1, pSet.Removes.Count(v => Equals(v, value)));
-        }
-
-        [Theory]
-        [AutoData]
         public void Lookup_AddedAndNotRemoved_ReturnsTrue(TestType value)
         {
             var pSet = new P_Set<TestType>();
 
-            pSet = pSet.Add(value);
+            pSet = pSet.Merge(new[] { value }.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
 
             var lookup = pSet.Lookup(value);
 
@@ -110,8 +51,8 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var pSet = new P_Set<TestType>();
 
-            pSet = pSet.Add(value);
-            pSet = pSet.Remove(value);
+            pSet = pSet.Merge(new[] { value }.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+            pSet = pSet.Merge(ImmutableHashSet<TestType>.Empty, new[] { value }.ToImmutableHashSet());
 
             var lookup = pSet.Lookup(value);
 
@@ -124,9 +65,9 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var pSet = new P_Set<TestType>();
 
-            pSet = pSet.Add(value);
-            pSet = pSet.Remove(value);
-            pSet = pSet.Add(value);
+            pSet = pSet.Merge(new[] { value }.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
+            pSet = pSet.Merge(ImmutableHashSet<TestType>.Empty, new[] { value }.ToImmutableHashSet());
+            pSet = pSet.Merge(new[] { value }.ToImmutableHashSet(), ImmutableHashSet<TestType>.Empty);
 
             var lookup = pSet.Lookup(value);
 

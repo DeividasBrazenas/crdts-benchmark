@@ -18,18 +18,6 @@ namespace CRDT.Sets.Convergent
         {
         }
 
-        public OR_Set<T> Add(T value, Guid tag) => new(Adds.Add(new OR_SetElement<T>(value, tag)), Removes);
-
-        public OR_Set<T> Remove(T value, Guid tag)
-        {
-            if (Adds.Any(e => Equals(e.Value, value) && e.Tag == tag))
-            {
-                return new(Adds, Removes.Add(new OR_SetElement<T>(value, tag)));
-            }
-
-            return this;
-        }
-
         public OR_Set<T> Merge(IImmutableSet<OR_SetElement<T>> adds, IImmutableSet<OR_SetElement<T>> removes)
         {
             var addsUnion = Adds.Union(adds);

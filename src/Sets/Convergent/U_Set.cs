@@ -17,32 +17,6 @@ namespace CRDT.Sets.Convergent
         {
         }
 
-        public U_Set<T> Add(T value)
-        {
-            var element = Elements.FirstOrDefault(e => Equals(e.Value, value));
-
-            if (element is not null && element.Removed)
-            {
-                return this;
-            }
-
-            return new(Elements.Add(new U_SetElement<T>(value, false)));
-        }
-
-        public U_Set<T> Remove(T value)
-        {
-            var element = Elements.FirstOrDefault(e => Equals(e.Value, value));
-
-            if (element is not null && !element.Removed)
-            {
-                var elements = Elements.Remove(element);
-
-                return new(elements.Add(new U_SetElement<T>(value, true)));
-            }
-
-            return this;
-        }
-
         public U_Set<T> Merge(IImmutableSet<U_SetElement<T>> elements)
         {
             var union = Elements.Union(elements);
