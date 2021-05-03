@@ -3,6 +3,7 @@ using AutoFixture.Xunit2;
 using CRDT.Core.Cluster;
 using CRDT.Core.DistributedTime;
 using CRDT.Registers.Convergent;
+using CRDT.Registers.Convergent.LastWriterWins;
 using CRDT.Registers.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;

@@ -1,5 +1,6 @@
 using AutoFixture.Xunit2;
 using CRDT.Registers.Convergent;
+using CRDT.Registers.Convergent.LastWriterWins;
 using CRDT.Registers.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;

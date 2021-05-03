@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Sets.Commutative;
+using CRDT.Sets.Commutative.ObservedRemoved;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;

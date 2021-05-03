@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Counters.Convergent;
+using CRDT.Counters.Convergent.GrowOnly;
 using CRDT.Counters.Entities;
 using Xunit;
 

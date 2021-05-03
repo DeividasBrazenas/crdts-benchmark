@@ -1,0 +1,55 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using CRDT.Application.Interfaces;
+using CRDT.Core.Abstractions;
+using CRDT.Sets.Commutative.ObservedRemoved;
+
+namespace CRDT.Application.Commutative.Set
+{
+    public class OR_OptimizedSetService<T> where T : DistributedEntity
+    {
+        private readonly IOR_OptimizedSetRepository<T> _repository;
+
+        public OR_OptimizedSetService(IOR_OptimizedSetRepository<T> repository)
+        {
+            _repository = repository;
+        }
+
+        public void Add(T value, Guid tag)
+        {
+            var existingElements = _repository.GetElements();
+
+            var set = new OR_OptimizedSet<T>(existingElements.ToImmutableHashSet());
+
+            set = set.Add(value, tag);
+
+            _repository.PersistElements(set.Elements);
+        }
+
+        public void Remove(T value, IEnumerable<Guid> tags)
+        {
+            var existingElements = _repository.GetElements();
+
+            var set = new OR_OptimizedSet<T>(existingElements.ToImmutableHashSet());
+
+            foreach (var tag in tags)
+            {
+                set = set.Remove(value, tag);
+            }
+
+            _repository.PersistElements(set.Elements);
+        }
+
+        public bool Lookup(T value)
+        {
+            var existingElements = _repository.GetElements();
+
+            var set = new OR_OptimizedSet<T>(existingElements.ToImmutableHashSet());
+
+            var lookup = set.Lookup(value);
+
+            return lookup;
+        }
+    }
+}

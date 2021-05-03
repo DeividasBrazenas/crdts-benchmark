@@ -2,6 +2,7 @@
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent;
+using CRDT.Application.Convergent.Register;
 using CRDT.Application.Interfaces;
 using CRDT.Application.UnitTests.Repositories;
 using CRDT.Registers.Entities;

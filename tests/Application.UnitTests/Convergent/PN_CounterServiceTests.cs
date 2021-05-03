@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent;
+using CRDT.Application.Convergent.Counter;
 using CRDT.Application.UnitTests.Repositories;
 using CRDT.Counters.Entities;
 using Xunit;
