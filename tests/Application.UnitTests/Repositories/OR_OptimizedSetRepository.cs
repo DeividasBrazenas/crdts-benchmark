@@ -21,8 +21,7 @@ namespace CRDT.Application.UnitTests.Repositories
         {
             foreach (var element in elements)
             {
-                var existingElement = Elements.FirstOrDefault(e =>
-                    Equals(e.Value, element.Value) && e.Tag == element.Tag);
+                var existingElement = Elements.FirstOrDefault(e => Equals(e.Value, element.Value) && e.Tag == element.Tag);
 
                 if (existingElement is not null)
                 {
