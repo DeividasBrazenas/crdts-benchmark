@@ -10,9 +10,4 @@
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Bases\" />
-    <Folder Include="Entities\" />
-  </ItemGroup>
-
 </Project>

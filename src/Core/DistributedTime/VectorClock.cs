@@ -23,6 +23,12 @@ namespace CRDT.Core.DistributedTime
             Values = values;
         }
 
+        public static bool operator <(VectorClock left, VectorClock right)
+            => left.IsBefore(right);
+
+        public static bool operator >(VectorClock left, VectorClock right)
+            => left.IsAfter(right);
+
         public bool Equals(VectorClock otherClock)
         {
             return Compare(otherClock) == Order.Same;
