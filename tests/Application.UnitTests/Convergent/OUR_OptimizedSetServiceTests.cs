@@ -153,7 +153,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeRemoves_SingleValueWithEmptyRepository_AddsElementsToTheRepository(TestType value, Guid tag, long timestamp)
         {
-            var element = new OUR_OptimizedSetElement<TestType>(value, tag, timestamp, true);
+            var element = new OUR_OptimizedSetElement<TestType>(value, tag, timestamp + 1, true);
 
             _repository.PersistElements(new List<OUR_OptimizedSetElement<TestType>> { new (value, tag, timestamp, false) });
             _ourSetService.Merge(new List<OUR_OptimizedSetElement<TestType>> { element });
