@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
 using Benchmarks.Repositories;
 using CRDT.Core.Cluster;
@@ -10,7 +11,7 @@ using CRDT.Counters.Entities;
 
 namespace Benchmarks.Counters
 {
-    [SimpleJob(RuntimeMoniker.NetCoreApp50)]
+    [SimpleJob(RunStrategy.Monitoring, RuntimeMoniker.NetCoreApp50, 1, 10, 100)]
     public class PN_CounterBenchmarks
     {
         private List<Node> _nodes;

@@ -11,12 +11,13 @@ using Newtonsoft.Json.Linq;
 
 namespace Benchmarks.Registers
 {
-    [SimpleJob(RunStrategy.Monitoring, RuntimeMoniker.NetCoreApp50, 1, 10, 30)]
+    [SimpleJob(RunStrategy.Monitoring, RuntimeMoniker.NetCoreApp50, 1, 10, 100)]
     public class LWW_RegisterBenchmarks
     {
         private List<Node> _nodes;
         private Dictionary<Node, CRDT.Application.Commutative.Register.LWW_RegisterService<TestType>> _commutativeReplicas;
         private Dictionary<Node, CRDT.Application.Convergent.Register.LWW_RegisterService<TestType>> _convergentReplicas;
+        private TestTypeBuilder _builder;
 
         [GlobalSetup]
         public void Setup()
@@ -24,12 +25,13 @@ namespace Benchmarks.Registers
             _nodes = CreateNodes(3);
             _commutativeReplicas = CreateCommutativeReplicas(_nodes);
             _convergentReplicas = CreateConvergentReplicas(_nodes);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Benchmark]
         public void Convergent_Assign_NewValue()
         {
-            var initialValue = TestTypeBuilder.Build();
+            var initialValue = _builder.Build();
             var valueId = initialValue.Id;
 
             long ts = 0;
@@ -45,7 +47,7 @@ namespace Benchmarks.Registers
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var newValue = TestTypeBuilder.Build(valueId);
+                    var newValue = _builder.Build(valueId);
 
                     replica.Value.LocalAssign(valueId, newValue, ts);
 
@@ -59,7 +61,7 @@ namespace Benchmarks.Registers
         [Benchmark]
         public void Commutative_Assign_NewValue()
         {
-            var initialValue = TestTypeBuilder.Build();
+            var initialValue = _builder.Build();
             var valueId = initialValue.Id;
 
             long ts = 0;
@@ -75,7 +77,7 @@ namespace Benchmarks.Registers
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var newValue = TestTypeBuilder.Build(valueId);
+                    var newValue = _builder.Build(valueId);
 
                     replica.Value.LocalAssign(valueId, JToken.FromObject(newValue), ts);
 
@@ -89,7 +91,7 @@ namespace Benchmarks.Registers
         [Benchmark]
         public void Convergent_Assign_UpdateSingleField()
         {
-            var initialValue = TestTypeBuilder.Build();
+            var initialValue = _builder.Build();
             var valueId = initialValue.Id;
 
             long ts = 0;
@@ -119,7 +121,7 @@ namespace Benchmarks.Registers
         [Benchmark]
         public void Commutative_Assign_UpdateSingleField()
         {
-            var initialValue = TestTypeBuilder.Build();
+            var initialValue = _builder.Build();
             var valueId = initialValue.Id;
 
             long ts = 0;
