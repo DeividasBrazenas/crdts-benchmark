@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent.Register;
 using CRDT.Application.Interfaces;
 using CRDT.Application.UnitTests.Repositories;
+using CRDT.Core.Cluster;
 using CRDT.Registers.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
@@ -25,7 +27,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Assign_EmptyRepository_AddsToRepository(TestType value, long timestamp)
         {
-            _service.Assign(value.Id, value, timestamp);
+            _service.DownstreamAssign(value.Id, value, timestamp);
 
             AssertExistsInRepository(value, timestamp);
         }
@@ -36,7 +38,7 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp - 100));
 
-            _service.Assign(value.Id, value, timestamp);
+            _service.DownstreamAssign(value.Id, value, timestamp);
 
             AssertExistsInRepository(value, timestamp - 100);
         }
@@ -47,7 +49,7 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp));
 
-            _service.Assign(value.Id, value, timestamp - 100);
+            _service.DownstreamAssign(value.Id, value, timestamp - 100);
 
             AssertExistsInRepository(value, timestamp);
         }
@@ -61,7 +63,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp));
 
-            _service.Assign(id, newValue, timestamp + 100);
+            _service.DownstreamAssign(id, newValue, timestamp + 100);
 
             AssertDoesNotExistInRepository(value, timestamp);
             AssertExistsInRepository(newValue, timestamp + 100);
@@ -76,7 +78,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp + 100));
 
-            _service.Assign(value.Id, newValue, timestamp);
+            _service.DownstreamAssign(value.Id, newValue, timestamp);
 
             AssertExistsInRepository(value, timestamp + 100);
             AssertDoesNotExistInRepository(newValue, timestamp);
@@ -94,11 +96,49 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Value_ExistingEntity_ReturnsValue(TestType value, long timestamp)
         {
-            _service.Assign(value.Id, value, timestamp);
+            _service.DownstreamAssign(value.Id, value, timestamp);
 
             var actualValue = _service.GetValue(value.Id);
 
             Assert.Equal(value, actualValue);
+        }
+
+        [Fact]
+        public void Convergent_Assign_UpdateSingleField()
+        {
+            var nodes = CreateNodes(3);
+            var convergentReplicas = CreateConvergentReplicas(nodes);
+
+            var initialValue = TestTypeBuilder.Build();
+            var valueId = initialValue.Id;
+
+            long ts = 0;
+
+            var firstReplica = convergentReplicas.First();
+            firstReplica.Value.LocalAssign(valueId, initialValue, ts);
+
+            ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId), ts, convergentReplicas);
+
+            ts++;
+
+            foreach (var replica in convergentReplicas)
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    initialValue.StringValue = Guid.NewGuid().ToString();
+
+                    replica.Value.LocalAssign(valueId, initialValue, ts);
+
+                    ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId), ts, convergentReplicas);
+
+                    ts++;
+                }
+            }
+
+            foreach (var replica in convergentReplicas)
+            {
+                Assert.Equal(initialValue, replica.Value.GetValue(valueId));
+            }
         }
 
         private void AssertExistsInRepository(TestType value, long timestamp)
@@ -113,5 +153,43 @@ namespace CRDT.Application.UnitTests.Convergent
                 e => Equals(e.Value, value) &&
                      e.Timestamp.Value == timestamp);
         }
+
+        private List<Node> CreateNodes(int count)
+        {
+            var nodes = new List<Node>();
+
+            for (var i = 0; i < count; i++)
+            {
+                nodes.Add(new Node());
+            }
+
+            return nodes;
+        }
+
+        private Dictionary<Node, LWW_RegisterService<TestType>> CreateConvergentReplicas(List<Node> nodes)
+        {
+            var dictionary = new Dictionary<Node, CRDT.Application.Convergent.Register.LWW_RegisterService<TestType>>();
+
+            foreach (var node in nodes)
+            {
+                var repository = new LWW_RegisterRepository();
+                var service = new CRDT.Application.Convergent.Register.LWW_RegisterService<TestType>(repository);
+
+                dictionary.Add(node, service);
+            }
+
+            return dictionary;
+        }
+
+        private void ConvergentDownstreamAssign(Guid senderId, TestType state, long timestamp, Dictionary<Node, LWW_RegisterService<TestType>> replicas)
+        {
+            var downstreamReplicas = replicas.Where(r => r.Key.Id != senderId);
+
+            foreach (var downstreamReplica in downstreamReplicas)
+            {
+                downstreamReplica.Value.DownstreamAssign(senderId, state, timestamp);
+            }
+        }
+
     }
 }

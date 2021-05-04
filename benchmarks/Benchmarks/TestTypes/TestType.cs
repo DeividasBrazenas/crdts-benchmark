@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using CRDT.Core.Abstractions;
 using Newtonsoft.Json;
 
-namespace CRDT.UnitTestHelpers.TestTypes
+namespace Benchmarks.TestTypes
 {
     public class TestType : DistributedEntity
     {

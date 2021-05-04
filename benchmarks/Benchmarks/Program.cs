@@ -1,5 +1,5 @@
 ﻿using BenchmarkDotNet.Running;
-using Benchmarks.Counters;
+using Benchmarks.Registers;
 
 namespace Benchmarks
 {
@@ -8,7 +8,8 @@ namespace Benchmarks
         static void Main(string[] args)
         {
             //BenchmarkRunner.Run<G_CounterBenchmarks>();
-            BenchmarkRunner.Run<PN_CounterBenchmarks>();
+            //BenchmarkRunner.Run<PN_CounterBenchmarks>();
+            BenchmarkRunner.Run<LWW_RegisterBenchmarks>();
         }
     }
 }

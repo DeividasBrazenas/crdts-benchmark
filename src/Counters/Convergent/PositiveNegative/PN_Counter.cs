@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Counters.Bases;
-using CRDT.Counters.Convergent.GrowOnly;
 using CRDT.Counters.Entities;
 
 namespace CRDT.Counters.Convergent.PositiveNegative

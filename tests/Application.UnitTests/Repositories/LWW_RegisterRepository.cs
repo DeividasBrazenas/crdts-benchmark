@@ -9,7 +9,7 @@ namespace CRDT.Application.UnitTests.Repositories
 {
     public class LWW_RegisterRepository : ILWW_RegisterRepository<TestType>
     {
-        public List<LWW_RegisterElement<TestType>> Elements { get; }
+        public List<LWW_RegisterElement<TestType>> Elements { get; private set; }
 
         public LWW_RegisterRepository()
         {
@@ -25,14 +25,11 @@ namespace CRDT.Application.UnitTests.Repositories
 
         public void PersistElement(LWW_RegisterElement<TestType> element)
         {
-            var entity = Elements.FirstOrDefault(a => a.Value.Id == element.Value.Id);
+            var elements = Elements.Where(e => e.Value.Id != element.Value.Id).ToList();
 
-            if (entity is not null)
-            {
-                Elements.Remove(entity);
-            }
+            elements.Add(element);
 
-            Elements.Add(element);
+            Elements = elements;
         }
     }
 }

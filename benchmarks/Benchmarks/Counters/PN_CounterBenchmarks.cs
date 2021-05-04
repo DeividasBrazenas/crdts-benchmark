@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-using CRDT.Benchmarks.Repositories;
+using Benchmarks.Repositories;
 using CRDT.Core.Cluster;
 using CRDT.Counters.Entities;
 

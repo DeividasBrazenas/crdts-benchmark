@@ -2,7 +2,7 @@
 using CRDT.Application.Interfaces;
 using CRDT.Counters.Entities;
 
-namespace CRDT.Benchmarks.Repositories
+namespace Benchmarks.Repositories
 {
     public class G_CounterRepository : IG_CounterRepository
     {

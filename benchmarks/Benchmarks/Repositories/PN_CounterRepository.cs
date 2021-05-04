@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using CRDT.Application.Interfaces;
 using CRDT.Counters.Entities;
 
-namespace CRDT.Benchmarks.Repositories
+namespace Benchmarks.Repositories
 {
     public class PN_CounterRepository : IPN_CounterRepository
     {

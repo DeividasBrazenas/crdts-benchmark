@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Benchmarks.TestTypes;
 using CRDT.Application.Interfaces;
 using CRDT.Registers.Entities;
-using CRDT.UnitTestHelpers.TestTypes;
 
-namespace CRDT.Benchmarks.Repositories
+namespace Benchmarks.Repositories
 {
     public class LWW_RegisterWithVCRepository : ILWW_RegisterWithVCRepository<TestType>
     {

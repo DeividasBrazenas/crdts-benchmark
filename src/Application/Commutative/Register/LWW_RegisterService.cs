@@ -10,38 +10,60 @@ namespace CRDT.Application.Commutative.Register
     public class LWW_RegisterService<T> where T : DistributedEntity
     {
         private readonly ILWW_RegisterRepository<T> _repository;
+        private readonly object _lockObject = new();
 
         public LWW_RegisterService(ILWW_RegisterRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Assign(Guid id, JToken value, long timestamp)
+        public void LocalAssign(Guid id, JToken value, long timestamp)
         {
-            var existingEntity = _repository.GetElement(id);
-
-            LWW_Register<T> register; 
-            if (existingEntity is null)
+            lock (_lockObject)
             {
-                var element = new LWW_RegisterElement<T>(BaseObject(id), null);
-                register = new LWW_Register<T>(element);
-            }
-            else
-            {
-                register = new LWW_Register<T>(existingEntity);
-            }
+                var existingEntity = _repository.GetElement(id);
 
-            var newRegister = register.Assign(value, timestamp);
+                LWW_Register<T> register;
+                if (existingEntity is null)
+                {
+                    var element = new LWW_RegisterElement<T>(BaseObject(id), null);
+                    register = new LWW_Register<T>(element);
+                }
+                else
+                {
+                    register = new LWW_Register<T>(existingEntity);
+                }
 
-            if (Equals(register, newRegister))
-            {
-                return;
+                register = register.Assign(value, timestamp);
+
+                _repository.PersistElement(register.Element);
             }
-
-            _repository.PersistElement(newRegister.Element);
         }
 
-        public T Value(Guid id)
+        public void DownstreamAssign(Guid id, JToken value, long timestamp)
+        {
+            lock(_lockObject)
+            {
+                var existingEntity = _repository.GetElement(id);
+
+                LWW_Register<T> register;
+                if (existingEntity is null)
+                {
+                    var element = new LWW_RegisterElement<T>(BaseObject(id), null);
+                    register = new LWW_Register<T>(element);
+                }
+                else
+                {
+                    register = new LWW_Register<T>(existingEntity);
+                }
+
+                register = register.Assign(value, timestamp);
+
+                _repository.PersistElement(register.Element);
+            }
+        }
+
+        public T GetValue(Guid id)
         {
             var entity = _repository.GetElement(id);
 

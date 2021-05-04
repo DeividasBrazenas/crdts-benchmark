@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CRDT.Application.Interfaces;
 using CRDT.Counters.Entities;
 

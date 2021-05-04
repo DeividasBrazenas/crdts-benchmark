@@ -5,6 +5,7 @@ using AutoFixture.Xunit2;
 using CRDT.Application.Commutative.Register;
 using CRDT.Application.Interfaces;
 using CRDT.Application.UnitTests.Repositories;
+using CRDT.Core.Cluster;
 using CRDT.Registers.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Newtonsoft.Json;
@@ -28,7 +29,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Update_EmptyRepository_AddsToRepository(TestType value, long timestamp)
         {
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
 
             AssertExistsInRepository(value, timestamp);
         }
@@ -39,7 +40,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp - 100));
 
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
 
             AssertExistsInRepository(value, timestamp - 100);
         }
@@ -50,7 +51,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp));
 
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp - 100);
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp - 100);
 
             AssertExistsInRepository(value, timestamp);
         }
@@ -64,7 +65,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp));
 
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(newValue)), timestamp + 100);
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(newValue)), timestamp + 100);
 
             AssertDoesNotExistInRepository(value, timestamp);
             AssertExistsInRepository(newValue, timestamp + 100);
@@ -79,7 +80,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp + 100));
 
-            _service.Assign(id, JToken.Parse(JsonConvert.SerializeObject(newValue)), timestamp);
+            _service.DownstreamAssign(id, JToken.Parse(JsonConvert.SerializeObject(newValue)), timestamp);
 
             AssertExistsInRepository(value, timestamp + 100);
             AssertDoesNotExistInRepository(newValue, timestamp);
@@ -89,8 +90,8 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Update_Concurrent_AddsOnlyOneEntityWithLowerNodeValue(TestType value, long timestamp)
         {
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
 
             AssertExistsInRepository(value, timestamp);
         }
@@ -113,7 +114,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             foreach (var operation in operations)
             {
-                _service.Assign(value.Id, operation.Item1, operation.Item2);
+                _service.DownstreamAssign(value.Id, operation.Item1, operation.Item2);
             }
 
             AssertExistsInRepository(value, timestamp + 7);
@@ -139,7 +140,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             foreach (var operation in operations)
             {
-                _service.Assign(value.Id, operation.Item1, operation.Item2);
+                _service.DownstreamAssign(value.Id, operation.Item1, operation.Item2);
             }
 
             var expected = new TestType(value.Id)
@@ -160,7 +161,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [Fact]
         public void Value_NotExistingEntity_ReturnsNull()
         {
-            var value = _service.Value(Guid.NewGuid());
+            var value = _service.GetValue(Guid.NewGuid());
 
             Assert.Null(value);
         }
@@ -169,11 +170,88 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Value_ExistingEntity_ReturnsValue(TestType value, long timestamp)
         {
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
 
-            var actualValue = _service.Value(value.Id);
+            var actualValue = _service.GetValue(value.Id);
 
             Assert.Equal(value, actualValue);
+        }
+
+        [Fact]
+        public void Commutative_Assign_UpdateSingleField()
+        {
+            var nodes = CreateNodes(3);
+            var commutativeReplicas = CreateCommutativeReplicas(nodes);
+
+            var initialValue = TestTypeBuilder.Build();
+            var valueId = initialValue.Id;
+
+            long ts = 0;
+
+            var firstReplica = commutativeReplicas.First();
+            firstReplica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), ts);
+
+            CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), ts, commutativeReplicas);
+
+            ts++;
+
+            foreach (var replica in commutativeReplicas)
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    initialValue.StringValue = Guid.NewGuid().ToString();
+
+                    var jToken = JToken.Parse($"{{\"StringValue\":\"{initialValue.StringValue}\"}}");
+
+                    replica.Value.LocalAssign(valueId, jToken, ts);
+
+                    CommutativeDownstreamAssign(replica.Key.Id, valueId, jToken, ts, commutativeReplicas);
+
+                    ts++;
+                }
+            }
+
+            foreach (var replica in commutativeReplicas)
+            {
+                Assert.Equal(initialValue, replica.Value.GetValue(valueId));
+            }
+        }
+
+        private List<Node> CreateNodes(int count)
+        {
+            var nodes = new List<Node>();
+
+            for (var i = 0; i < count; i++)
+            {
+                nodes.Add(new Node());
+            }
+
+            return nodes;
+        }
+
+        private Dictionary<Node, LWW_RegisterService<TestType>> CreateCommutativeReplicas(List<Node> nodes)
+        {
+            var dictionary = new Dictionary<Node, LWW_RegisterService<TestType>>();
+
+            foreach (var node in nodes)
+            {
+                var repository = new LWW_RegisterRepository();
+                var service = new LWW_RegisterService<TestType>(repository);
+
+                dictionary.Add(node, service);
+            }
+
+            return dictionary;
+        }
+
+        private void CommutativeDownstreamAssign(Guid senderId, Guid objectId, JToken value, long timestamp, Dictionary<Node, LWW_RegisterService<TestType>> replicas)
+        {
+            var downstreamReplicas = replicas.Where(r => r.Key.Id != senderId);
+
+            foreach (var downstreamReplica in downstreamReplicas)
+            {
+                downstreamReplica.Value.DownstreamAssign(objectId, value, timestamp);
+            }
         }
 
         private void AssertExistsInRepository(TestType value, long timestamp)

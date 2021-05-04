@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Benchmarks.TestTypes;
 using CRDT.Application.Interfaces;
-using CRDT.UnitTestHelpers.TestTypes;
 
-namespace CRDT.Benchmarks.Repositories
+namespace Benchmarks.Repositories
 {
     public class P_SetRepository : IP_SetRepository<TestType>
     {

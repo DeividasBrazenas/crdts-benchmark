@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Benchmarks.TestTypes;
 using CRDT.Application.Interfaces;
 using CRDT.Sets.Entities;
-using CRDT.UnitTestHelpers.TestTypes;
 
-namespace CRDT.Benchmarks.Repositories
+namespace Benchmarks.Repositories
 {
     public class OUR_SetRepository : IOUR_SetRepository<TestType>
     {
