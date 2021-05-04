@@ -10,29 +10,55 @@ namespace CRDT.Application.Convergent.Register
     public class LWW_RegisterWithVCService<T> where T : DistributedEntity
     {
         private readonly ILWW_RegisterWithVCRepository<T> _repository;
+        private readonly object _lockObject = new();
 
         public LWW_RegisterWithVCService(ILWW_RegisterWithVCRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Assign(Guid id, T value, VectorClock vectorClock)
+        public void LocalAssign(Guid id, T value, VectorClock vectorClock)
         {
-            var existingEntity = _repository.GetElement(id);
-
-            LWW_RegisterWithVC<T> existingRegister;
-            if (existingEntity is null)
+            lock (_lockObject)
             {
-                existingRegister = new LWW_RegisterWithVC<T>(new LWW_RegisterWithVCElement<T>(null, new VectorClock()));
+                var existingEntity = _repository.GetElement(id);
+
+                LWW_RegisterWithVC<T> existingRegister;
+                if (existingEntity is null)
+                {
+                    existingRegister = new LWW_RegisterWithVC<T>(new LWW_RegisterWithVCElement<T>(null, new VectorClock()));
+                }
+                else
+                {
+                    existingRegister = new LWW_RegisterWithVC<T>(existingEntity);
+                }
+
+                var newRegister = existingRegister.Assign(value, vectorClock);
+
+                _repository.PersistElement(newRegister.Element);
             }
-            else
+        }
+
+        public void DownstreamAssign(Guid id, T value, VectorClock vectorClock)
+        {
+            lock (_lockObject)
             {
-                existingRegister = new LWW_RegisterWithVC<T>(existingEntity);
+                var existingEntity = _repository.GetElement(id);
+
+                LWW_RegisterWithVC<T> existingRegister;
+                if (existingEntity is null)
+                {
+                    existingRegister = new LWW_RegisterWithVC<T>(new LWW_RegisterWithVCElement<T>(null, new VectorClock()));
+                }
+                else
+                {
+                    existingRegister = new LWW_RegisterWithVC<T>(existingEntity);
+                }
+
+                var newRegister = existingRegister.Assign(value, vectorClock);
+
+                _repository.PersistElement(newRegister.Element);
             }
-
-            var newRegister = existingRegister.Assign(value, vectorClock);
-
-            _repository.PersistElement(newRegister.Element);
         }
 
         public T GetValue(Guid id)

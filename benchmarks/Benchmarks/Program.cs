@@ -10,6 +10,7 @@ namespace Benchmarks
             //BenchmarkRunner.Run<G_CounterBenchmarks>();
             //BenchmarkRunner.Run<PN_CounterBenchmarks>();
             BenchmarkRunner.Run<LWW_RegisterBenchmarks>();
+            BenchmarkRunner.Run<LWW_RegisterWithVCBenchmarks>();
         }
     }
 }

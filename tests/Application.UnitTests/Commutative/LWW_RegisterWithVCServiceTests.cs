@@ -33,7 +33,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
 
             AssertExistsInRepository(value, new VectorClock(clock.Add(node, 0)));
         }
@@ -46,7 +46,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
 
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 1)));
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 1)));
 
             AssertExistsInRepository(value, new VectorClock(clock.Add(node, 0)));
         }
@@ -59,7 +59,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1))));
 
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
 
             AssertExistsInRepository(value, new VectorClock(clock.Add(node, 1)));
         }
@@ -75,7 +75,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
 
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(newValue)), new VectorClock(clock.Add(node, 1)));
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(newValue)), new VectorClock(clock.Add(node, 1)));
 
             AssertDoesNotExistInRepository(value, new VectorClock(clock.Add(node, 0)));
             AssertExistsInRepository(newValue, new VectorClock(clock.Add(node, 1)));
@@ -92,7 +92,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1))));
 
-            _service.Assign(id, JToken.Parse(JsonConvert.SerializeObject(newValue)), new VectorClock(clock.Add(node, 0)));
+            _service.DownstreamAssign(id, JToken.Parse(JsonConvert.SerializeObject(newValue)), new VectorClock(clock.Add(node, 0)));
 
             AssertExistsInRepository(value, new VectorClock(clock.Add(node, 1)));
             AssertDoesNotExistInRepository(newValue, new VectorClock(clock.Add(node, 0)));
@@ -104,8 +104,8 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
 
             AssertExistsInRepository(value, new VectorClock(clock.Add(node, 0)));
         }
@@ -130,7 +130,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             foreach (var operation in operations)
             {
-                _service.Assign(value.Id, operation.Item1, operation.Item2);
+                _service.DownstreamAssign(value.Id, operation.Item1, operation.Item2);
             }
 
             AssertExistsInRepository(value, new VectorClock(clock.Add(node, 7)));
@@ -158,7 +158,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             foreach (var operation in operations)
             {
-                _service.Assign(value.Id, operation.Item1, operation.Item2);
+                _service.DownstreamAssign(value.Id, operation.Item1, operation.Item2);
             }
 
             var expected = new TestType(value.Id)
@@ -179,7 +179,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [Fact]
         public void Value_NotExistingEntity_ReturnsNull()
         {
-            var value = _service.Value(Guid.NewGuid());
+            var value = _service.GetValue(Guid.NewGuid());
 
             Assert.Null(value);
         }
@@ -190,11 +190,126 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _service.Assign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
+            _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
 
-            var actualValue = _service.Value(value.Id);
+            var actualValue = _service.GetValue(value.Id);
 
             Assert.Equal(value, actualValue);
+        }
+
+        [Fact]
+        public void Commutative_Assign_NewValue()
+        {
+            var nodes = CreateNodes(3);
+            var commutativeReplicas = CreateCommutativeReplicas(nodes);
+
+            var initialValue = TestTypeBuilder.Build();
+            var valueId = initialValue.Id;
+
+            var clock = new VectorClock(nodes);
+
+            var firstReplica = commutativeReplicas.First();
+            firstReplica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), clock);
+
+            CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), clock, commutativeReplicas);
+
+            clock.Increment(firstReplica.Key);
+
+            foreach (var replica in commutativeReplicas)
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    var newValue = TestTypeBuilder.Build(valueId);
+
+                    replica.Value.LocalAssign(valueId, JToken.FromObject(newValue), clock);
+
+                    CommutativeDownstreamAssign(replica.Key.Id, valueId, JToken.FromObject(replica.Value.GetValue(valueId)), clock, commutativeReplicas);
+
+                    clock.Increment(replica.Key);
+                }
+            }
+
+            foreach (var replica in commutativeReplicas)
+            {
+                Assert.Equal(initialValue, replica.Value.GetValue(valueId));
+            }
+        }
+
+        [Fact]
+        public void Commutative_Assign_UpdateSingleField()
+        {
+            var nodes = CreateNodes(3);
+            var commutativeReplicas = CreateCommutativeReplicas(nodes);
+
+            var initialValue = TestTypeBuilder.Build();
+            var valueId = initialValue.Id;
+
+            var clock = new VectorClock(nodes);
+
+            var firstReplica = commutativeReplicas.First();
+            firstReplica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), clock);
+
+            CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), clock, commutativeReplicas);
+
+            clock.Increment(firstReplica.Key);
+
+            foreach (var replica in commutativeReplicas)
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    var jToken = JToken.Parse($"{{\"StringValue\":\"{Guid.NewGuid()}\"}}");
+
+                    replica.Value.LocalAssign(valueId, jToken, clock);
+
+                    CommutativeDownstreamAssign(replica.Key.Id, valueId, jToken, clock, commutativeReplicas);
+
+                    clock.Increment(replica.Key);
+                }
+            }
+
+            foreach (var replica in commutativeReplicas)
+            {
+                Assert.Equal(initialValue, replica.Value.GetValue(valueId));
+            }
+        }
+
+        private List<Node> CreateNodes(int count)
+        {
+            var nodes = new List<Node>();
+
+            for (var i = 0; i < count; i++)
+            {
+                nodes.Add(new Node());
+            }
+
+            return nodes;
+        }
+
+        private Dictionary<Node, LWW_RegisterWithVCService<TestType>> CreateCommutativeReplicas(List<Node> nodes)
+        {
+            var dictionary = new Dictionary<Node, LWW_RegisterWithVCService<TestType>>();
+
+            foreach (var node in nodes)
+            {
+                var repository = new LWW_RegisterWithVCRepository();
+                var service = new LWW_RegisterWithVCService<TestType>(repository);
+
+                dictionary.Add(node, service);
+            }
+
+            return dictionary;
+        }
+
+        private bool CommutativeDownstreamAssign(Guid senderId, Guid objectId, JToken value, VectorClock clock, Dictionary<Node, LWW_RegisterWithVCService<TestType>> replicas)
+        {
+            var downstreamReplicas = replicas.Where(r => r.Key.Id != senderId);
+
+            foreach (var downstreamReplica in downstreamReplicas)
+            {
+                downstreamReplica.Value.DownstreamAssign(objectId, value, clock);
+            }
+
+            return true;
         }
 
         private void AssertExistsInRepository(TestType value, VectorClock vectorClock)

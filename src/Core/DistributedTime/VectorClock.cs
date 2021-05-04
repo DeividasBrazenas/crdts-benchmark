@@ -18,6 +18,18 @@ namespace CRDT.Core.DistributedTime
             Values = ImmutableSortedDictionary<Node, long>.Empty;
         }
 
+        public VectorClock(List<Node> nodes)
+        {
+            var values = new SortedDictionary<Node, long>();
+
+            foreach (var node in nodes)
+            {
+                values.Add(node, 0);
+            }
+
+            Values = values.ToImmutableSortedDictionary();
+        }
+
         public VectorClock(ImmutableSortedDictionary<Node, long> values)
         {
             Values = values;
