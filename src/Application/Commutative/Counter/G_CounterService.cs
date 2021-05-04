@@ -7,7 +7,7 @@ namespace CRDT.Application.Commutative.Counter
 {
     public class G_CounterService
     {
-        public readonly IG_CounterRepository _repository;
+        private readonly IG_CounterRepository _repository;
         private readonly object _lockObject = new();
 
         public G_CounterService(IG_CounterRepository repository)

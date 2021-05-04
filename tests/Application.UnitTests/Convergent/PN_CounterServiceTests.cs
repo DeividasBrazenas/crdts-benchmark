@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent.Counter;
 using CRDT.Application.UnitTests.Repositories;
@@ -35,13 +36,13 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _service.Merge(otherAdditions.ToImmutableHashSet(), otherSubtractions.ToImmutableHashSet());
 
-            Assert.Equal(4, _repository.Additions.Count);
+            Assert.Equal(4, _repository.Additions.ToList().Count);
             Assert.Contains(_repository.Additions, e => e.Value == 7 && e.Node.Id == nodeOneId);
             Assert.Contains(_repository.Additions, e => e.Value == 17 && e.Node.Id == nodeTwoId);
             Assert.Contains(_repository.Additions, e => e.Value == 42 && e.Node.Id == nodeThreeId);
             Assert.Contains(_repository.Additions, e => e.Value == 10 && e.Node.Id == nodeFourId);
 
-            Assert.Equal(4, _repository.Subtractions.Count);
+            Assert.Equal(4, _repository.Subtractions.ToList().Count);
             Assert.Contains(_repository.Subtractions, e => e.Value == 2 && e.Node.Id == nodeOneId);
             Assert.Contains(_repository.Subtractions, e => e.Value == 9 && e.Node.Id == nodeTwoId);
             Assert.Contains(_repository.Subtractions, e => e.Value == 11 && e.Node.Id == nodeThreeId);
@@ -66,13 +67,13 @@ namespace CRDT.Application.UnitTests.Convergent
             _service.Merge(otherAdditions.ToImmutableHashSet(), otherSubtractions.ToImmutableHashSet());
             _service.Merge(otherAdditions.ToImmutableHashSet(), otherSubtractions.ToImmutableHashSet());
 
-            Assert.Equal(4, _repository.Additions.Count);
+            Assert.Equal(4, _repository.Additions.ToList().Count);
             Assert.Contains(_repository.Additions, e => e.Value == 7 && e.Node.Id == nodeOneId);
             Assert.Contains(_repository.Additions, e => e.Value == 17 && e.Node.Id == nodeTwoId);
             Assert.Contains(_repository.Additions, e => e.Value == 42 && e.Node.Id == nodeThreeId);
             Assert.Contains(_repository.Additions, e => e.Value == 10 && e.Node.Id == nodeFourId);
 
-            Assert.Equal(4, _repository.Subtractions.Count);
+            Assert.Equal(4, _repository.Subtractions.ToList().Count);
             Assert.Contains(_repository.Subtractions, e => e.Value == 2 && e.Node.Id == nodeOneId);
             Assert.Contains(_repository.Subtractions, e => e.Value == 9 && e.Node.Id == nodeTwoId);
             Assert.Contains(_repository.Subtractions, e => e.Value == 11 && e.Node.Id == nodeThreeId);

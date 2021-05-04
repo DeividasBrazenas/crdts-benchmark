@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Commutative.Counter;
 using CRDT.Application.UnitTests.Repositories;
@@ -38,7 +39,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _service.Add(value, nodeId);
 
-            Assert.Equal(elements.Count, _repository.Additions.Count);
+            Assert.Equal(elements.Count, _repository.Additions.ToList().Count);
             Assert.Contains(_repository.Additions, e => e.Value == 999 + value && e.Node.Id == nodeId);
         }
 
@@ -61,7 +62,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _service.Subtract(value, nodeId);
 
-            Assert.Equal(elements.Count, _repository.Subtractions.Count);
+            Assert.Equal(elements.Count, _repository.Subtractions.ToList().Count);
             Assert.Contains(_repository.Subtractions, e => e.Value == 999 + value && e.Node.Id == nodeId);
         }
 

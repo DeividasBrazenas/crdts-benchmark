@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CRDT.Counters.Entities;
 
 namespace CRDT.Application.Interfaces
@@ -9,8 +10,8 @@ namespace CRDT.Application.Interfaces
 
         IEnumerable<CounterElement> GetSubtractions();
 
-        void PersistAdditions(IEnumerable<CounterElement> values);
+        void PersistAdditions(IEnumerable<CounterElement> additions);
 
-        void PersistSubtractions(IEnumerable<CounterElement> values);
+        void PersistSubtractions(IEnumerable<CounterElement> subtractions);
     }
 }

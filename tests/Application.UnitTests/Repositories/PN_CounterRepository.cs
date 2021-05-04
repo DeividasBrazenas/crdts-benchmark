@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using CRDT.Application.Interfaces;
 using CRDT.Counters.Entities;
 
@@ -7,9 +7,9 @@ namespace CRDT.Application.UnitTests.Repositories
 {
     public class PN_CounterRepository : IPN_CounterRepository
     {
-        public List<CounterElement> Additions;
+        public IEnumerable<CounterElement> Additions;
 
-        public List<CounterElement> Subtractions;
+        public IEnumerable<CounterElement> Subtractions;
 
         public PN_CounterRepository()
         {
@@ -27,34 +27,14 @@ namespace CRDT.Application.UnitTests.Repositories
             return Subtractions;
         }
 
-        public void PersistAdditions(IEnumerable<CounterElement> values)
+        public void PersistAdditions(IEnumerable<CounterElement> additions)
         {
-            foreach (var value in values)
-            {
-                var existingValue = Additions.FirstOrDefault(v => v.Node.Id == value.Node.Id);
-
-                if (existingValue is not null)
-                {
-                    Additions.Remove(existingValue);
-                }
-
-                Additions.Add(value);
-            }
+            Additions = additions;
         }
 
-        public void PersistSubtractions(IEnumerable<CounterElement> values)
+        public void PersistSubtractions(IEnumerable<CounterElement> subtractions)
         {
-            foreach (var value in values)
-            {
-                var existingValue = Subtractions.FirstOrDefault(v => v.Node.Id == value.Node.Id);
-
-                if (existingValue is not null)
-                {
-                    Subtractions.Remove(existingValue);
-                }
-
-                Subtractions.Add(value);
-            }
+            Subtractions = subtractions;
         }
     }
 }

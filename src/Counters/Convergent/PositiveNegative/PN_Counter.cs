@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Counters.Bases;
+using CRDT.Counters.Convergent.GrowOnly;
 using CRDT.Counters.Entities;
 
 namespace CRDT.Counters.Convergent.PositiveNegative
@@ -62,31 +63,10 @@ namespace CRDT.Counters.Convergent.PositiveNegative
 
         private IImmutableSet<CounterElement> MergeElements(IImmutableSet<CounterElement> firstSet, IImmutableSet<CounterElement> secondSet)
         {
-            var commonNodes = firstSet.Where(e => secondSet.Any(el => Equals(e.Node, el.Node))).Select(s => s.Node);
-            var firstSetElements = firstSet.Where(e => commonNodes.All(c => e.Node.Id != c.Id));
-            var secondSetElements = secondSet.Where(e => commonNodes.All(c => e.Node.Id != c.Id));
+            var union = firstSet.Union(secondSet);
+            var filteredElements = union.Where(u => !union.Any(e => Equals(u.Node, e.Node) && u.Value < e.Value));
 
-            var mergedElements = new HashSet<CounterElement>();
-
-            foreach (var node in commonNodes)
-            {
-                var firstSetElement = firstSet.First(e => Equals(e.Node, node));
-                var secondSetElement = secondSet.First(e => Equals(e.Node, node));
-
-                mergedElements.Add(new CounterElement(Math.Max(firstSetElement.Value, secondSetElement.Value), node.Id));
-            }
-
-            foreach (var element in firstSetElements)
-            {
-                mergedElements.Add(element);
-            }
-
-            foreach (var element in secondSetElements)
-            {
-                mergedElements.Add(element);
-            }
-
-            return mergedElements.ToImmutableHashSet();
+            return filteredElements.ToImmutableHashSet();
         }
 
         protected override IEnumerable<object> GetEqualityComponents()

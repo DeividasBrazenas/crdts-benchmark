@@ -7,7 +7,8 @@ namespace Benchmarks
     {
         static void Main(string[] args)
         {
-            BenchmarkRunner.Run<G_CounterBenchmarks>();
+            //BenchmarkRunner.Run<G_CounterBenchmarks>();
+            BenchmarkRunner.Run<PN_CounterBenchmarks>();
         }
     }
 }
