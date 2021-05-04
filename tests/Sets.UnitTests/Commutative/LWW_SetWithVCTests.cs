@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Core.Cluster;
 using CRDT.Core.DistributedTime;
-using CRDT.Sets.Commutative;
 using CRDT.Sets.Commutative.LastWriterWins;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;

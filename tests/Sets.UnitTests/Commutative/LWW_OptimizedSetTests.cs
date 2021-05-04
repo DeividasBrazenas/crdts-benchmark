@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using AutoFixture.Xunit2;
-using CRDT.Sets.Commutative;
 using CRDT.Sets.Commutative.LastWriterWins;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;

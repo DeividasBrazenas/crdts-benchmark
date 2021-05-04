@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
-using CRDT.Counters.Convergent;
 using CRDT.Counters.Convergent.PositiveNegative;
 using CRDT.Counters.Entities;
 using Xunit;

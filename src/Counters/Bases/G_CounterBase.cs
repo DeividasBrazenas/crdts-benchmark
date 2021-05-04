@@ -14,6 +14,6 @@ namespace CRDT.Counters.Bases
             Elements = elements;
         }
 
-        public int Sum => Elements.Sum(e => e.Value);
+        public int Sum() => Elements.Sum(e => e.Value);
     }
 }

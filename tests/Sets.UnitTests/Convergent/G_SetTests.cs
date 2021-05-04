@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using AutoFixture.Xunit2;
-using CRDT.Sets.Convergent;
 using CRDT.Sets.Convergent.GrowOnly;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;

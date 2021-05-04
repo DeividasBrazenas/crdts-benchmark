@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoFixture.Xunit2;
-using CRDT.Application.Convergent;
 using CRDT.Application.Convergent.Set;
 using CRDT.Application.Interfaces;
 using CRDT.Application.UnitTests.Repositories;

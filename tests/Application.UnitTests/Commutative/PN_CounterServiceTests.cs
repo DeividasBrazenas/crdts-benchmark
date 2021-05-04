@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using AutoFixture.Xunit2;
-using CRDT.Application.Commutative;
 using CRDT.Application.Commutative.Counter;
 using CRDT.Application.UnitTests.Repositories;
 using CRDT.Counters.Entities;

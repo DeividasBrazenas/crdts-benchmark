@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
-using CRDT.Counters.Commutative;
 using CRDT.Counters.Commutative.GrowOnly;
 using CRDT.Counters.Entities;
 using Xunit;
@@ -49,7 +48,7 @@ namespace CRDT.Counters.UnitTests.Commutative
 
             var counter = new G_Counter(elements.ToImmutableHashSet());
 
-            var sum = counter.Sum;
+            var sum = counter.Sum();
 
             Assert.Equal(33, sum);
         }

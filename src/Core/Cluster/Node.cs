@@ -8,6 +8,11 @@ namespace CRDT.Core.Cluster
     {
         public Guid Id { get; }
 
+        public Node()
+        {
+            Id = Guid.NewGuid();
+        }
+
         public Node(Guid id)
         {
             Id = id;

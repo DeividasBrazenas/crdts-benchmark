@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoFixture.Xunit2;
-using CRDT.Application.Commutative;
 using CRDT.Application.Commutative.Register;
 using CRDT.Application.Interfaces;
 using CRDT.Application.UnitTests.Repositories;

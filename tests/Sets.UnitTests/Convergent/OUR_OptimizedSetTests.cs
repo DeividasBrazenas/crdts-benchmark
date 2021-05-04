@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Immutable;
 using AutoFixture.Xunit2;
-using CRDT.Sets.Convergent;
 using CRDT.Sets.Convergent.ObservedUpdatedRemoved;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;

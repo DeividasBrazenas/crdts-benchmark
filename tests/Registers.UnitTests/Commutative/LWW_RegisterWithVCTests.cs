@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using AutoFixture.Xunit2;
 using CRDT.Core.Cluster;
 using CRDT.Core.DistributedTime;
-using CRDT.Registers.Commutative;
 using CRDT.Registers.Commutative.LastWriterWins;
 using CRDT.Registers.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
