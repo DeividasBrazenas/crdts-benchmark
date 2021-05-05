@@ -7,8 +7,8 @@ namespace CRDT.Application.UnitTests.Repositories
 {
     public class P_SetRepository : IP_SetRepository<TestType>
     {
-        public List<TestType> Adds { get; }
-        public List<TestType> Removes { get; }
+        public IEnumerable<TestType> Adds { get; private set; }
+        public IEnumerable<TestType> Removes { get; private set; }
 
         public P_SetRepository()
         {
@@ -22,24 +22,12 @@ namespace CRDT.Application.UnitTests.Repositories
 
         public void PersistAdds(IEnumerable<TestType> values)
         {
-            foreach (var value in values)
-            {
-                if (!Adds.Any(e => Equals(e, value)))
-                {
-                    Adds.Add(value);
-                }
-            }
+            Adds = values;
         }
 
         public void PersistRemoves(IEnumerable<TestType> values)
         {
-            foreach (var value in values)
-            {
-                if (!Removes.Any(e => Equals(e, value)))
-                {
-                    Removes.Add(value);
-                }
-            }
+            Removes = values;
         }
     }
 }

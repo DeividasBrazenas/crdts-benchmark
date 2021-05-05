@@ -8,34 +8,71 @@ namespace CRDT.Application.Commutative.Set
     public class P_SetService<T> where T : DistributedEntity
     {
         private readonly IP_SetRepository<T> _repository;
+        private readonly object _lockObject = new();
 
         public P_SetService(IP_SetRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Add(T value)
+        public void LocalAdd(T value)
         {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
 
-            var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            set = set.Add(value);
+                set = set.Add(value);
 
-            _repository.PersistAdds(set.Adds);
+                _repository.PersistAdds(set.Adds);
+            }
         }
 
-        public void Remove(T value)
+        public void DownstreamAdd(T value)
         {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
 
-            var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            set = set.Remove(value);
+                set = set.Add(value);
 
-            _repository.PersistRemoves(set.Removes);
+                _repository.PersistAdds(set.Adds);
+            }
+        }
+
+        public void LocalRemove(T value)
+        {
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
+
+                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+
+                set = set.Remove(value);
+
+                _repository.PersistRemoves(set.Removes);
+            }
+        }
+
+        public void DownstreamRemove(T value)
+        {
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
+
+                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+
+                set = set.Remove(value);
+
+                _repository.PersistRemoves(set.Removes);
+            }
         }
 
         public bool Lookup(T value)

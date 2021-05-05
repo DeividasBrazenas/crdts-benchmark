@@ -34,7 +34,7 @@ namespace Benchmarks.Sets
         }
 
         [Benchmark]
-        public void Convergent_Add_NewValue()
+        public void Convergent_AddNewValue()
         {
             TestType value;
 
@@ -52,7 +52,7 @@ namespace Benchmarks.Sets
         }
 
         [Benchmark]
-        public void Commutative_Add_NewValue()
+        public void Commutative_AddNewValue()
         {
             TestType value;
 
@@ -98,7 +98,7 @@ namespace Benchmarks.Sets
             return dictionary;
         }
 
-        private bool CommutativeDownstreamAdd(Guid senderId, TestType value)
+        private void CommutativeDownstreamAdd(Guid senderId, TestType value)
         {
             var downstreamReplicas = _commutativeReplicas.Where(r => r.Key.Id != senderId);
 
@@ -106,8 +106,6 @@ namespace Benchmarks.Sets
             {
                 downstreamReplica.Value.DownstreamAdd(value);
             }
-
-            return true;
         }
         #endregion
 
@@ -128,7 +126,7 @@ namespace Benchmarks.Sets
             return dictionary;
         }
 
-        private bool ConvergentDownstreamMerge(Guid senderId, IEnumerable<TestType> state)
+        private void ConvergentDownstreamMerge(Guid senderId, IEnumerable<TestType> state)
         {
             var downstreamReplicas = _convergentReplicas.Where(r => r.Key.Id != senderId);
 
@@ -136,8 +134,6 @@ namespace Benchmarks.Sets
             {
                 downstreamReplica.Value.Merge(state);
             }
-
-            return true;
         }
 
         #endregion

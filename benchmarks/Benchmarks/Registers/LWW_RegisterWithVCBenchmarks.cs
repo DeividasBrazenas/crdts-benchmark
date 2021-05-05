@@ -34,7 +34,7 @@ namespace Benchmarks.Registers
         }
 
         [Benchmark]
-        public void Convergent_Assign_NewValue()
+        public void Convergent_AssignNewValue()
         {
             var value = _objects[0];
             var valueId = value.Id;
@@ -64,7 +64,7 @@ namespace Benchmarks.Registers
         }
 
         [Benchmark]
-        public void Commutative_Assign_NewValue()
+        public void Commutative_AssignNewValue()
         {
             var value = _objects[0];
             var valueId = value.Id;
@@ -94,7 +94,7 @@ namespace Benchmarks.Registers
         }
 
         [Benchmark]
-        public void Convergent_Assign_UpdateSingleField()
+        public void Convergent_UpdateSingleField()
         {
             var value = _objects[0];
             var valueId = value.Id;
@@ -124,7 +124,7 @@ namespace Benchmarks.Registers
         }
 
         [Benchmark]
-        public void Commutative_Assign_UpdateSingleField()
+        public void Commutative_UpdateSingleField()
         {
             var value = _objects[0];
             var valueId = value.Id;
@@ -184,7 +184,7 @@ namespace Benchmarks.Registers
             return dictionary;
         }
 
-        private bool CommutativeDownstreamAssign(Guid senderId, Guid objectId, JToken value, VectorClock clock)
+        private void CommutativeDownstreamAssign(Guid senderId, Guid objectId, JToken value, VectorClock clock)
         {
             var downstreamReplicas = _commutativeReplicas.Where(r => r.Key.Id != senderId);
 
@@ -192,8 +192,6 @@ namespace Benchmarks.Registers
             {
                 downstreamReplica.Value.DownstreamAssign(objectId, value, clock);
             }
-
-            return true;
         }
         #endregion
 
@@ -214,7 +212,7 @@ namespace Benchmarks.Registers
             return dictionary;
         }
 
-        private bool ConvergentDownstreamAssign(Guid senderId, TestType state, VectorClock clock)
+        private void ConvergentDownstreamAssign(Guid senderId, TestType state, VectorClock clock)
         {
             var downstreamReplicas = _convergentReplicas.Where(r => r.Key.Id != senderId);
 
@@ -222,8 +220,6 @@ namespace Benchmarks.Registers
             {
                 downstreamReplica.Value.DownstreamAssign(state.Id, state, clock);
             }
-
-            return true;
         }
 
         #endregion
