@@ -133,19 +133,19 @@ namespace CRDT.Application.UnitTests.Convergent
 
             ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId), clock, convergentReplicas);
 
-            clock.Increment(firstReplica.Key);
+            clock = clock.Increment(firstReplica.Key);
 
             foreach (var replica in convergentReplicas)
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var newValue = TestTypeBuilder.Build(valueId);
+                    initialValue = TestTypeBuilder.Build(valueId);
 
-                    replica.Value.LocalAssign(valueId, newValue, clock);
+                    replica.Value.LocalAssign(valueId, initialValue, clock);
 
                     ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId), clock, convergentReplicas);
 
-                    clock.Increment(replica.Key);
+                    clock = clock.Increment(replica.Key);
                 }
             }
 
@@ -171,7 +171,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId), clock, convergentReplicas);
 
-            clock.Increment(firstReplica.Key);
+            clock = clock.Increment(firstReplica.Key);
 
             foreach (var replica in convergentReplicas)
             {
@@ -183,7 +183,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
                     ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId), clock, convergentReplicas);
 
-                    clock.Increment(replica.Key);
+                    clock = clock.Increment(replica.Key);
                 }
             }
 
@@ -226,7 +226,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             foreach (var downstreamReplica in downstreamReplicas)
             {
-                downstreamReplica.Value.DownstreamAssign(senderId, state, clock);
+                downstreamReplica.Value.DownstreamAssign(state.Id, state, clock);
             }
 
             return true;

@@ -42,19 +42,19 @@ namespace Benchmarks.Registers
 
             ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId), clock);
 
-            clock.Increment(firstReplica.Key);
+            clock = clock.Increment(firstReplica.Key);
 
             foreach (var replica in _convergentReplicas)
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var newValue = _builder.Build(valueId);
+                    initialValue = _builder.Build(valueId);
 
-                    replica.Value.LocalAssign(valueId, newValue, clock);
+                    replica.Value.LocalAssign(valueId, initialValue, clock);
 
                     ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId), clock);
 
-                    clock.Increment(replica.Key);
+                    clock = clock.Increment(replica.Key);
                 }
             }
         }
@@ -72,19 +72,19 @@ namespace Benchmarks.Registers
 
             CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), clock);
 
-            clock.Increment(firstReplica.Key);
+            clock = clock.Increment(firstReplica.Key);
 
             foreach (var replica in _commutativeReplicas)
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var newValue = _builder.Build(valueId);
+                    initialValue = _builder.Build(valueId);
 
-                    replica.Value.LocalAssign(valueId, JToken.FromObject(newValue), clock);
+                    replica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), clock);
 
                     CommutativeDownstreamAssign(replica.Key.Id, valueId, JToken.FromObject(replica.Value.GetValue(valueId)), clock);
 
-                    clock.Increment(replica.Key);
+                    clock = clock.Increment(replica.Key);
                 }
             }
         }
@@ -102,7 +102,7 @@ namespace Benchmarks.Registers
 
             ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId), clock);
 
-            clock.Increment(firstReplica.Key);
+            clock = clock.Increment(firstReplica.Key);
 
             foreach (var replica in _convergentReplicas)
             {
@@ -114,7 +114,7 @@ namespace Benchmarks.Registers
 
                     ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId), clock);
 
-                    clock.Increment(replica.Key);
+                    clock = clock.Increment(replica.Key);
                 }
             }
         }
@@ -132,19 +132,21 @@ namespace Benchmarks.Registers
 
             CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), clock);
 
-            clock.Increment(firstReplica.Key);
+            clock = clock.Increment(firstReplica.Key);
 
             foreach (var replica in _commutativeReplicas)
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var jToken = JToken.Parse($"{{\"StringValue\":\"{Guid.NewGuid()}\"}}");
+                    initialValue.StringValue = Guid.NewGuid().ToString();
+
+                    var jToken = JToken.Parse($"{{\"StringValue\":\"{initialValue.StringValue}\"}}");
 
                     replica.Value.LocalAssign(valueId, jToken, clock);
 
                     CommutativeDownstreamAssign(replica.Key.Id, valueId, jToken, clock);
 
-                    clock.Increment(replica.Key);
+                    clock = clock.Increment(replica.Key);
                 }
             }
         }
@@ -214,7 +216,7 @@ namespace Benchmarks.Registers
 
             foreach (var downstreamReplica in downstreamReplicas)
             {
-                downstreamReplica.Value.DownstreamAssign(senderId, state, clock);
+                downstreamReplica.Value.DownstreamAssign(state.Id, state, clock);
             }
 
             return true;

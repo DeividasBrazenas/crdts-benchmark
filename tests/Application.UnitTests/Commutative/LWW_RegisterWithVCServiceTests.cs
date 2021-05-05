@@ -213,19 +213,19 @@ namespace CRDT.Application.UnitTests.Commutative
 
             CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), clock, commutativeReplicas);
 
-            clock.Increment(firstReplica.Key);
+            clock = clock.Increment(firstReplica.Key);
 
             foreach (var replica in commutativeReplicas)
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var newValue = TestTypeBuilder.Build(valueId);
+                    initialValue = TestTypeBuilder.Build(valueId);
 
-                    replica.Value.LocalAssign(valueId, JToken.FromObject(newValue), clock);
+                    replica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), clock);
 
                     CommutativeDownstreamAssign(replica.Key.Id, valueId, JToken.FromObject(replica.Value.GetValue(valueId)), clock, commutativeReplicas);
 
-                    clock.Increment(replica.Key);
+                    clock = clock.Increment(replica.Key);
                 }
             }
 
@@ -251,19 +251,21 @@ namespace CRDT.Application.UnitTests.Commutative
 
             CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), clock, commutativeReplicas);
 
-            clock.Increment(firstReplica.Key);
+            clock = clock.Increment(firstReplica.Key);
 
             foreach (var replica in commutativeReplicas)
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 1; i++)
                 {
-                    var jToken = JToken.Parse($"{{\"StringValue\":\"{Guid.NewGuid()}\"}}");
+                    initialValue.StringValue = Guid.NewGuid().ToString();
+
+                    var jToken = JToken.Parse($"{{\"StringValue\":\"{initialValue.StringValue}\"}}");
 
                     replica.Value.LocalAssign(valueId, jToken, clock);
 
                     CommutativeDownstreamAssign(replica.Key.Id, valueId, jToken, clock, commutativeReplicas);
 
-                    clock.Increment(replica.Key);
+                    clock = clock.Increment(replica.Key);
                 }
             }
 

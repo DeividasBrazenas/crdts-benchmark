@@ -47,9 +47,9 @@ namespace Benchmarks.Registers
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var newValue = _builder.Build(valueId);
+                    initialValue = _builder.Build(valueId);
 
-                    replica.Value.LocalAssign(valueId, newValue, ts);
+                    replica.Value.LocalAssign(valueId, initialValue, ts);
 
                     ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId), ts);
 
@@ -77,9 +77,9 @@ namespace Benchmarks.Registers
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var newValue = _builder.Build(valueId);
+                    initialValue = _builder.Build(valueId);
 
-                    replica.Value.LocalAssign(valueId, JToken.FromObject(newValue), ts);
+                    replica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), ts);
 
                     CommutativeDownstreamAssign(replica.Key.Id, valueId, JToken.FromObject(replica.Value.GetValue(valueId)), ts);
 
@@ -137,7 +137,9 @@ namespace Benchmarks.Registers
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    var jToken = JToken.Parse($"{{\"StringValue\":\"{Guid.NewGuid()}\"}}");
+                    initialValue.StringValue = Guid.NewGuid().ToString();
+
+                    var jToken = JToken.Parse($"{{\"StringValue\":\"{initialValue.StringValue}\"}}");
 
                     replica.Value.LocalAssign(valueId, jToken, ts);
 
