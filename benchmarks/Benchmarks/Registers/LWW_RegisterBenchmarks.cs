@@ -17,7 +17,9 @@ namespace Benchmarks.Registers
         private List<Node> _nodes;
         private Dictionary<Node, CRDT.Application.Commutative.Register.LWW_RegisterService<TestType>> _commutativeReplicas;
         private Dictionary<Node, CRDT.Application.Convergent.Register.LWW_RegisterService<TestType>> _convergentReplicas;
-        private TestTypeBuilder _builder;
+        private List<TestType> _objects;
+        private int _objectsCount;
+        private Random _random;
 
         [GlobalSetup]
         public void Setup()
@@ -25,19 +27,21 @@ namespace Benchmarks.Registers
             _nodes = CreateNodes(3);
             _commutativeReplicas = CreateCommutativeReplicas(_nodes);
             _convergentReplicas = CreateConvergentReplicas(_nodes);
-            _builder = new TestTypeBuilder(new Random());
+            _random = new Random();
+            _objectsCount = 1000;
+            _objects = new TestTypeBuilder(_random).Build(Guid.NewGuid(), _objectsCount);
         }
 
         [Benchmark]
         public void Convergent_Assign_NewValue()
         {
-            var initialValue = _builder.Build();
-            var valueId = initialValue.Id;
+            var value = _objects[0];
+            var valueId = value.Id;
 
             long ts = 0;
 
             var firstReplica = _convergentReplicas.First();
-            firstReplica.Value.LocalAssign(valueId, initialValue, ts);
+            firstReplica.Value.LocalAssign(valueId, value, ts);
 
             ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId), ts);
 
@@ -47,9 +51,9 @@ namespace Benchmarks.Registers
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    initialValue = _builder.Build(valueId);
+                    value = _objects[_random.Next(_objectsCount)];
 
-                    replica.Value.LocalAssign(valueId, initialValue, ts);
+                    replica.Value.LocalAssign(valueId, value, ts);
 
                     ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId), ts);
 
@@ -61,13 +65,13 @@ namespace Benchmarks.Registers
         [Benchmark]
         public void Commutative_Assign_NewValue()
         {
-            var initialValue = _builder.Build();
-            var valueId = initialValue.Id;
+            var value = _objects[0];
+            var valueId = value.Id;
 
             long ts = 0;
 
             var firstReplica = _commutativeReplicas.First();
-            firstReplica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), ts);
+            firstReplica.Value.LocalAssign(valueId, JToken.FromObject(value), ts);
 
             CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), ts);
 
@@ -77,9 +81,9 @@ namespace Benchmarks.Registers
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    initialValue = _builder.Build(valueId);
+                    value = _objects[_random.Next(_objectsCount)];
 
-                    replica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), ts);
+                    replica.Value.LocalAssign(valueId, JToken.FromObject(value), ts);
 
                     CommutativeDownstreamAssign(replica.Key.Id, valueId, JToken.FromObject(replica.Value.GetValue(valueId)), ts);
 
@@ -91,13 +95,13 @@ namespace Benchmarks.Registers
         [Benchmark]
         public void Convergent_Assign_UpdateSingleField()
         {
-            var initialValue = _builder.Build();
-            var valueId = initialValue.Id;
+            var value = _objects[0];
+            var valueId = value.Id;
 
             long ts = 0;
 
             var firstReplica = _convergentReplicas.First();
-            firstReplica.Value.LocalAssign(valueId, initialValue, ts);
+            firstReplica.Value.LocalAssign(valueId, value, ts);
 
             ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId), ts);
 
@@ -107,9 +111,9 @@ namespace Benchmarks.Registers
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    initialValue.StringValue = Guid.NewGuid().ToString();
+                    value.StringValue = Guid.NewGuid().ToString();
 
-                    replica.Value.LocalAssign(valueId, initialValue, ts);
+                    replica.Value.LocalAssign(valueId, value, ts);
 
                     ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId), ts);
 
@@ -121,13 +125,13 @@ namespace Benchmarks.Registers
         [Benchmark]
         public void Commutative_Assign_UpdateSingleField()
         {
-            var initialValue = _builder.Build();
-            var valueId = initialValue.Id;
+            var value = _objects[0];
+            var valueId = value.Id;
 
             long ts = 0;
 
             var firstReplica = _commutativeReplicas.First();
-            firstReplica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), ts);
+            firstReplica.Value.LocalAssign(valueId, JToken.FromObject(value), ts);
 
             CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), ts);
 
@@ -137,9 +141,9 @@ namespace Benchmarks.Registers
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    initialValue.StringValue = Guid.NewGuid().ToString();
+                    value.StringValue = Guid.NewGuid().ToString();
 
-                    var jToken = JToken.Parse($"{{\"StringValue\":\"{initialValue.StringValue}\"}}");
+                    var jToken = JToken.Parse($"{{\"StringValue\":\"{value.StringValue}\"}}");
 
                     replica.Value.LocalAssign(valueId, jToken, ts);
 

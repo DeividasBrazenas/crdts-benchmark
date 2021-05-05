@@ -28,5 +28,17 @@ namespace CRDT.UnitTestHelpers.TestTypes
 
             return value;
         }
+
+        public static List<TestType> Build(Guid? guid, int count)
+        {
+            var objects = new List<TestType>();
+
+            for (int i = 0; i < count; i++)
+            {
+                objects.Add(Build(guid));
+            }
+
+            return objects;
+        }
     }
 }

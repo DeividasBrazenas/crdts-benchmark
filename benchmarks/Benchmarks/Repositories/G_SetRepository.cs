@@ -7,27 +7,21 @@ namespace Benchmarks.Repositories
 {
     public class G_SetRepository : IG_SetRepository<TestType>
     {
-        public List<TestType> Entities { get; }
+        public IEnumerable<TestType> Elements { get; private set; }
 
         public G_SetRepository()
         {
-            Entities = new List<TestType>();
+            Elements = new List<TestType>();
         }
 
         public IEnumerable<TestType> GetValues()
         {
-            return Entities;
+            return Elements;
         }
 
         public void PersistValues(IEnumerable<TestType> values)
         {
-            foreach (var value in values)
-            {
-                if (!Entities.Any(e => Equals(e, value)))
-                {
-                    Entities.Add(value);
-                }
-            }
+            Elements = values;
         }
     }
 }

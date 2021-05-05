@@ -15,4 +15,8 @@
     <ProjectReference Include="..\..\src\Application\Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Sets\" />
+  </ItemGroup>
+
 </Project>

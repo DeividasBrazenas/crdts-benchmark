@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent.Set;
 using CRDT.Application.Interfaces;
 using CRDT.Application.UnitTests.Repositories;
+using CRDT.Core.Cluster;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
 using static CRDT.UnitTestHelpers.TestTypes.TestTypeBuilder;
@@ -131,6 +134,78 @@ namespace CRDT.Application.UnitTests.Convergent
             var lookup = _gSetService.Lookup(value);
 
             Assert.False(lookup);
+        }
+
+        [Fact]
+        public void Convergent_Add_NewValue()
+        {
+            var nodes = CreateNodes(3);
+            var convergentReplicas = CreateConvergentReplicas(nodes);
+            var random = new Random();
+            var objectsCount = 1000;
+            var objects = Build(Guid.NewGuid(), objectsCount);
+            TestType value;
+            var expectedObjects = new HashSet<TestType>();
+
+            foreach (var replica in convergentReplicas)
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    value = objects[random.Next(objectsCount)];
+
+                    replica.Value.LocalAdd(value);
+
+                    ConvergentDownstreamMerge(replica.Key.Id, replica.Value.State, convergentReplicas);
+
+                    expectedObjects.Add(value);
+                }
+            }
+
+            var state = convergentReplicas.First().Value.State;
+
+            foreach (var replica in convergentReplicas)
+            {
+                Assert.Equal(state, replica.Value.State);
+            }
+        }
+
+        private List<Node> CreateNodes(int count)
+        {
+            var nodes = new List<Node>();
+
+            for (var i = 0; i < count; i++)
+            {
+                nodes.Add(new Node());
+            }
+
+            return nodes;
+        }
+
+        private Dictionary<Node, G_SetService<TestType>> CreateConvergentReplicas(List<Node> nodes)
+        {
+            var dictionary = new Dictionary<Node, G_SetService<TestType>>();
+
+            foreach (var node in nodes)
+            {
+                var repository = new G_SetRepository();
+                var service = new G_SetService<TestType>(repository);
+
+                dictionary.Add(node, service);
+            }
+
+            return dictionary;
+        }
+
+        private bool ConvergentDownstreamMerge(Guid senderId, IEnumerable<TestType> state, Dictionary<Node, G_SetService<TestType>> replicas)
+        {
+            var downstreamReplicas = replicas.Where(r => r.Key.Id != senderId);
+
+            foreach (var downstreamReplica in downstreamReplicas)
+            {
+                downstreamReplica.Value.Merge(state);
+            }
+
+            return true;
         }
 
         private void AssertContains(List<TestType> expectedValues, IEnumerable<TestType> actualValues)

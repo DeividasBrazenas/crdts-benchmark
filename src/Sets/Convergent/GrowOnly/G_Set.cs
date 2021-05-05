@@ -14,6 +14,8 @@ namespace CRDT.Sets.Convergent.GrowOnly
         {
         }
 
+        public G_Set<T> Add(T value) => new(Values.Add(value));
+
         public G_Set<T> Merge(IImmutableSet<T> values) => new(Values.Union(values));
     }
 }

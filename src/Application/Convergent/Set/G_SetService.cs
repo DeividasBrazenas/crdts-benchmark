@@ -9,21 +9,39 @@ namespace CRDT.Application.Convergent.Set
     public class G_SetService<T> where T : DistributedEntity
     {
         private readonly IG_SetRepository<T> _repository;
+        private readonly object _lockObject = new();
 
         public G_SetService(IG_SetRepository<T> repository)
         {
             _repository = repository;
         }
 
+        public void LocalAdd(T value)
+        {
+            lock (_lockObject)
+            {
+                var existingEntities = _repository.GetValues();
+
+                var set = new G_Set<T>(existingEntities.ToImmutableHashSet());
+
+                set = set.Add(value);
+
+                _repository.PersistValues(set.Values);
+            }
+        }
+
         public void Merge(IEnumerable<T> values)
         {
-            var existingEntities = _repository.GetValues();
+            lock (_lockObject)
+            {
+                var existingEntities = _repository.GetValues();
 
-            var set = new G_Set<T>(existingEntities.ToImmutableHashSet());
+                var set = new G_Set<T>(existingEntities.ToImmutableHashSet());
 
-            set = set.Merge(values.ToImmutableHashSet());
+                set = set.Merge(values.ToImmutableHashSet());
 
-            _repository.PersistValues(set.Values);
+                _repository.PersistValues(set.Values);
+            }
         }
 
         public bool Lookup(T value)
@@ -36,5 +54,7 @@ namespace CRDT.Application.Convergent.Set
 
             return lookup;
         }
+
+        public IEnumerable<T> State => _repository.GetValues();
     }
 }

@@ -34,6 +34,18 @@ namespace Benchmarks.TestTypes
             return value;
         }
 
+        public List<TestType> Build(Guid? guid, int count)
+        {
+            var objects = new List<TestType>();
+
+            for (int i = 0; i < count; i++)
+            {
+                objects.Add(Build(guid));
+            }
+
+            return objects;
+        }
+
         private InnerTestType BuildInnerObject()
         {
             var value = new InnerTestType
