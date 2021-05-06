@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Commutative.Set;
@@ -25,7 +26,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Add_NoExistingValues_AddsElementToTheRepository(TestType value)
         {
-            _uSetService.Add(value);
+            _uSetService.DownstreamAdd(value);
 
             var repositoryValues = _repository.GetElements();
             Assert.Contains(new U_SetElement<TestType>(value, false), repositoryValues);
@@ -33,11 +34,11 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<U_SetElement<TestType>> elements, TestType value)
+        public void Add_WithExistingValues_AddsElementToTheRepository(HashSet<U_SetElement<TestType>> elements, TestType value)
         {
-            _repository.PersistElements(elements);
+            _repository.PersistElements(elements.ToImmutableHashSet());
 
-            _uSetService.Add(value);
+            _uSetService.DownstreamAdd(value);
 
             var repositoryValues = _repository.GetElements();
             Assert.Contains(new U_SetElement<TestType>(value, false), repositoryValues);
@@ -45,13 +46,13 @@ namespace CRDT.Application.UnitTests.Commutative
         
         [Theory]
         [AutoData]
-        public void Add_IsIdempotent(List<U_SetElement<TestType>> elements, TestType value)
+        public void Add_IsIdempotent(HashSet<U_SetElement<TestType>> elements, TestType value)
         {
-            _repository.PersistElements(elements);
+            _repository.PersistElements(elements.ToImmutableHashSet());
 
-            _uSetService.Add(value);
-            _uSetService.Add(value);
-            _uSetService.Add(value);
+            _uSetService.DownstreamAdd(value);
+            _uSetService.DownstreamAdd(value);
+            _uSetService.DownstreamAdd(value);
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(v => Equals(v, new U_SetElement<TestType>(value, false))));
@@ -61,7 +62,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value)
         {
-            _uSetService.Remove(value);
+            _uSetService.DownstreamRemove(value);
 
             var repositoryValues = _repository.GetElements();
             Assert.DoesNotContain(new U_SetElement<TestType>(value, true), repositoryValues);
@@ -71,8 +72,8 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_AddExists_AddsElementToTheRepository(TestType value)
         {
-            _uSetService.Add(value);
-            _uSetService.Remove(value);
+            _uSetService.DownstreamAdd(value);
+            _uSetService.DownstreamRemove(value);
 
             var repositoryValues = _repository.GetElements();
             Assert.Contains(new U_SetElement<TestType>(value, true), repositoryValues);
@@ -82,10 +83,10 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_IsIdempotent(TestType value)
         {
-            _uSetService.Add(value);
-            _uSetService.Remove(value);
-            _uSetService.Remove(value);
-            _uSetService.Remove(value);
+            _uSetService.DownstreamAdd(value);
+            _uSetService.DownstreamRemove(value);
+            _uSetService.DownstreamRemove(value);
+            _uSetService.DownstreamRemove(value);
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(v => Equals(v, new U_SetElement<TestType>(value, true))));
@@ -95,7 +96,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_ReturnsTrue(TestType value)
         {
-            _uSetService.Add(value);
+            _uSetService.DownstreamAdd(value);
 
             var lookup = _uSetService.Lookup(value);
 
@@ -106,8 +107,8 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_ReturnsFalse(TestType value)
         {
-            _uSetService.Add(value);
-            _uSetService.Remove(value);
+            _uSetService.DownstreamAdd(value);
+            _uSetService.DownstreamRemove(value);
 
             var lookup = _uSetService.Lookup(value);
 
@@ -118,9 +119,9 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_ReAdd_ReturnsFalse(TestType value)
         {
-            _uSetService.Add(value);
-            _uSetService.Remove(value);
-            _uSetService.Add(value);
+            _uSetService.DownstreamAdd(value);
+            _uSetService.DownstreamRemove(value);
+            _uSetService.DownstreamAdd(value);
 
             var lookup = _uSetService.Lookup(value);
 

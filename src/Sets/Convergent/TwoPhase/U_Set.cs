@@ -17,26 +17,35 @@ namespace CRDT.Sets.Convergent.TwoPhase
         {
         }
 
-        public U_Set<T> Merge(ImmutableHashSet<U_SetElement<T>> elements)
+        public U_Set<T> Add(T value)
         {
-            var union = Elements.Union(elements);
+            var element = Elements.FirstOrDefault(e => Equals(e.Value, value));
 
-            var validElements = new HashSet<U_SetElement<T>>();
-
-            foreach (var element in union)
+            if (element is not null && element.Removed)
             {
-                if (!element.Removed)
-                {
-                    if(union.Any(e => Equals(element.Value, e.Value) && e.Removed))
-                    {
-                        continue;
-                    }
-                }
-
-                validElements.Add(element);
+                return this;
             }
 
-            return new(validElements.ToImmutableHashSet());
+            return new(Elements.Add(new U_SetElement<T>(value, false)));
+        }
+
+        public U_Set<T> Remove(T value)
+        {
+            var element = Elements.FirstOrDefault(e => Equals(e.Value, value));
+
+            if (element is not null && !element.Removed)
+            {
+                var elements = Elements.Remove(element);
+
+                return new(elements.Add(new U_SetElement<T>(value, true)));
+            }
+
+            return this;
+        }
+
+        public U_Set<T> Merge(ImmutableHashSet<U_SetElement<T>> elements)
+        {
+            return new(Elements.Union(elements).ToImmutableHashSet());
         }
     }
 }

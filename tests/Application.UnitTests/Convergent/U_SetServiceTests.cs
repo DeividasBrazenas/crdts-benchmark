@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent.Set;
@@ -28,7 +29,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Merge_SingleValueWithEmptyRepository_AddsElementsToTheRepository(TestType value)
         {
-            _uSetService.Merge(new List<U_SetElement<TestType>> { new(value, false) });
+            _uSetService.Merge(new HashSet<U_SetElement<TestType>> { new(value, false) }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x.Value, value)));
@@ -36,11 +37,11 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_SingleElement_AddsElementsToTheRepository(List<U_SetElement<TestType>> existingValues, TestType value)
+        public void Merge_SingleElement_AddsElementsToTheRepository(HashSet<U_SetElement<TestType>> existingValues, TestType value)
         {
-            _repository.PersistElements(existingValues);
+            _repository.PersistElements(existingValues.ToImmutableHashSet());
 
-            _uSetService.Merge(new List<U_SetElement<TestType>> { new(value, false) });
+            _uSetService.Merge(new HashSet<U_SetElement<TestType>> { new(value, false) }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x.Value, value)));
@@ -48,15 +49,15 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_IsIdempotent(List<U_SetElement<TestType>> values, U_SetElement<TestType> value)
+        public void Merge_IsIdempotent(HashSet<U_SetElement<TestType>> values, U_SetElement<TestType> value)
         {
-            _repository.PersistElements(values);
+            _repository.PersistElements(values.ToImmutableHashSet());
 
             values.Add(value);
 
-            _uSetService.Merge(values);
-            _uSetService.Merge(values);
-            _uSetService.Merge(values);
+            _uSetService.Merge(values.ToImmutableHashSet());
+            _uSetService.Merge(values.ToImmutableHashSet());
+            _uSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             AssertContains(values, repositoryValues);
@@ -74,16 +75,16 @@ namespace CRDT.Application.UnitTests.Convergent
             var firstRepository = new U_SetRepository();
             var firstService = new U_SetService<TestType>(firstRepository);
 
-            _repository.PersistElements(new List<U_SetElement<TestType>> { firstValue, secondValue, thirdValue });
-            firstService.Merge(new List<U_SetElement<TestType>> { fourthValue, fifthValue });
+            _repository.PersistElements(new HashSet<U_SetElement<TestType>> { firstValue, secondValue, thirdValue }.ToImmutableHashSet());
+            firstService.Merge(new HashSet<U_SetElement<TestType>> { fourthValue, fifthValue }.ToImmutableHashSet());
 
             var firstRepositoryValues = firstRepository.GetElements();
 
             var secondRepository = new U_SetRepository();
             var secondService = new U_SetService<TestType>(secondRepository);
 
-            _repository.PersistElements(new List<U_SetElement<TestType>> { fourthValue, fifthValue });
-            secondService.Merge(new List<U_SetElement<TestType>> { firstValue, secondValue, thirdValue });
+            _repository.PersistElements(new HashSet<U_SetElement<TestType>> { fourthValue, fifthValue }.ToImmutableHashSet());
+            secondService.Merge(new HashSet<U_SetElement<TestType>> { firstValue, secondValue, thirdValue }.ToImmutableHashSet());
 
             var secondRepositoryValues = firstRepository.GetElements();
 
@@ -94,11 +95,12 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeRemoves_SingleValueWithEmptyRepository_UpdatesElementInRepository(TestType value)
         {
-            _repository.PersistElements(new List<U_SetElement<TestType>> { new(value, false) });
+            _repository.PersistElements(new HashSet<U_SetElement<TestType>> { new(value, false) }.ToImmutableHashSet());
 
             var removeElement = new U_SetElement<TestType>(value, true);
+            _uSetService.LocalRemove(value);
 
-            _uSetService.Merge(new List<U_SetElement<TestType>> { removeElement });
+            _uSetService.Merge(_uSetService.State);
 
             var repositoryValues = _repository.GetElements();
 
@@ -110,13 +112,14 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeRemoves_IsIdempotent(TestType value)
         {
-            _repository.PersistElements(new List<U_SetElement<TestType>> { new(value, false) });
+            _repository.PersistElements(new HashSet<U_SetElement<TestType>> { new(value, false) }.ToImmutableHashSet());
 
             var removeElement = new U_SetElement<TestType>(value, true);
+            _uSetService.LocalRemove(value);
 
-            _uSetService.Merge(new List<U_SetElement<TestType>> { removeElement });
-            _uSetService.Merge(new List<U_SetElement<TestType>> { removeElement });
-            _uSetService.Merge(new List<U_SetElement<TestType>> { removeElement });
+            _uSetService.Merge(_uSetService.State);
+            _uSetService.Merge(_uSetService.State);
+            _uSetService.Merge(_uSetService.State);
 
             var repositoryValues = _repository.GetElements();
 
@@ -131,7 +134,7 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var element = new U_SetElement<TestType>(value, false);
 
-            _uSetService.Merge(new List<U_SetElement<TestType>> { element });
+            _uSetService.Merge(new HashSet<U_SetElement<TestType>> { element }.ToImmutableHashSet());
 
             var lookup = _uSetService.Lookup(value);
 
@@ -142,8 +145,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_ReturnsFalse(TestType value)
         {
-            _uSetService.Merge(new List<U_SetElement<TestType>> { new(value, false) });
-            _uSetService.Merge(new List<U_SetElement<TestType>> { new(value, true) });
+            _uSetService.LocalAdd(value);
+            _uSetService.Merge(_uSetService.State);
+
+            _uSetService.LocalRemove(value);
+            _uSetService.Merge(_uSetService.State);
 
             var lookup = _uSetService.Lookup(value);
 
@@ -154,16 +160,21 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_ReAdd_ReturnsFalse(TestType value)
         {
-            _uSetService.Merge(new List<U_SetElement<TestType>> { new(value, false) });
-            _uSetService.Merge(new List<U_SetElement<TestType>> { new(value, true) });
-            _uSetService.Merge(new List<U_SetElement<TestType>> { new(value, false) });
+            _uSetService.LocalAdd(value);
+            _uSetService.Merge(_uSetService.State);
+
+            _uSetService.LocalRemove(value);
+            _uSetService.Merge(_uSetService.State);
+
+            _uSetService.LocalAdd(value);
+            _uSetService.Merge(_uSetService.State);
 
             var lookup = _uSetService.Lookup(value);
 
             Assert.False(lookup);
         }
 
-        private void AssertContains(List<U_SetElement<TestType>> expectedValues, IEnumerable<U_SetElement<TestType>> actualValues)
+        private void AssertContains(HashSet<U_SetElement<TestType>> expectedValues, IEnumerable<U_SetElement<TestType>> actualValues)
         {
             foreach (var value in expectedValues)
             {

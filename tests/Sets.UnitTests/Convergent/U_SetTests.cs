@@ -44,8 +44,8 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var uSet = new U_Set<TestType>();
 
-            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, false) }.ToImmutableHashSet());
-            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, true) }.ToImmutableHashSet());
+            uSet = uSet.Add(value);
+            uSet = uSet.Remove(value);
 
             var lookup = uSet.Lookup(value);
 
@@ -58,9 +58,9 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var uSet = new U_Set<TestType>();
 
-            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, false) }.ToImmutableHashSet());
-            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, true) }.ToImmutableHashSet());
-            uSet = uSet.Merge(new[] { new U_SetElement<TestType>(value, false) }.ToImmutableHashSet());
+            uSet = uSet.Add(value);
+            uSet = uSet.Remove(value);
+            uSet = uSet.Add(value);
 
             var lookup = uSet.Lookup(value);
 
@@ -80,7 +80,8 @@ namespace CRDT.Sets.UnitTests.Convergent
 
             var newUSet = uSet.Merge(new[] { elementThree, elementFour }.ToImmutableHashSet());
 
-            Assert.Equal(3, newUSet.Elements.Count);
+            Assert.Equal(4, newUSet.Elements.Count);
+            Assert.Contains(newUSet.Elements, e => Equals(e, elementOne));
             Assert.Contains(newUSet.Elements, e => Equals(e, elementTwo));
             Assert.Contains(newUSet.Elements, e => Equals(e, elementThree));
             Assert.Contains(newUSet.Elements, e => Equals(e, elementFour));
