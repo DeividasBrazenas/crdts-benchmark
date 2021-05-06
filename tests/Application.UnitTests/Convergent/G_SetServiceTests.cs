@@ -9,7 +9,6 @@ using CRDT.Application.UnitTests.Repositories;
 using CRDT.Core.Cluster;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
-using static CRDT.UnitTestHelpers.TestTypes.TestTypeBuilder;
 
 namespace CRDT.Application.UnitTests.Convergent
 {
@@ -17,11 +16,13 @@ namespace CRDT.Application.UnitTests.Convergent
     {
         private readonly IG_SetRepository<TestType> _repository;
         private readonly G_SetService<TestType> _gSetService;
+        private readonly TestTypeBuilder _builder;
 
         public G_SetServiceTests()
         {
             _repository = new G_SetRepository();
             _gSetService = new G_SetService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -36,9 +37,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(ImmutableHashSet<TestType> values)
+        public void Merge_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(HashSet<TestType> values)
         {
-            _gSetService.Merge(values);
+            _gSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetValues();
             AssertContains(values, repositoryValues);
@@ -46,9 +47,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_SingleElement_AddsElementsToTheRepository(ImmutableHashSet<TestType> existingValues, TestType value)
+        public void Merge_SingleElement_AddsElementsToTheRepository(HashSet<TestType> existingValues, TestType value)
         {
-            _repository.PersistValues(existingValues);
+            _repository.PersistValues(existingValues.ToImmutableHashSet());
 
             _gSetService.Merge(new HashSet<TestType> { value }.ToImmutableHashSet());
 
@@ -58,11 +59,11 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_SeveralElements_AddsElementsToTheRepository(ImmutableHashSet<TestType> existingValues, ImmutableHashSet<TestType> values)
+        public void Merge_SeveralElements_AddsElementsToTheRepository(HashSet<TestType> existingValues, HashSet<TestType> values)
         {
-            _repository.PersistValues(existingValues);
+            _repository.PersistValues(existingValues.ToImmutableHashSet());
 
-            _gSetService.Merge(values);
+            _gSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetValues();
             AssertContains(values, repositoryValues);
@@ -70,15 +71,15 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_IsIdempotent(ImmutableHashSet<TestType> values, TestType value)
+        public void Merge_IsIdempotent(HashSet<TestType> values, TestType value)
         {
-            _repository.PersistValues(values);
+            _repository.PersistValues(values.ToImmutableHashSet());
 
             values.Add(value);
 
-            _gSetService.Merge(values);
-            _gSetService.Merge(values);
-            _gSetService.Merge(values);
+            _gSetService.Merge(values.ToImmutableHashSet());
+            _gSetService.Merge(values.ToImmutableHashSet());
+            _gSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetValues();
             AssertContains(values, repositoryValues);
@@ -87,11 +88,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [Fact]
         public void Merge_IsCommutative()
         {
-            var firstValue = Build();
-            var secondValue = Build();
-            var thirdValue = Build();
-            var fourthValue = Build();
-            var fifthValue = Build();
+            var firstValue = _builder.Build();
+            var secondValue = _builder.Build();
+            var thirdValue = _builder.Build();
+            var fourthValue = _builder.Build();
+            var fifthValue = _builder.Build();
 
             var firstRepository = new G_SetRepository();
             var firstService = new G_SetService<TestType>(firstRepository);
@@ -114,9 +115,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Lookup_ReturnsTrue(ImmutableHashSet<TestType> values, TestType value)
+        public void Lookup_ReturnsTrue(HashSet<TestType> values, TestType value)
         {
-            _repository.PersistValues(values);
+            _repository.PersistValues(values.ToImmutableHashSet());
 
             _gSetService.Merge(new HashSet<TestType> { value }.ToImmutableHashSet());
 
@@ -127,9 +128,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Lookup_ReturnsFalse(ImmutableHashSet<TestType> values, TestType value)
+        public void Lookup_ReturnsFalse(HashSet<TestType> values, TestType value)
         {
-            _repository.PersistValues(values);
+            _repository.PersistValues(values.ToImmutableHashSet());
 
             var lookup = _gSetService.Lookup(value);
 
@@ -143,7 +144,7 @@ namespace CRDT.Application.UnitTests.Convergent
             var convergentReplicas = CreateConvergentReplicas(nodes);
             var random = new Random();
             var objectsCount = 1000;
-            var objects = Build(Guid.NewGuid(), objectsCount);
+            var objects = _builder.Build(Guid.NewGuid(), objectsCount);
             TestType value;
             var expectedObjects = new HashSet<TestType>();
 
@@ -196,7 +197,7 @@ namespace CRDT.Application.UnitTests.Convergent
             return dictionary;
         }
 
-        private bool ConvergentDownstreamMerge(Guid senderId, IEnumerable<TestType> state, Dictionary<Node, G_SetService<TestType>> replicas)
+        private bool ConvergentDownstreamMerge(Guid senderId, ImmutableHashSet<TestType> state, Dictionary<Node, G_SetService<TestType>> replicas)
         {
             var downstreamReplicas = replicas.Where(r => r.Key.Id != senderId);
 
@@ -208,7 +209,7 @@ namespace CRDT.Application.UnitTests.Convergent
             return true;
         }
 
-        private void AssertContains(ImmutableHashSet<TestType> expectedValues, IEnumerable<TestType> actualValues)
+        private void AssertContains(HashSet<TestType> expectedValues, IEnumerable<TestType> actualValues)
         {
             foreach (var value in expectedValues)
             {

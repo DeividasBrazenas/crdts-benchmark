@@ -12,6 +12,13 @@ namespace CRDT.Sets.UnitTests.Commutative
 {
     public class OUR_SetTests
     {
+        private readonly TestTypeBuilder _builder;
+
+        public OUR_SetTests()
+        {
+            _builder = new TestTypeBuilder(new Random());
+        }
+
         [Theory]
         [AutoData]
         public void Create_CreatesSetWithElements(OUR_SetElement<TestType> one, OUR_SetElement<TestType> two,
@@ -67,7 +74,7 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var ourSet = new OUR_Set<TestType>();
 
-            var newValue = Build(value.Id);
+            var newValue = _builder.Build(value.Id);
             var newElement = new OUR_SetElement<TestType>(newValue, tag, timestamp + 1);
 
             ourSet = ourSet.Add(value, tag, timestamp);
@@ -185,7 +192,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             ourSet = ourSet.Add(value, tag, timestamp);
             ourSet = ourSet.Remove(value, tag, timestamp + 1);
 
-            var newValue = Build(value.Id);
+            var newValue = _builder.Build(value.Id);
 
             ourSet = ourSet.Update(newValue, tag, timestamp + 1);
 

@@ -16,11 +16,13 @@ namespace CRDT.Application.UnitTests.Convergent
     {
         private readonly IOR_OptimizedSetRepository<TestType> _repository;
         private readonly OR_OptimizedSetService<TestType> _orSetService;
+        private readonly TestTypeBuilder _builder;
 
         public OR_OptimizedSetServiceTests()
         {
             _repository = new OR_OptimizedSetRepository();
             _orSetService = new OR_OptimizedSetService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -87,11 +89,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeAdds_IsCommutative(Guid firstTag, Guid secondTag)
         {
-            var firstElement = new OR_OptimizedSetElement<TestType>(Build(), firstTag, false);
-            var secondElement = new OR_OptimizedSetElement<TestType>(Build(), secondTag, false);
-            var thirdElement = new OR_OptimizedSetElement<TestType>(Build(), secondTag, false);
-            var fourthElement = new OR_OptimizedSetElement<TestType>(Build(), firstTag, false);
-            var fifthElement = new OR_OptimizedSetElement<TestType>(Build(), firstTag, false);
+            var firstElement = new OR_OptimizedSetElement<TestType>(_builder.Build(), firstTag, false);
+            var secondElement = new OR_OptimizedSetElement<TestType>(_builder.Build(), secondTag, false);
+            var thirdElement = new OR_OptimizedSetElement<TestType>(_builder.Build(), secondTag, false);
+            var fourthElement = new OR_OptimizedSetElement<TestType>(_builder.Build(), firstTag, false);
+            var fifthElement = new OR_OptimizedSetElement<TestType>(_builder.Build(), firstTag, false);
 
             var firstRepository = new OR_OptimizedSetRepository();
             var firstService = new OR_OptimizedSetService<TestType>(firstRepository);

@@ -16,11 +16,12 @@ namespace CRDT.Application.UnitTests.Convergent
     {
         private readonly IOR_SetRepository<TestType> _repository;
         private readonly OR_SetService<TestType> _orSetService;
-
+        private readonly TestTypeBuilder _builder;
         public OR_SetServiceTests()
         {
             _repository = new OR_SetRepository();
             _orSetService = new OR_SetService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -91,11 +92,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeAdds_IsCommutative(Guid firstTag, Guid secondTag)
         {
-            var firstElement = new OR_SetElement<TestType>(Build(), firstTag);
-            var secondElement = new OR_SetElement<TestType>(Build(), secondTag);
-            var thirdElement = new OR_SetElement<TestType>(Build(), secondTag);
-            var fourthElement = new OR_SetElement<TestType>(Build(), firstTag);
-            var fifthElement = new OR_SetElement<TestType>(Build(), firstTag);
+            var firstElement = new OR_SetElement<TestType>(_builder.Build(), firstTag);
+            var secondElement = new OR_SetElement<TestType>(_builder.Build(), secondTag);
+            var thirdElement = new OR_SetElement<TestType>(_builder.Build(), secondTag);
+            var fourthElement = new OR_SetElement<TestType>(_builder.Build(), firstTag);
+            var fifthElement = new OR_SetElement<TestType>(_builder.Build(), firstTag);
 
             var firstRepository = new OR_SetRepository();
             var firstService = new OR_SetService<TestType>(firstRepository);
@@ -195,11 +196,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeRemoves_IsCommutative(Guid firstTag, Guid secondTag)
         {
-            var firstElement = new OR_SetElement<TestType>(Build(), firstTag);
-            var secondElement = new OR_SetElement<TestType>(Build(), secondTag);
-            var thirdElement = new OR_SetElement<TestType>(Build(), secondTag);
-            var fourthElement = new OR_SetElement<TestType>(Build(), firstTag);
-            var fifthElement = new OR_SetElement<TestType>(Build(), firstTag);
+            var firstElement = new OR_SetElement<TestType>(_builder.Build(), firstTag);
+            var secondElement = new OR_SetElement<TestType>(_builder.Build(), secondTag);
+            var thirdElement = new OR_SetElement<TestType>(_builder.Build(), secondTag);
+            var fourthElement = new OR_SetElement<TestType>(_builder.Build(), firstTag);
+            var fifthElement = new OR_SetElement<TestType>(_builder.Build(), firstTag);
 
             var firstRepository = new OR_SetRepository();
             var firstService = new OR_SetService<TestType>(firstRepository);

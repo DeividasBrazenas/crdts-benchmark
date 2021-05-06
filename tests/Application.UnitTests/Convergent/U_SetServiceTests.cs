@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent.Set;
@@ -15,11 +16,12 @@ namespace CRDT.Application.UnitTests.Convergent
     {
         private readonly IU_SetRepository<TestType> _repository;
         private readonly U_SetService<TestType> _uSetService;
-
+        private readonly TestTypeBuilder _builder;
         public U_SetServiceTests()
         {
             _repository = new U_SetRepository();
             _uSetService = new U_SetService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -63,11 +65,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [Fact]
         public void Merge_IsCommutative()
         {
-            var firstValue = new U_SetElement<TestType>(Build(), false);
-            var secondValue = new U_SetElement<TestType>(Build(), true);
-            var thirdValue = new U_SetElement<TestType>(Build(), false);
-            var fourthValue = new U_SetElement<TestType>(Build(), true);
-            var fifthValue = new U_SetElement<TestType>(Build(), false);
+            var firstValue = new U_SetElement<TestType>(_builder.Build(), false);
+            var secondValue = new U_SetElement<TestType>(_builder.Build(), true);
+            var thirdValue = new U_SetElement<TestType>(_builder.Build(), false);
+            var fourthValue = new U_SetElement<TestType>(_builder.Build(), true);
+            var fifthValue = new U_SetElement<TestType>(_builder.Build(), false);
 
             var firstRepository = new U_SetRepository();
             var firstService = new U_SetService<TestType>(firstRepository);

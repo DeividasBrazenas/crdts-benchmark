@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Commutative.Set;
@@ -32,9 +33,9 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<TestType> adds, TestType value)
+        public void Add_WithExistingValues_AddsElementToTheRepository(HashSet<TestType> adds, TestType value)
         {
-            _repository.PersistAdds(adds);
+            _repository.PersistAdds(adds.ToImmutableHashSet());
 
             _pSetService.DownstreamAdd(value);
 
@@ -44,9 +45,9 @@ namespace CRDT.Application.UnitTests.Commutative
         
         [Theory]
         [AutoData]
-        public void Add_IsIdempotent(List<TestType> adds, TestType value)
+        public void Add_IsIdempotent(HashSet<TestType> adds, TestType value)
         {
-            _repository.PersistAdds(adds);
+            _repository.PersistAdds(adds.ToImmutableHashSet());
 
             _pSetService.DownstreamAdd(value);
             _pSetService.DownstreamAdd(value);
@@ -92,10 +93,10 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_ReturnsTrue(List<TestType> existingAdds, List<TestType> existingRemoves, TestType value)
+        public void Lookup_ReturnsTrue(HashSet<TestType> existingAdds, HashSet<TestType> existingRemoves, TestType value)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
             _pSetService.DownstreamAdd(value);
 
@@ -106,10 +107,10 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_ReturnsFalse(List<TestType> existingAdds, List<TestType> existingRemoves, TestType value)
+        public void Lookup_ReturnsFalse(HashSet<TestType> existingAdds, HashSet<TestType> existingRemoves, TestType value)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
             _pSetService.DownstreamAdd(value);
             _pSetService.DownstreamRemove(value);
@@ -121,10 +122,10 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_ReAdd_ReturnsFalse(List<TestType> existingAdds, List<TestType> existingRemoves, TestType value)
+        public void Lookup_ReAdd_ReturnsFalse(HashSet<TestType> existingAdds, HashSet<TestType> existingRemoves, TestType value)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
             _pSetService.DownstreamAdd(value);
             _pSetService.DownstreamRemove(value);

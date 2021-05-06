@@ -6,7 +6,7 @@ namespace CRDT.Sets.Bases
 {
     public abstract class G_SetBase<T> where T : DistributedEntity
     {
-        public ImmutableHashSet<T> Values { get; }
+        public ImmutableHashSet<T> Values { get; protected set; }
 
         protected G_SetBase()
         {

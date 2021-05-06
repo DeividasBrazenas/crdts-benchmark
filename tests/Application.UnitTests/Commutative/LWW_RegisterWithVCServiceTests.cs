@@ -20,11 +20,13 @@ namespace CRDT.Application.UnitTests.Commutative
     {
         private readonly LWW_RegisterWithVCService<TestType> _service;
         private readonly ILWW_RegisterWithVCRepository<TestType> _repository;
+        private readonly TestTypeBuilder _builder;
 
         public LWW_RegisterWithVCServiceTests()
         {
             _repository = new LWW_RegisterWithVCRepository();
             _service = new LWW_RegisterWithVCService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -70,8 +72,8 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            var value = TestTypeBuilder.Build(id);
-            var newValue = TestTypeBuilder.Build(id);
+            var value = _builder.Build(id);
+            var newValue = _builder.Build(id);
 
             _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
 
@@ -87,8 +89,8 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            var value = TestTypeBuilder.Build(id);
-            var newValue = TestTypeBuilder.Build(id);
+            var value = _builder.Build(id);
+            var newValue = _builder.Build(id);
 
             _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1))));
 
@@ -203,7 +205,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var nodes = CreateNodes(3);
             var commutativeReplicas = CreateCommutativeReplicas(nodes);
 
-            var initialValue = TestTypeBuilder.Build();
+            var initialValue = _builder.Build();
             var valueId = initialValue.Id;
 
             var clock = new VectorClock(nodes);
@@ -219,7 +221,7 @@ namespace CRDT.Application.UnitTests.Commutative
             {
                 for (int i = 0; i < 100; i++)
                 {
-                    initialValue = TestTypeBuilder.Build(valueId);
+                    initialValue = _builder.Build(valueId);
 
                     replica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), clock);
 
@@ -241,7 +243,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var nodes = CreateNodes(3);
             var commutativeReplicas = CreateCommutativeReplicas(nodes);
 
-            var initialValue = TestTypeBuilder.Build();
+            var initialValue = _builder.Build();
             var valueId = initialValue.Id;
 
             var clock = new VectorClock(nodes);

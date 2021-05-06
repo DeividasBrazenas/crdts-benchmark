@@ -80,7 +80,7 @@ namespace CRDT.Sets.UnitTests.Convergent
             ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(value, tag, timestamp, false) }.ToImmutableHashSet());
             ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(value, tag, timestamp + 1, true) }.ToImmutableHashSet());
           
-            var newValue = Build(value.Id);
+            var newValue = new TestTypeBuilder(new Random()).Build(value.Id);
 
             ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(newValue, tag, timestamp + 3, false) }.ToImmutableHashSet());
 

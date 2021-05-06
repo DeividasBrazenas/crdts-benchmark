@@ -30,7 +30,7 @@ namespace CRDT.Application.Convergent.Set
             }
         }
 
-        public void Merge(IEnumerable<T> values)
+        public void Merge(ImmutableHashSet<T> values)
         {
             lock (_lockObject)
             {
@@ -55,6 +55,6 @@ namespace CRDT.Application.Convergent.Set
             return lookup;
         }
 
-        public IEnumerable<T> State => _repository.GetValues();
+        public ImmutableHashSet<T> State => _repository.GetValues();
     }
 }

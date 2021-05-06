@@ -23,7 +23,7 @@ namespace CRDT.Application.Convergent.Set
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new P_Set<T>(existingAdds, existingRemoves);
 
                 set = set.Add(value);
 
@@ -38,7 +38,7 @@ namespace CRDT.Application.Convergent.Set
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new P_Set<T>(existingAdds, existingRemoves);
 
                 set = set.Remove(value);
 
@@ -46,16 +46,16 @@ namespace CRDT.Application.Convergent.Set
             }
         }
 
-        public void Merge(IEnumerable<T> adds, IEnumerable<T> removes)
+        public void Merge(ImmutableHashSet<T> adds, ImmutableHashSet<T> removes)
         {
             lock (_lockObject)
             {
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new P_Set<T>(existingAdds, existingRemoves);
 
-                set = set.Merge(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+                set = set.Merge(adds, removes);
 
                 _repository.PersistAdds(set.Adds);
                 _repository.PersistRemoves(set.Removes);
@@ -67,13 +67,13 @@ namespace CRDT.Application.Convergent.Set
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new P_Set<T>(existingAdds, existingRemoves);
 
             var lookup = set.Lookup(value);
 
             return lookup;
         }
 
-        public (IEnumerable<T>, IEnumerable<T>) State => (_repository.GetAdds(), _repository.GetRemoves());
+        public (ImmutableHashSet<T>, ImmutableHashSet<T>) State => (_repository.GetAdds(), _repository.GetRemoves());
     }
 }

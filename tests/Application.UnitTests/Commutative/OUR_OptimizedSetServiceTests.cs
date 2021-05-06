@@ -16,11 +16,12 @@ namespace CRDT.Application.UnitTests.Commutative
     {
         private readonly IOUR_OptimizedSetRepository<TestType> _repository;
         private readonly OUR_OptimizedSetService<TestType> _ourSetService;
-
+        private readonly TestTypeBuilder _builder;
         public OUR_OptimizedSetServiceTests()
         {
             _repository = new OUR_OptimizedSetRepository();
             _ourSetService = new OUR_OptimizedSetService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -169,7 +170,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             _ourSetService.Add(value, tag, timestamp);
 
-            var newValue = Build(value.Id);
+            var newValue = _builder.Build(value.Id);
             _ourSetService.Update(newValue, tag, timestamp + 3);
 
             var lookup = _ourSetService.Lookup(newValue);
@@ -182,7 +183,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             _ourSetService.Add(value, tag, timestamp);
 
-            var newValue = Build(value.Id);
+            var newValue = _builder.Build(value.Id);
             _ourSetService.Update(newValue, tag, timestamp + 3);
 
             var lookup = _ourSetService.Lookup(value);

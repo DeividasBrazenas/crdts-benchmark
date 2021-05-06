@@ -14,6 +14,13 @@ namespace CRDT.Sets.UnitTests.Commutative
 {
     public class OUR_SetWithVCTests
     {
+        private readonly TestTypeBuilder _builder;
+
+        public OUR_SetWithVCTests()
+        {
+            _builder = new TestTypeBuilder(new Random());
+        }
+
         [Theory]
         [AutoData]
         public void Create_CreatesSetWithElements(OUR_SetWithVCElement<TestType> one, OUR_SetWithVCElement<TestType> two,
@@ -75,7 +82,7 @@ namespace CRDT.Sets.UnitTests.Commutative
 
             var ourSet = new OUR_SetWithVC<TestType>();
 
-            var newValue = Build(value.Id);
+            var newValue = _builder.Build(value.Id);
             var newElement = new OUR_SetWithVCElement<TestType>(newValue, tag, new VectorClock(clock.Add(node, 1)));
 
             ourSet = ourSet.Add(value, tag, new VectorClock(clock.Add(node, 0)));
@@ -207,7 +214,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             ourSet = ourSet.Add(value, tag, new VectorClock(clock.Add(node, 0)));
             ourSet = ourSet.Remove(value, tag, new VectorClock(clock.Add(node, 1)));
 
-            var newValue = Build(value.Id);
+            var newValue = _builder.Build(value.Id);
 
             ourSet = ourSet.Update(newValue, tag, new VectorClock(clock.Add(node, 1)));
 

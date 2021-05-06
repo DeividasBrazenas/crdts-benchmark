@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using CRDT.Core.Abstractions;
 
 namespace CRDT.Application.Interfaces
 {
     public interface IP_SetRepository<T> where T : DistributedEntity
     {
-        IEnumerable<T> GetAdds();
+        ImmutableHashSet<T> GetAdds();
 
-        IEnumerable<T> GetRemoves();
+        ImmutableHashSet<T> GetRemoves();
 
-        void PersistAdds(IEnumerable<T> values);
+        void PersistAdds(ImmutableHashSet<T> values);
 
-        void PersistRemoves(IEnumerable<T> values);
+        void PersistRemoves(ImmutableHashSet<T> values);
     }
 }

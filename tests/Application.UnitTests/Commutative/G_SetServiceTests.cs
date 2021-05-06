@@ -16,11 +16,13 @@ namespace CRDT.Application.UnitTests.Commutative
     {
         private readonly IG_SetRepository<TestType> _repository;
         private readonly G_SetService<TestType> _gSetService;
+        private readonly TestTypeBuilder _builder;
 
         public G_SetServiceTests()
         {
             _repository = new G_SetRepository();
             _gSetService = new G_SetService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -35,9 +37,9 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementsToTheRepository(ImmutableHashSet<TestType> existingValues, TestType value)
+        public void Add_WithExistingValues_AddsElementsToTheRepository(HashSet<TestType> existingValues, TestType value)
         {
-            _repository.PersistValues(existingValues);
+            _repository.PersistValues(existingValues.ToImmutableHashSet());
 
             _gSetService.DownstreamAdd(value);
 
@@ -47,9 +49,9 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_IsIdempotent(ImmutableHashSet<TestType> existingValues, TestType value)
+        public void Add_IsIdempotent(HashSet<TestType> existingValues, TestType value)
         {
-            _repository.PersistValues(existingValues);
+            _repository.PersistValues(existingValues.ToImmutableHashSet());
 
             _gSetService.DownstreamAdd(value);
             _gSetService.DownstreamAdd(value);
@@ -61,9 +63,9 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_ReturnsTrue(ImmutableHashSet<TestType> existingValues, TestType value)
+        public void Lookup_ReturnsTrue(HashSet<TestType> existingValues, TestType value)
         {
-            _repository.PersistValues(existingValues);
+            _repository.PersistValues(existingValues.ToImmutableHashSet());
 
             _gSetService.DownstreamAdd(value);
 
@@ -74,9 +76,9 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_ReturnsFalse(ImmutableHashSet<TestType> existingValues, TestType value)
+        public void Lookup_ReturnsFalse(HashSet<TestType> existingValues, TestType value)
         {
-            _repository.PersistValues(existingValues);
+            _repository.PersistValues(existingValues.ToImmutableHashSet());
 
             var lookup = _gSetService.Lookup(value);
 
@@ -90,7 +92,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var commutativeReplicas = CreateCommutativeReplicas(nodes);
             var objectsCount = 1000;
             var random = new Random();
-            var objects = TestTypeBuilder.Build(Guid.NewGuid(), objectsCount);
+            var objects = _builder.Build(Guid.NewGuid(), objectsCount);
             TestType value;
 
             foreach (var replica in commutativeReplicas)

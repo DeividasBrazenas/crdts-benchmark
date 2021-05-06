@@ -19,11 +19,12 @@ namespace CRDT.Application.UnitTests.Convergent
     {
         private readonly IOUR_OptimizedSetWithVCRepository<TestType> _repository;
         private readonly OUR_OptimizedSetWithVCService<TestType> _ourSetService;
-
+        private readonly TestTypeBuilder _builder;
         public OUR_OptimizedSetWithVCServiceTests()
         {
             _repository = new OUR_OptimizedSetWithVCRepository();
             _ourSetService = new OUR_OptimizedSetWithVCService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -59,7 +60,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _repository.PersistElements(new List<OUR_OptimizedSetWithVCElement<TestType>> { element });
 
-            var newElement = new OUR_OptimizedSetWithVCElement<TestType>(Build(value.Id), tag, new VectorClock(clock.Add(node, 1)), false);
+            var newElement = new OUR_OptimizedSetWithVCElement<TestType>(_builder.Build(value.Id), tag, new VectorClock(clock.Add(node, 1)), false);
 
             _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { newElement });
 
@@ -78,7 +79,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _repository.PersistElements(new List<OUR_OptimizedSetWithVCElement<TestType>> { element });
 
-            var newElement = new OUR_OptimizedSetWithVCElement<TestType>(Build(value.Id), tag, new VectorClock(clock.Add(node, 0)), false);
+            var newElement = new OUR_OptimizedSetWithVCElement<TestType>(_builder.Build(value.Id), tag, new VectorClock(clock.Add(node, 0)), false);
 
             _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { newElement });
 
@@ -139,11 +140,11 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            var firstElement = new OUR_OptimizedSetWithVCElement<TestType>(Build(), firstTag, new VectorClock(clock.Add(node, 0)), false);
-            var secondElement = new OUR_OptimizedSetWithVCElement<TestType>(Build(), secondTag, new VectorClock(clock.Add(node, 0)), false);
-            var thirdElement = new OUR_OptimizedSetWithVCElement<TestType>(Build(), secondTag, new VectorClock(clock.Add(node, 0)), false);
-            var fourthElement = new OUR_OptimizedSetWithVCElement<TestType>(Build(), firstTag, new VectorClock(clock.Add(node, 0)), false);
-            var fifthElement = new OUR_OptimizedSetWithVCElement<TestType>(Build(), firstTag, new VectorClock(clock.Add(node, 0)), false);
+            var firstElement = new OUR_OptimizedSetWithVCElement<TestType>(_builder.Build(), firstTag, new VectorClock(clock.Add(node, 0)), false);
+            var secondElement = new OUR_OptimizedSetWithVCElement<TestType>(_builder.Build(), secondTag, new VectorClock(clock.Add(node, 0)), false);
+            var thirdElement = new OUR_OptimizedSetWithVCElement<TestType>(_builder.Build(), secondTag, new VectorClock(clock.Add(node, 0)), false);
+            var fourthElement = new OUR_OptimizedSetWithVCElement<TestType>(_builder.Build(), firstTag, new VectorClock(clock.Add(node, 0)), false);
+            var fifthElement = new OUR_OptimizedSetWithVCElement<TestType>(_builder.Build(), firstTag, new VectorClock(clock.Add(node, 0)), false);
 
             var firstRepository = new OUR_OptimizedSetWithVCRepository();
             var firstService = new OUR_OptimizedSetWithVCService<TestType>(firstRepository);

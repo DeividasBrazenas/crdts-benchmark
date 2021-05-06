@@ -16,11 +16,13 @@ namespace CRDT.Application.UnitTests.Convergent
     {
         private readonly IOUR_OptimizedSetRepository<TestType> _repository;
         private readonly OUR_OptimizedSetService<TestType> _ourSetService;
+        private readonly TestTypeBuilder _builder;
 
         public OUR_OptimizedSetServiceTests()
         {
             _repository = new OUR_OptimizedSetRepository();
             _ourSetService = new OUR_OptimizedSetService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -52,7 +54,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _repository.PersistElements(new List<OUR_OptimizedSetElement<TestType>> { element });
 
-            var newElement = new OUR_OptimizedSetElement<TestType>(Build(value.Id), tag, timestamp + 1, false);
+            var newElement = new OUR_OptimizedSetElement<TestType>(_builder.Build(value.Id), tag, timestamp + 1, false);
 
             _ourSetService.Merge(new List<OUR_OptimizedSetElement<TestType>> { newElement });
 
@@ -69,7 +71,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _repository.PersistElements(new List<OUR_OptimizedSetElement<TestType>> { element });
 
-            var newElement = new OUR_OptimizedSetElement<TestType>(Build(value.Id), tag, timestamp - 1, false);
+            var newElement = new OUR_OptimizedSetElement<TestType>(_builder.Build(value.Id), tag, timestamp - 1, false);
 
             _ourSetService.Merge(new List<OUR_OptimizedSetElement<TestType>> { newElement });
 
@@ -124,11 +126,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeAdds_IsCommutative(Guid firstTag, Guid secondTag, long timestamp)
         {
-            var firstElement = new OUR_OptimizedSetElement<TestType>(Build(), firstTag, timestamp, false);
-            var secondElement = new OUR_OptimizedSetElement<TestType>(Build(), secondTag, timestamp, false);
-            var thirdElement = new OUR_OptimizedSetElement<TestType>(Build(), secondTag, timestamp, false);
-            var fourthElement = new OUR_OptimizedSetElement<TestType>(Build(), firstTag, timestamp, false);
-            var fifthElement = new OUR_OptimizedSetElement<TestType>(Build(), firstTag, timestamp, false);
+            var firstElement = new OUR_OptimizedSetElement<TestType>(_builder.Build(), firstTag, timestamp, false);
+            var secondElement = new OUR_OptimizedSetElement<TestType>(_builder.Build(), secondTag, timestamp, false);
+            var thirdElement = new OUR_OptimizedSetElement<TestType>(_builder.Build(), secondTag, timestamp, false);
+            var fourthElement = new OUR_OptimizedSetElement<TestType>(_builder.Build(), firstTag, timestamp, false);
+            var fifthElement = new OUR_OptimizedSetElement<TestType>(_builder.Build(), firstTag, timestamp, false);
 
             var firstRepository = new OUR_OptimizedSetRepository();
             var firstService = new OUR_OptimizedSetService<TestType>(firstRepository);

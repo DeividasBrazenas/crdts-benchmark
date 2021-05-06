@@ -30,13 +30,7 @@ namespace CRDT.Sets.Convergent.TwoPhase
 
         public P_Set<T> Merge(ImmutableHashSet<T> adds, ImmutableHashSet<T> removes)
         {
-            var addsUnion = Adds.Union(adds);
-
-            var removesUnion = Removes.Union(removes);
-
-            var validRemoves = removesUnion.Where(r => addsUnion.Any(a => Equals(a, r)));
-
-            return new(addsUnion.ToImmutableHashSet(), validRemoves.ToImmutableHashSet());
+            return new(Adds.Union(adds), Removes.Union(removes));
         } 
     }
 }

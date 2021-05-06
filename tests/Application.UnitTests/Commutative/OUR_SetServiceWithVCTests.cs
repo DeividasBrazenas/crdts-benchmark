@@ -19,11 +19,13 @@ namespace CRDT.Application.UnitTests.Commutative
     {
         private readonly IOUR_SetWithVCRepository<TestType> _repository;
         private readonly OUR_SetWithVCService<TestType> _ourSetService;
+        private readonly TestTypeBuilder _builder;
 
         public OUR_SetWithVCServiceTests()
         {
             _repository = new OUR_SetWithVCRepository();
             _ourSetService = new OUR_SetWithVCService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -194,7 +196,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _ourSetService.Add(value, tag, new VectorClock(clock.Add(node, 0)));
 
-            var newValue = Build(value.Id);
+            var newValue = _builder.Build(value.Id);
             _ourSetService.Update(newValue, tag, new VectorClock(clock.Add(node, 3)));
 
             var lookup = _ourSetService.Lookup(newValue);
@@ -209,7 +211,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _ourSetService.Add(value, tag, new VectorClock(clock.Add(node, 0)));
 
-            var newValue = Build(value.Id);
+            var newValue = _builder.Build(value.Id);
             _ourSetService.Update(newValue, tag, new VectorClock(clock.Add(node, 3)));
 
             var lookup = _ourSetService.Lookup(value);

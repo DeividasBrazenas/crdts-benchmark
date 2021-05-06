@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
@@ -188,7 +189,7 @@ namespace Benchmarks.Sets
             return dictionary;
         }
 
-        private void ConvergentDownstreamMerge(Guid senderId, IEnumerable<TestType> adds, IEnumerable<TestType> removes)
+        private void ConvergentDownstreamMerge(Guid senderId, ImmutableHashSet<TestType> adds, ImmutableHashSet<TestType> removes)
         {
             var downstreamReplicas = _convergentReplicas.Where(r => r.Key.Id != senderId);
 

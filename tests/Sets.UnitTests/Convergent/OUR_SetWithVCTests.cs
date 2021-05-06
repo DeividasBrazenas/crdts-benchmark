@@ -95,7 +95,7 @@ namespace CRDT.Sets.UnitTests.Convergent
             ourSet = ourSet.Merge(new[] { new OUR_SetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0))) }.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
             ourSet = ourSet.Merge(ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty, new[] { new OUR_SetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 1))) }.ToImmutableHashSet());
 
-            var newValue = Build(value.Id);
+            var newValue = new TestTypeBuilder(new Random()).Build(value.Id);
 
             ourSet = ourSet.Merge(new[] { new OUR_SetWithVCElement<TestType>(newValue, tag, new VectorClock(clock.Add(node, 2))) }.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
 

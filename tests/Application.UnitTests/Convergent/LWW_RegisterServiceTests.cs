@@ -16,11 +16,13 @@ namespace CRDT.Application.UnitTests.Convergent
     {
         private readonly LWW_RegisterService<TestType> _service;
         private readonly ILWW_RegisterRepository<TestType> _repository;
+        private readonly TestTypeBuilder _builder;
 
         public LWW_RegisterServiceTests()
         {
             _repository = new LWW_RegisterRepository();
             _service = new LWW_RegisterService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -58,8 +60,8 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Assign_DifferentValueExistsWithLowerTimestamp_ReplacesEntity(Guid id, long timestamp)
         {
-            var value = TestTypeBuilder.Build(id);
-            var newValue = TestTypeBuilder.Build(id);
+            var value = _builder.Build(id);
+            var newValue = _builder.Build(id);
 
             _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp));
 
@@ -73,8 +75,8 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Assign_DifferentValueExistsWithHigherTimestamp_DoesNotDoAnything(Guid id, long timestamp)
         {
-            var value = TestTypeBuilder.Build(id);
-            var newValue = TestTypeBuilder.Build(id);
+            var value = _builder.Build(id);
+            var newValue = _builder.Build(id);
 
             _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp + 100));
 
@@ -109,7 +111,7 @@ namespace CRDT.Application.UnitTests.Convergent
             var nodes = CreateNodes(3);
             var convergentReplicas = CreateConvergentReplicas(nodes);
 
-            var initialValue = TestTypeBuilder.Build();
+            var initialValue = _builder.Build();
             var valueId = initialValue.Id;
 
             long ts = 0;

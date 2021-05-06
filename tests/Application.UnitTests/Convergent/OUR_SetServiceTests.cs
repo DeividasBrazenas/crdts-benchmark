@@ -16,11 +16,13 @@ namespace CRDT.Application.UnitTests.Convergent
     {
         private readonly IOUR_SetRepository<TestType> _repository;
         private readonly OUR_SetService<TestType> _orSetService;
+        private readonly TestTypeBuilder _builder;
 
         public OUR_SetServiceTests()
         {
             _repository = new OUR_SetRepository();
             _orSetService = new OUR_SetService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -52,7 +54,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _repository.PersistAdds(new List<OUR_SetElement<TestType>> { element });
 
-            var newElement = new OUR_SetElement<TestType>(Build(value.Id), tag, timestamp + 1);
+            var newElement = new OUR_SetElement<TestType>(_builder.Build(value.Id), tag, timestamp + 1);
 
             _orSetService.Merge(new List<OUR_SetElement<TestType>> { newElement }, new List<OUR_SetElement<TestType>>());
 
@@ -69,7 +71,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _repository.PersistAdds(new List<OUR_SetElement<TestType>> { element });
 
-            var newElement = new OUR_SetElement<TestType>(Build(value.Id), tag, timestamp - 1);
+            var newElement = new OUR_SetElement<TestType>(_builder.Build(value.Id), tag, timestamp - 1);
 
             _orSetService.Merge(new List<OUR_SetElement<TestType>> { newElement }, new List<OUR_SetElement<TestType>>());
 
@@ -124,11 +126,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeAdds_IsCommutative(Guid firstTag, Guid secondTag, long timestamp)
         {
-            var firstElement = new OUR_SetElement<TestType>(Build(), firstTag, timestamp);
-            var secondElement = new OUR_SetElement<TestType>(Build(), secondTag, timestamp);
-            var thirdElement = new OUR_SetElement<TestType>(Build(), secondTag, timestamp);
-            var fourthElement = new OUR_SetElement<TestType>(Build(), firstTag, timestamp);
-            var fifthElement = new OUR_SetElement<TestType>(Build(), firstTag, timestamp);
+            var firstElement = new OUR_SetElement<TestType>(_builder.Build(), firstTag, timestamp);
+            var secondElement = new OUR_SetElement<TestType>(_builder.Build(), secondTag, timestamp);
+            var thirdElement = new OUR_SetElement<TestType>(_builder.Build(), secondTag, timestamp);
+            var fourthElement = new OUR_SetElement<TestType>(_builder.Build(), firstTag, timestamp);
+            var fifthElement = new OUR_SetElement<TestType>(_builder.Build(), firstTag, timestamp);
 
             var firstRepository = new OUR_SetRepository();
             var firstService = new OUR_SetService<TestType>(firstRepository);
@@ -228,11 +230,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeRemoves_IsCommutative(Guid firstTag, Guid secondTag, long timestamp)
         {
-            var firstElement = new OUR_SetElement<TestType>(Build(), firstTag, timestamp);
-            var secondElement = new OUR_SetElement<TestType>(Build(), secondTag, timestamp);
-            var thirdElement = new OUR_SetElement<TestType>(Build(), secondTag, timestamp);
-            var fourthElement = new OUR_SetElement<TestType>(Build(), firstTag, timestamp);
-            var fifthElement = new OUR_SetElement<TestType>(Build(), firstTag, timestamp);
+            var firstElement = new OUR_SetElement<TestType>(_builder.Build(), firstTag, timestamp);
+            var secondElement = new OUR_SetElement<TestType>(_builder.Build(), secondTag, timestamp);
+            var thirdElement = new OUR_SetElement<TestType>(_builder.Build(), secondTag, timestamp);
+            var fourthElement = new OUR_SetElement<TestType>(_builder.Build(), firstTag, timestamp);
+            var fifthElement = new OUR_SetElement<TestType>(_builder.Build(), firstTag, timestamp);
 
             var firstRepository = new OUR_SetRepository();
             var firstService = new OUR_SetService<TestType>(firstRepository);

@@ -19,11 +19,12 @@ namespace CRDT.Application.UnitTests.Convergent
     {
         private readonly IOUR_SetWithVCRepository<TestType> _repository;
         private readonly OUR_SetWithVCService<TestType> _orSetService;
-
+        private readonly TestTypeBuilder _builder;
         public OUR_SetWithVCServiceTests()
         {
             _repository = new OUR_SetWithVCRepository();
             _orSetService = new OUR_SetWithVCService<TestType>(_repository);
+            _builder = new TestTypeBuilder(new Random());
         }
 
         [Theory]
@@ -59,7 +60,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { element });
 
-            var newElement = new OUR_SetWithVCElement<TestType>(Build(value.Id), tag, new VectorClock(clock.Add(node, 1)));
+            var newElement = new OUR_SetWithVCElement<TestType>(_builder.Build(value.Id), tag, new VectorClock(clock.Add(node, 1)));
 
             _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { newElement }, new List<OUR_SetWithVCElement<TestType>>());
 
@@ -78,7 +79,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { element });
 
-            var newElement = new OUR_SetWithVCElement<TestType>(Build(value.Id), tag, new VectorClock(clock.Add(node, 0)));
+            var newElement = new OUR_SetWithVCElement<TestType>(_builder.Build(value.Id), tag, new VectorClock(clock.Add(node, 0)));
 
             _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { newElement }, new List<OUR_SetWithVCElement<TestType>>());
 
@@ -139,11 +140,11 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            var firstElement = new OUR_SetWithVCElement<TestType>(Build(), firstTag, new VectorClock(clock.Add(node, 0)));
-            var secondElement = new OUR_SetWithVCElement<TestType>(Build(), secondTag, new VectorClock(clock.Add(node, 0)));
-            var thirdElement = new OUR_SetWithVCElement<TestType>(Build(), secondTag, new VectorClock(clock.Add(node, 0)));
-            var fourthElement = new OUR_SetWithVCElement<TestType>(Build(), firstTag, new VectorClock(clock.Add(node, 0)));
-            var fifthElement = new OUR_SetWithVCElement<TestType>(Build(), firstTag, new VectorClock(clock.Add(node, 0)));
+            var firstElement = new OUR_SetWithVCElement<TestType>(_builder.Build(), firstTag, new VectorClock(clock.Add(node, 0)));
+            var secondElement = new OUR_SetWithVCElement<TestType>(_builder.Build(), secondTag, new VectorClock(clock.Add(node, 0)));
+            var thirdElement = new OUR_SetWithVCElement<TestType>(_builder.Build(), secondTag, new VectorClock(clock.Add(node, 0)));
+            var fourthElement = new OUR_SetWithVCElement<TestType>(_builder.Build(), firstTag, new VectorClock(clock.Add(node, 0)));
+            var fifthElement = new OUR_SetWithVCElement<TestType>(_builder.Build(), firstTag, new VectorClock(clock.Add(node, 0)));
 
             var firstRepository = new OUR_SetWithVCRepository();
             var firstService = new OUR_SetWithVCService<TestType>(firstRepository);
@@ -245,11 +246,11 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            var firstElement = new OUR_SetWithVCElement<TestType>(Build(), firstTag, new VectorClock(clock.Add(node, 0)));
-            var secondElement = new OUR_SetWithVCElement<TestType>(Build(), secondTag, new VectorClock(clock.Add(node, 0)));
-            var thirdElement = new OUR_SetWithVCElement<TestType>(Build(), secondTag, new VectorClock(clock.Add(node, 0)));
-            var fourthElement = new OUR_SetWithVCElement<TestType>(Build(), firstTag, new VectorClock(clock.Add(node, 0)));
-            var fifthElement = new OUR_SetWithVCElement<TestType>(Build(), firstTag, new VectorClock(clock.Add(node, 0)));
+            var firstElement = new OUR_SetWithVCElement<TestType>(_builder.Build(), firstTag, new VectorClock(clock.Add(node, 0)));
+            var secondElement = new OUR_SetWithVCElement<TestType>(_builder.Build(), secondTag, new VectorClock(clock.Add(node, 0)));
+            var thirdElement = new OUR_SetWithVCElement<TestType>(_builder.Build(), secondTag, new VectorClock(clock.Add(node, 0)));
+            var fourthElement = new OUR_SetWithVCElement<TestType>(_builder.Build(), firstTag, new VectorClock(clock.Add(node, 0)));
+            var fifthElement = new OUR_SetWithVCElement<TestType>(_builder.Build(), firstTag, new VectorClock(clock.Add(node, 0)));
 
             var firstRepository = new OUR_SetWithVCRepository();
             var firstService = new OUR_SetWithVCService<TestType>(firstRepository);

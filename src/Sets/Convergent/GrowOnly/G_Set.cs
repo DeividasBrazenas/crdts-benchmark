@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
 
@@ -18,9 +19,7 @@ namespace CRDT.Sets.Convergent.GrowOnly
 
         public G_Set<T> Merge(ImmutableHashSet<T> values)
         {
-            Values.ToBuilder().UnionWith(values);
-
-            return new(Values);
+            return new(Values.Union(values));
         }
     }
 }
