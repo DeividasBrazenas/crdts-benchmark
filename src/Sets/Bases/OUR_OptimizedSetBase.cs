@@ -7,19 +7,19 @@ namespace CRDT.Sets.Bases
 {
     public abstract class OUR_OptimizedSetBase<T> where T : DistributedEntity
     {
-        public IImmutableSet<OUR_OptimizedSetElement<T>> Elements { get; protected set; }
+        public ImmutableHashSet<OUR_OptimizedSetElement<T>> Elements { get; protected set; }
 
         protected OUR_OptimizedSetBase()
         {
             Elements = ImmutableHashSet<OUR_OptimizedSetElement<T>>.Empty;
         }
 
-        protected OUR_OptimizedSetBase(IImmutableSet<OUR_OptimizedSetElement<T>> elements)
+        protected OUR_OptimizedSetBase(ImmutableHashSet<OUR_OptimizedSetElement<T>> elements)
         {
             Elements = elements;
         }
 
-        public IImmutableSet<T> Values =>
+        public ImmutableHashSet<T> Values =>
             Elements
                 .Where(e => !e.Removed)
                 .Select(e => e.Value)

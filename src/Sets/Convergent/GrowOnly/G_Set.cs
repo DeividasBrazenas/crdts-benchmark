@@ -10,12 +10,17 @@ namespace CRDT.Sets.Convergent.GrowOnly
         {
         }
 
-        public G_Set(IImmutableSet<T> values) : base(values)
+        public G_Set(ImmutableHashSet<T> values) : base(values)
         {
         }
 
         public G_Set<T> Add(T value) => new(Values.Add(value));
 
-        public G_Set<T> Merge(IImmutableSet<T> values) => new(Values.Union(values));
+        public G_Set<T> Merge(ImmutableHashSet<T> values)
+        {
+            Values.ToBuilder().UnionWith(values);
+
+            return new(Values);
+        }
     }
 }

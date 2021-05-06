@@ -7,14 +7,14 @@ namespace CRDT.Sets.Bases
 {
     public abstract class LWW_OptimizedSetBase<T> where T : DistributedEntity
     {
-        public IImmutableSet<LWW_OptimizedSetElement<T>> Elements { get; protected set; }
+        public ImmutableHashSet<LWW_OptimizedSetElement<T>> Elements { get; protected set; }
 
         protected LWW_OptimizedSetBase()
         {
             Elements = ImmutableHashSet<LWW_OptimizedSetElement<T>>.Empty;
         }
 
-        protected LWW_OptimizedSetBase(IImmutableSet<LWW_OptimizedSetElement<T>> elements)
+        protected LWW_OptimizedSetBase(ImmutableHashSet<LWW_OptimizedSetElement<T>> elements)
         {
             Elements = elements;
         }

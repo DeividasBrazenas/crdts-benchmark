@@ -12,7 +12,7 @@ namespace CRDT.Sets.Commutative.TwoPhase
         {
         }
 
-        public P_Set(IImmutableSet<T> adds, IImmutableSet<T> removes) : base(adds, removes)
+        public P_Set(ImmutableHashSet<T> adds, ImmutableHashSet<T> removes) : base(adds, removes)
         {
         }
 

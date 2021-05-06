@@ -7,9 +7,9 @@ namespace CRDT.Counters.Bases
 {
     public abstract class G_CounterBase : ValueObject
     {
-        public IImmutableSet<CounterElement> Elements;
+        public ImmutableHashSet<CounterElement> Elements;
 
-        protected G_CounterBase(IImmutableSet<CounterElement> elements)
+        protected G_CounterBase(ImmutableHashSet<CounterElement> elements)
         {
             Elements = elements;
         }

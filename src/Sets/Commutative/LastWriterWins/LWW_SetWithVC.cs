@@ -13,7 +13,7 @@ namespace CRDT.Sets.Commutative.LastWriterWins
         {
         }
 
-        public LWW_SetWithVC(IImmutableSet<LWW_SetWithVCElement<T>> adds, IImmutableSet<LWW_SetWithVCElement<T>> removes) 
+        public LWW_SetWithVC(ImmutableHashSet<LWW_SetWithVCElement<T>> adds, ImmutableHashSet<LWW_SetWithVCElement<T>> removes) 
             : base(adds, removes)
         {
         }
@@ -43,7 +43,7 @@ namespace CRDT.Sets.Commutative.LastWriterWins
             {
                 var element = Removes.FirstOrDefault(r => r.Value.Id == value.Id);
 
-                IImmutableSet<LWW_SetWithVCElement<T>> elements = Removes;
+                ImmutableHashSet<LWW_SetWithVCElement<T>> elements = Removes;
 
                 if (element is not null)
                 {

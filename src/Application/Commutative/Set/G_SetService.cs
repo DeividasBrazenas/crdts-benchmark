@@ -22,7 +22,7 @@ namespace CRDT.Application.Commutative.Set
             {
                 var existingEntities = _repository.GetValues();
 
-                var set = new G_Set<T>(existingEntities.ToImmutableHashSet());
+                var set = new G_Set<T>(existingEntities);
 
                 set = set.Add(value);
 
@@ -36,7 +36,7 @@ namespace CRDT.Application.Commutative.Set
             {
                 var existingEntities = _repository.GetValues();
 
-                var set = new G_Set<T>(existingEntities.ToImmutableHashSet());
+                var set = new G_Set<T>(existingEntities);
 
                 set = set.Add(value);
 
@@ -48,7 +48,7 @@ namespace CRDT.Application.Commutative.Set
         {
             var existingEntities = _repository.GetValues();
 
-            var set = new G_Set<T>(existingEntities.ToImmutableHashSet());
+            var set = new G_Set<T>(existingEntities);
 
             var lookup = set.Lookup(value);
 

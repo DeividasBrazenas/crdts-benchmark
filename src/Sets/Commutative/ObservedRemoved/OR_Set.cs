@@ -13,7 +13,7 @@ namespace CRDT.Sets.Commutative.ObservedRemoved
         {
         }
 
-        public OR_Set(IImmutableSet<OR_SetElement<T>> adds, IImmutableSet<OR_SetElement<T>> removes)
+        public OR_Set(ImmutableHashSet<OR_SetElement<T>> adds, ImmutableHashSet<OR_SetElement<T>> removes)
             : base(adds, removes)
         {
         }

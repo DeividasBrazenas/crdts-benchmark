@@ -11,12 +11,12 @@ namespace CRDT.Sets.Convergent.LastWriterWins
         public LWW_SetWithVC()
         {
         }
-        public LWW_SetWithVC(IImmutableSet<LWW_SetWithVCElement<T>> adds, IImmutableSet<LWW_SetWithVCElement<T>> removes)
+        public LWW_SetWithVC(ImmutableHashSet<LWW_SetWithVCElement<T>> adds, ImmutableHashSet<LWW_SetWithVCElement<T>> removes)
             : base(adds, removes)
         {
         }
 
-        public LWW_SetWithVC<T> Merge(IImmutableSet<LWW_SetWithVCElement<T>> adds, IImmutableSet<LWW_SetWithVCElement<T>> removes)
+        public LWW_SetWithVC<T> Merge(ImmutableHashSet<LWW_SetWithVCElement<T>> adds, ImmutableHashSet<LWW_SetWithVCElement<T>> removes)
         {
             var addsUnion = Adds.Union(adds);
             var removesUnion = Removes.Union(removes);

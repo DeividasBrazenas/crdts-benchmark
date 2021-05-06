@@ -9,7 +9,7 @@ namespace CRDT.Counters.Commutative.GrowOnly
 {
     public class G_Counter : G_CounterBase
     {
-        public G_Counter(IImmutableSet<CounterElement> elements) : base(elements)
+        public G_Counter(ImmutableHashSet<CounterElement> elements) : base(elements)
         {
         }
 

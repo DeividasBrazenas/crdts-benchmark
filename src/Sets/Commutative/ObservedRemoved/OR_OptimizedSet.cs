@@ -13,7 +13,7 @@ namespace CRDT.Sets.Commutative.ObservedRemoved
         {
         }
 
-        public OR_OptimizedSet(IImmutableSet<OR_OptimizedSetElement<T>> elements)
+        public OR_OptimizedSet(ImmutableHashSet<OR_OptimizedSetElement<T>> elements)
             : base(elements)
         {
         }

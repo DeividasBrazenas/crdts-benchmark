@@ -7,9 +7,9 @@ namespace CRDT.Sets.Bases
 {
     public abstract class LWW_SetWithVCBase<T> where T : DistributedEntity
     {
-        public IImmutableSet<LWW_SetWithVCElement<T>> Adds { get; protected set; }
+        public ImmutableHashSet<LWW_SetWithVCElement<T>> Adds { get; protected set; }
 
-        public IImmutableSet<LWW_SetWithVCElement<T>> Removes { get; protected set; }
+        public ImmutableHashSet<LWW_SetWithVCElement<T>> Removes { get; protected set; }
 
         protected LWW_SetWithVCBase()
         {
@@ -17,8 +17,8 @@ namespace CRDT.Sets.Bases
             Removes = ImmutableHashSet<LWW_SetWithVCElement<T>>.Empty;
         }
 
-        protected LWW_SetWithVCBase(IImmutableSet<LWW_SetWithVCElement<T>> adds, 
-            IImmutableSet<LWW_SetWithVCElement<T>> removes)
+        protected LWW_SetWithVCBase(ImmutableHashSet<LWW_SetWithVCElement<T>> adds, 
+            ImmutableHashSet<LWW_SetWithVCElement<T>> removes)
         {
             Adds = adds;
             Removes = removes;

@@ -13,7 +13,7 @@ namespace CRDT.Sets.Commutative.LastWriterWins
         {
         }
 
-        public LWW_OptimizedSetWithVC(IImmutableSet<LWW_OptimizedSetWithVCElement<T>> elements)
+        public LWW_OptimizedSetWithVC(ImmutableHashSet<LWW_OptimizedSetWithVCElement<T>> elements)
             : base(elements)
         {
         }

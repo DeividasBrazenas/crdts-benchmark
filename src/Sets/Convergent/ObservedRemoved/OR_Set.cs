@@ -12,12 +12,12 @@ namespace CRDT.Sets.Convergent.ObservedRemoved
         {
         }
 
-        public OR_Set(IImmutableSet<OR_SetElement<T>> adds, IImmutableSet<OR_SetElement<T>> removes)
+        public OR_Set(ImmutableHashSet<OR_SetElement<T>> adds, ImmutableHashSet<OR_SetElement<T>> removes)
             : base(adds, removes)
         {
         }
 
-        public OR_Set<T> Merge(IImmutableSet<OR_SetElement<T>> adds, IImmutableSet<OR_SetElement<T>> removes)
+        public OR_Set<T> Merge(ImmutableHashSet<OR_SetElement<T>> adds, ImmutableHashSet<OR_SetElement<T>> removes)
         {
             var addsUnion = Adds.Union(adds);
 

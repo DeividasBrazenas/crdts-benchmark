@@ -10,7 +10,7 @@ namespace CRDT.Sets.Commutative.GrowOnly
         {
         }
 
-        public G_Set(IImmutableSet<T> values) : base(values)
+        public G_Set(ImmutableHashSet<T> values) : base(values)
         {
         }
 

@@ -7,11 +7,11 @@ namespace CRDT.Counters.Bases
 {
     public abstract class PN_CounterBase : ValueObject
     {
-        public IImmutableSet<CounterElement> Additions;
+        public ImmutableHashSet<CounterElement> Additions;
 
-        public IImmutableSet<CounterElement> Subtractions;
+        public ImmutableHashSet<CounterElement> Subtractions;
 
-        protected PN_CounterBase(IImmutableSet<CounterElement> additions, IImmutableSet<CounterElement> subtractions)
+        protected PN_CounterBase(ImmutableHashSet<CounterElement> additions, ImmutableHashSet<CounterElement> subtractions)
         {
             Additions = additions;
             Subtractions = subtractions;

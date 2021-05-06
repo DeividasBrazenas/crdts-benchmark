@@ -22,7 +22,7 @@ namespace Benchmarks.Registers
         private int _objectsCount;
         private Random _random;
 
-        [GlobalSetup]
+        [IterationSetup]
         public void Setup()
         {
             _nodes = CreateNodes(3);

@@ -7,14 +7,14 @@ namespace CRDT.Sets.Bases
 {
     public abstract class U_SetBase<T> where T : DistributedEntity
     {
-        public IImmutableSet<U_SetElement<T>> Elements { get; protected set; }
+        public ImmutableHashSet<U_SetElement<T>> Elements { get; protected set; }
 
         protected U_SetBase()
         {
             Elements = ImmutableHashSet<U_SetElement<T>>.Empty;
         }
 
-        protected U_SetBase(IImmutableSet<U_SetElement<T>> elements)
+        protected U_SetBase(ImmutableHashSet<U_SetElement<T>> elements)
         {
             Elements = elements;
         }

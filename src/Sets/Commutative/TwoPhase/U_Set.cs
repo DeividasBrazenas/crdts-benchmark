@@ -12,7 +12,7 @@ namespace CRDT.Sets.Commutative.TwoPhase
         {
         }
 
-        public U_Set(IImmutableSet<U_SetElement<T>> elements) : base(elements)
+        public U_Set(ImmutableHashSet<U_SetElement<T>> elements) : base(elements)
         {
         }
 

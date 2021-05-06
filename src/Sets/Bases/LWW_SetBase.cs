@@ -7,9 +7,9 @@ namespace CRDT.Sets.Bases
 {
     public abstract class LWW_SetBase<T> where T : DistributedEntity
     {
-        public IImmutableSet<LWW_SetElement<T>> Adds { get; protected set; }
+        public ImmutableHashSet<LWW_SetElement<T>> Adds { get; protected set; }
 
-        public IImmutableSet<LWW_SetElement<T>> Removes { get; protected set; }
+        public ImmutableHashSet<LWW_SetElement<T>> Removes { get; protected set; }
 
         protected LWW_SetBase()
         {
@@ -17,8 +17,8 @@ namespace CRDT.Sets.Bases
             Removes = ImmutableHashSet<LWW_SetElement<T>>.Empty;
         }
 
-        protected LWW_SetBase(IImmutableSet<LWW_SetElement<T>> adds, 
-            IImmutableSet<LWW_SetElement<T>> removes)
+        protected LWW_SetBase(ImmutableHashSet<LWW_SetElement<T>> adds, 
+            ImmutableHashSet<LWW_SetElement<T>> removes)
         {
             Adds = adds;
             Removes = removes;

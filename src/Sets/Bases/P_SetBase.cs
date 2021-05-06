@@ -6,9 +6,9 @@ namespace CRDT.Sets.Bases
 {
     public abstract class P_SetBase<T> where T : DistributedEntity
     {
-        public IImmutableSet<T> Adds { get; protected set; }
+        public ImmutableHashSet<T> Adds { get; protected set; }
 
-        public IImmutableSet<T> Removes { get; protected set; }
+        public ImmutableHashSet<T> Removes { get; protected set; }
 
         protected P_SetBase()
         {
@@ -16,7 +16,7 @@ namespace CRDT.Sets.Bases
             Removes = ImmutableHashSet<T>.Empty;
         }
 
-        protected P_SetBase(IImmutableSet<T> adds, IImmutableSet<T> removes)
+        protected P_SetBase(ImmutableHashSet<T> adds, ImmutableHashSet<T> removes)
         {
             Adds = adds;
             Removes = removes;

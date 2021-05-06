@@ -13,12 +13,12 @@ namespace CRDT.Sets.Convergent.LastWriterWins
         {
         }
 
-        public LWW_OptimizedSetWithVC(IImmutableSet<LWW_OptimizedSetWithVCElement<T>> elements)
+        public LWW_OptimizedSetWithVC(ImmutableHashSet<LWW_OptimizedSetWithVCElement<T>> elements)
             : base(elements)
         {
         }
 
-        public LWW_OptimizedSetWithVC<T> Merge(IImmutableSet<LWW_OptimizedSetWithVCElement<T>> elements)
+        public LWW_OptimizedSetWithVC<T> Merge(ImmutableHashSet<LWW_OptimizedSetWithVCElement<T>> elements)
         {
             var union = Elements.Union(elements);
 

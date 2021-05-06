@@ -12,7 +12,7 @@ namespace CRDT.Sets.Convergent.TwoPhase
         {
         }
 
-        public P_Set(IImmutableSet<T> adds, IImmutableSet<T> removes) : base(adds, removes)
+        public P_Set(ImmutableHashSet<T> adds, ImmutableHashSet<T> removes) : base(adds, removes)
         {
         }
 
@@ -28,7 +28,7 @@ namespace CRDT.Sets.Convergent.TwoPhase
             return this;
         }
 
-        public P_Set<T> Merge(IImmutableSet<T> adds, IImmutableSet<T> removes)
+        public P_Set<T> Merge(ImmutableHashSet<T> adds, ImmutableHashSet<T> removes)
         {
             var addsUnion = Adds.Union(adds);
 

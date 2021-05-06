@@ -9,7 +9,7 @@ namespace CRDT.Counters.Convergent.GrowOnly
 {
     public class G_Counter : G_CounterBase
     {
-        public G_Counter(IImmutableSet<CounterElement> elements) : base(elements)
+        public G_Counter(ImmutableHashSet<CounterElement> elements) : base(elements)
         {
         }
 
@@ -32,7 +32,7 @@ namespace CRDT.Counters.Convergent.GrowOnly
             return new G_Counter(elements.ToImmutableHashSet());
         }
 
-        public G_Counter Merge(IImmutableSet<CounterElement> elements)
+        public G_Counter Merge(ImmutableHashSet<CounterElement> elements)
         {
             var union = Elements.Union(elements);
             var filteredElements = union.Where(u => !union.Any(e => Equals(u.Node, e.Node) && u.Value < e.Value));

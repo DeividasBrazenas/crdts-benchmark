@@ -9,7 +9,7 @@ namespace CRDT.Counters.Commutative.PositiveNegative
 {
     public class PN_Counter : PN_CounterBase
     {
-        public PN_Counter(IImmutableSet<CounterElement> additions, IImmutableSet<CounterElement> subtractions) 
+        public PN_Counter(ImmutableHashSet<CounterElement> additions, ImmutableHashSet<CounterElement> subtractions) 
             : base(additions, subtractions)
         {
         }

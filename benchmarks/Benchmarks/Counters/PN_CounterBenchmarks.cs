@@ -18,7 +18,7 @@ namespace Benchmarks.Counters
         private Dictionary<Node, CRDT.Application.Commutative.Counter.PN_CounterService> _commutativeReplicas;
         private Dictionary<Node, CRDT.Application.Convergent.Counter.PN_CounterService> _convergentReplicas;
 
-        [GlobalSetup]
+        [IterationSetup]
         public void Setup()
         {
             _nodes = CreateNodes(3);

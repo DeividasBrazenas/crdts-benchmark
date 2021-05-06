@@ -7,9 +7,9 @@ namespace CRDT.Sets.Bases
 {
     public abstract class OR_SetBase<T> where T : DistributedEntity
     {
-        public IImmutableSet<OR_SetElement<T>> Adds { get; protected set; }
+        public ImmutableHashSet<OR_SetElement<T>> Adds { get; protected set; }
 
-        public IImmutableSet<OR_SetElement<T>> Removes { get; protected set; }
+        public ImmutableHashSet<OR_SetElement<T>> Removes { get; protected set; }
 
         protected OR_SetBase()
         {
@@ -17,13 +17,13 @@ namespace CRDT.Sets.Bases
             Removes = ImmutableHashSet<OR_SetElement<T>>.Empty;
         }
 
-        protected OR_SetBase(IImmutableSet<OR_SetElement<T>> adds, IImmutableSet<OR_SetElement<T>> removes)
+        protected OR_SetBase(ImmutableHashSet<OR_SetElement<T>> adds, ImmutableHashSet<OR_SetElement<T>> removes)
         {
             Adds = adds;
             Removes = removes;
         }
 
-        public IImmutableSet<T> Values =>
+        public ImmutableHashSet<T> Values =>
             Adds
                 .Where(a => !Removes.Any(r => Equals(r, a) && a.Tag == r.Tag))
                 .Select(e => e.Value)

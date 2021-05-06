@@ -12,12 +12,12 @@ namespace CRDT.Sets.Convergent.ObservedUpdatedRemoved
         {
         }
 
-        public OUR_OptimizedSet(IImmutableSet<OUR_OptimizedSetElement<T>> elements)
+        public OUR_OptimizedSet(ImmutableHashSet<OUR_OptimizedSetElement<T>> elements)
             : base(elements)
         {
         }
 
-        public OUR_OptimizedSet<T> Merge(IImmutableSet<OUR_OptimizedSetElement<T>> elements)
+        public OUR_OptimizedSet<T> Merge(ImmutableHashSet<OUR_OptimizedSetElement<T>> elements)
         {
             var union = Elements.Union(elements);
 

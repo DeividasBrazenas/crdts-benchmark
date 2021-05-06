@@ -14,7 +14,7 @@ namespace CRDT.Sets.Commutative.ObservedUpdatedRemoved
         {
         }
 
-        public OUR_OptimizedSetWithVC(IImmutableSet<OUR_OptimizedSetWithVCElement<T>> elements)
+        public OUR_OptimizedSetWithVC(ImmutableHashSet<OUR_OptimizedSetWithVCElement<T>> elements)
             : base(elements)
         {
         }

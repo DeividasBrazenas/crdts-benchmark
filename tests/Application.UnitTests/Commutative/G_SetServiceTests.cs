@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Commutative.Set;
@@ -34,7 +35,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementsToTheRepository(List<TestType> existingValues, TestType value)
+        public void Add_WithExistingValues_AddsElementsToTheRepository(ImmutableHashSet<TestType> existingValues, TestType value)
         {
             _repository.PersistValues(existingValues);
 
@@ -46,7 +47,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_IsIdempotent(List<TestType> existingValues, TestType value)
+        public void Add_IsIdempotent(ImmutableHashSet<TestType> existingValues, TestType value)
         {
             _repository.PersistValues(existingValues);
 
@@ -60,7 +61,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_ReturnsTrue(List<TestType> existingValues, TestType value)
+        public void Lookup_ReturnsTrue(ImmutableHashSet<TestType> existingValues, TestType value)
         {
             _repository.PersistValues(existingValues);
 
@@ -73,7 +74,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_ReturnsFalse(List<TestType> existingValues, TestType value)
+        public void Lookup_ReturnsFalse(ImmutableHashSet<TestType> existingValues, TestType value)
         {
             _repository.PersistValues(existingValues);
 
@@ -152,7 +153,7 @@ namespace CRDT.Application.UnitTests.Commutative
             return true;
         }
 
-        private void AssertContains(List<TestType> expectedValues, IEnumerable<TestType> actualValues)
+        private void AssertContains(ImmutableHashSet<TestType> expectedValues, IEnumerable<TestType> actualValues)
         {
             foreach (var value in expectedValues)
             {

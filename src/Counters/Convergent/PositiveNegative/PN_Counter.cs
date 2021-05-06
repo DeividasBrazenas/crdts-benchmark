@@ -9,7 +9,7 @@ namespace CRDT.Counters.Convergent.PositiveNegative
 {
     public class PN_Counter : PN_CounterBase
     {
-        public PN_Counter(IImmutableSet<CounterElement> additions, IImmutableSet<CounterElement> subtractions) 
+        public PN_Counter(ImmutableHashSet<CounterElement> additions, ImmutableHashSet<CounterElement> subtractions) 
             : base(additions, subtractions)
         {
         }
@@ -52,7 +52,7 @@ namespace CRDT.Counters.Convergent.PositiveNegative
             return new PN_Counter(Additions, subtractions.ToImmutableHashSet());
         }
 
-        public PN_Counter Merge(IImmutableSet<CounterElement> additions, IImmutableSet<CounterElement> subtractions)
+        public PN_Counter Merge(ImmutableHashSet<CounterElement> additions, ImmutableHashSet<CounterElement> subtractions)
         {
             var mergedAdditions = MergeElements(Additions, additions);
             var mergedSubtractions = MergeElements(Subtractions, subtractions);
@@ -60,7 +60,7 @@ namespace CRDT.Counters.Convergent.PositiveNegative
             return new PN_Counter(mergedAdditions, mergedSubtractions);
         }
 
-        private IImmutableSet<CounterElement> MergeElements(IImmutableSet<CounterElement> firstSet, IImmutableSet<CounterElement> secondSet)
+        private ImmutableHashSet<CounterElement> MergeElements(ImmutableHashSet<CounterElement> firstSet, ImmutableHashSet<CounterElement> secondSet)
         {
             var union = firstSet.Union(secondSet);
             var filteredElements = union.Where(u => !union.Any(e => Equals(u.Node, e.Node) && u.Value < e.Value));

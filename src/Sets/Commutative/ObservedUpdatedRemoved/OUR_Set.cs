@@ -14,7 +14,7 @@ namespace CRDT.Sets.Commutative.ObservedUpdatedRemoved
         {
         }
 
-        public OUR_Set(IImmutableSet<OUR_SetElement<T>> adds, IImmutableSet<OUR_SetElement<T>> removes)
+        public OUR_Set(ImmutableHashSet<OUR_SetElement<T>> adds, ImmutableHashSet<OUR_SetElement<T>> removes)
             : base(adds, removes)
         {
         }

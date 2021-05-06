@@ -13,11 +13,11 @@ namespace CRDT.Sets.Convergent.TwoPhase
         {
         }
 
-        public U_Set(IImmutableSet<U_SetElement<T>> elements) : base(elements)
+        public U_Set(ImmutableHashSet<U_SetElement<T>> elements) : base(elements)
         {
         }
 
-        public U_Set<T> Merge(IImmutableSet<U_SetElement<T>> elements)
+        public U_Set<T> Merge(ImmutableHashSet<U_SetElement<T>> elements)
         {
             var union = Elements.Union(elements);
 
