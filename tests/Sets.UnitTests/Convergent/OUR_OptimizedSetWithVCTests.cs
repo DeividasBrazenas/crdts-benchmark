@@ -54,8 +54,8 @@ namespace CRDT.Sets.UnitTests.Convergent
 
             var ourSet = new OUR_OptimizedSetWithVC<TestType>();
 
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0)), false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 1)), true) }.ToImmutableHashSet());
+            ourSet = ourSet.Add(value, tag, new VectorClock(clock.Add(node, 0)));
+            ourSet = ourSet.Remove(value, tag, new VectorClock(clock.Add(node, 1)));
 
             var lookup = ourSet.Lookup(value);
 
@@ -108,16 +108,16 @@ namespace CRDT.Sets.UnitTests.Convergent
 
             var ourSet = new OUR_OptimizedSetWithVC<TestType>();
 
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(one, tagOne, new VectorClock(clock.Add(node, 0)), false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(one, tagOne, new VectorClock(clock.Add(node, 1)), false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(one, tagTwo, new VectorClock(clock.Add(node, 2)), true) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(two, tagTwo, new VectorClock(clock.Add(node, 3)), false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(two, tagTwo, new VectorClock(clock.Add(node, 4)), false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(two, tagOne, new VectorClock(clock.Add(node, 5)), false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(two, tagOne, new VectorClock(clock.Add(node, 6)), true) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(three, tagThree, new VectorClock(clock.Add(node, 7)), true) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(three, tagThree, new VectorClock(clock.Add(node, 8)), false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetWithVCElement<TestType>(three, tagThree, new VectorClock(clock.Add(node, 9)), true) }.ToImmutableHashSet());
+            ourSet = ourSet.Add(one, tagOne, new VectorClock(clock.Add(node, 0)));
+            ourSet = ourSet.Add(one, tagOne, new VectorClock(clock.Add(node, 1)));
+            ourSet = ourSet.Remove(one, tagTwo, new VectorClock(clock.Add(node, 2)));
+            ourSet = ourSet.Add(two, tagTwo, new VectorClock(clock.Add(node, 3)));
+            ourSet = ourSet.Add(two, tagTwo, new VectorClock(clock.Add(node, 4)));
+            ourSet = ourSet.Add(two, tagOne, new VectorClock(clock.Add(node, 5)));
+            ourSet = ourSet.Remove(two, tagOne, new VectorClock(clock.Add(node, 6)));
+            ourSet = ourSet.Remove(three, tagThree, new VectorClock(clock.Add(node, 7)));
+            ourSet = ourSet.Add(three, tagThree, new VectorClock(clock.Add(node, 8)));
+            ourSet = ourSet.Remove(three, tagThree, new VectorClock(clock.Add(node, 9)));
 
             var actualValues = ourSet.Values;
 
@@ -145,7 +145,7 @@ namespace CRDT.Sets.UnitTests.Convergent
                 new OUR_OptimizedSetWithVCElement<TestType>(three, tagThree, new VectorClock(clock.Add(node, 7)), false),
             }.ToImmutableHashSet());
 
-            Assert.Equal(4, newOrSet.Elements.Count);
+            Assert.Equal(7, newOrSet.Elements.Count);
             Assert.Contains(new OUR_OptimizedSetWithVCElement<TestType>(one, tagOne, new VectorClock(clock.Add(node, 4)), false), newOrSet.Elements);
             Assert.Contains(new OUR_OptimizedSetWithVCElement<TestType>(two, tagOne, new VectorClock(clock.Add(node, 7)), true), newOrSet.Elements);
             Assert.Contains(new OUR_OptimizedSetWithVCElement<TestType>(three, tagThree, new VectorClock(clock.Add(node, 7)), false), newOrSet.Elements);

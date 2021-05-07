@@ -34,7 +34,7 @@ namespace CRDT.Application.UnitTests.Convergent
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
             var element = new OUR_OptimizedSetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0)), false);
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { element });
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { element }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -42,9 +42,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAdds_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(List<OUR_OptimizedSetWithVCElement<TestType>> values)
+        public void MergeAdds_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(HashSet<OUR_OptimizedSetWithVCElement<TestType>> values)
         {
-            _ourSetService.Merge(values);
+            _ourSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             AssertContains(values, repositoryValues);
@@ -58,11 +58,11 @@ namespace CRDT.Application.UnitTests.Convergent
 
             var element = new OUR_OptimizedSetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0)), false);
 
-            _repository.PersistElements(new List<OUR_OptimizedSetWithVCElement<TestType>> { element });
+            _repository.PersistElements(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { element }.ToImmutableHashSet());
 
             var newElement = new OUR_OptimizedSetWithVCElement<TestType>(_builder.Build(value.Id), tag, new VectorClock(clock.Add(node, 1)), false);
 
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { newElement });
+            _ourSetService.LocalAdd(newElement.Value, newElement.Tag, newElement.VectorClock);
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(0, repositoryValues.Count(x => Equals(x, element)));
@@ -77,11 +77,11 @@ namespace CRDT.Application.UnitTests.Convergent
 
             var element = new OUR_OptimizedSetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 1)), false);
 
-            _repository.PersistElements(new List<OUR_OptimizedSetWithVCElement<TestType>> { element });
+            _repository.PersistElements(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { element }.ToImmutableHashSet());
 
             var newElement = new OUR_OptimizedSetWithVCElement<TestType>(_builder.Build(value.Id), tag, new VectorClock(clock.Add(node, 0)), false);
 
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { newElement });
+            _ourSetService.LocalAdd(newElement.Value, newElement.Tag, newElement.VectorClock);
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -89,14 +89,14 @@ namespace CRDT.Application.UnitTests.Convergent
         }
         [Theory]
         [AutoData]
-        public void MergeAdds_SingleElement_AddsElementsToTheRepository(List<OUR_OptimizedSetWithVCElement<TestType>> existingValues, TestType value, Guid tag, Node node)
+        public void MergeAdds_SingleElement_AddsElementsToTheRepository(HashSet<OUR_OptimizedSetWithVCElement<TestType>> existingValues, TestType value, Guid tag, Node node)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _repository.PersistElements(existingValues);
+            _repository.PersistElements(existingValues.ToImmutableHashSet());
 
             var element = new OUR_OptimizedSetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0)), false);
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { element });
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { element }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -104,11 +104,11 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAdds_SeveralElements_AddsElementsToTheRepository(List<OUR_OptimizedSetWithVCElement<TestType>> existingValues, List<OUR_OptimizedSetWithVCElement<TestType>> values)
+        public void MergeAdds_SeveralElements_AddsElementsToTheRepository(HashSet<OUR_OptimizedSetWithVCElement<TestType>> existingValues, HashSet<OUR_OptimizedSetWithVCElement<TestType>> values)
         {
-            _repository.PersistElements(existingValues);
+            _repository.PersistElements(existingValues.ToImmutableHashSet());
 
-            _ourSetService.Merge(values);
+            _ourSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             AssertContains(values, repositoryValues);
@@ -116,19 +116,19 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAdds_IsIdempotent(List<OUR_OptimizedSetWithVCElement<TestType>> values, TestType value, Guid tag, Node node)
+        public void MergeAdds_IsIdempotent(HashSet<OUR_OptimizedSetWithVCElement<TestType>> values, TestType value, Guid tag, Node node)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _repository.PersistElements(values);
+            _repository.PersistElements(values.ToImmutableHashSet());
 
             var element = new OUR_OptimizedSetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0)), false);
 
             values.Add(element);
 
-            _ourSetService.Merge(values);
-            _ourSetService.Merge(values);
-            _ourSetService.Merge(values);
+            _ourSetService.Merge(values.ToImmutableHashSet());
+            _ourSetService.Merge(values.ToImmutableHashSet());
+            _ourSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             AssertContains(values, repositoryValues);
@@ -149,16 +149,16 @@ namespace CRDT.Application.UnitTests.Convergent
             var firstRepository = new OUR_OptimizedSetWithVCRepository();
             var firstService = new OUR_OptimizedSetWithVCService<TestType>(firstRepository);
 
-            _repository.PersistElements(new List<OUR_OptimizedSetWithVCElement<TestType>> { firstElement, secondElement, thirdElement });
-            firstService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { fourthElement, fifthElement });
+            _repository.PersistElements(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
+            firstService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
 
             var firstRepositoryValues = firstRepository.GetElements();
 
             var secondRepository = new OUR_OptimizedSetWithVCRepository();
             var secondService = new OUR_OptimizedSetWithVCService<TestType>(secondRepository);
 
-            _repository.PersistElements(new List<OUR_OptimizedSetWithVCElement<TestType>> { fourthElement, fifthElement });
-            secondService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { firstElement, secondElement, thirdElement });
+            _repository.PersistElements(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
+            secondService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
 
             var secondRepositoryValues = firstRepository.GetElements();
 
@@ -173,8 +173,8 @@ namespace CRDT.Application.UnitTests.Convergent
 
             var element = new OUR_OptimizedSetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 1)), true);
 
-            _repository.PersistElements(new List<OUR_OptimizedSetWithVCElement<TestType>> { new (value, tag, new VectorClock(clock.Add(node, 0)), false) });
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { element });
+            _repository.PersistElements(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { new(value, tag, new VectorClock(clock.Add(node, 0)), false) }.ToImmutableHashSet());
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { element }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -182,17 +182,17 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeRemoves_SeveralElements_AddsElementsToTheRepository(List<OUR_OptimizedSetWithVCElement<TestType>> existingValues, TestType one, TestType two, Guid tag, Node node)
+        public void MergeRemoves_SeveralElements_AddsElementsToTheRepository(HashSet<OUR_OptimizedSetWithVCElement<TestType>> existingValues, TestType one, TestType two, Guid tag, Node node)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _repository.PersistElements(existingValues);
+            _repository.PersistElements(existingValues.ToImmutableHashSet());
 
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>>
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>>
             {
                 new (one, tag, new VectorClock(clock.Add(node, 0)), true),
                 new (two, tag, new VectorClock(clock.Add(node, 0)), true),
-            });
+            }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, new OUR_OptimizedSetWithVCElement<TestType>(one, tag, new VectorClock(clock.Add(node, 0)), true))));
@@ -207,9 +207,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
             var element = new OUR_OptimizedSetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0)), true);
 
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { element });
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { element });
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { element });
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { element }.ToImmutableHashSet());
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { element }.ToImmutableHashSet());
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { element }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -221,7 +221,7 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>> { new (value, tag, new VectorClock(clock.Add(node, 0)), false) });
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>> { new(value, tag, new VectorClock(clock.Add(node, 0)), false) }.ToImmutableHashSet());
 
             var lookup = _ourSetService.Lookup(value);
 
@@ -234,11 +234,11 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>>
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>>
             {
                 new(value, firstTag, new VectorClock(clock.Add(node, 0)), false),
                 new(value, secondTag, new VectorClock(clock.Add(node, 0)), false)
-            });
+            }.ToImmutableHashSet());
 
             var lookup = _ourSetService.Lookup(value);
 
@@ -251,10 +251,10 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>>
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>>
             {
                 new(value, tag, new VectorClock(clock.Add(node, 0)), true)
-            });
+            }.ToImmutableHashSet());
 
             var lookup = _ourSetService.Lookup(value);
 
@@ -267,18 +267,18 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _ourSetService.Merge(new List<OUR_OptimizedSetWithVCElement<TestType>>
+            _ourSetService.Merge(new HashSet<OUR_OptimizedSetWithVCElement<TestType>>
             {
                 new(value, firstTag, new VectorClock(clock.Add(node, 0)), true),
                 new(value, secondTag, new VectorClock(clock.Add(node, 0)), true)
-            });
+            }.ToImmutableHashSet());
 
             var lookup = _ourSetService.Lookup(value);
 
             Assert.False(lookup);
         }
 
-        private void AssertContains(List<OUR_OptimizedSetWithVCElement<TestType>> expectedValues, IEnumerable<OUR_OptimizedSetWithVCElement<TestType>> actualValues)
+        private void AssertContains(HashSet<OUR_OptimizedSetWithVCElement<TestType>> expectedValues, IEnumerable<OUR_OptimizedSetWithVCElement<TestType>> actualValues)
         {
             foreach (var value in expectedValues)
             {
