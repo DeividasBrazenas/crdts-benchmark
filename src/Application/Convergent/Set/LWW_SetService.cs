@@ -10,23 +10,56 @@ namespace CRDT.Application.Convergent.Set
     public class LWW_SetService<T> where T : DistributedEntity
     {
         private readonly ILWW_SetRepository<T> _repository;
+        private readonly object _lockObject = new();
 
         public LWW_SetService(ILWW_SetRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Merge(IEnumerable<LWW_SetElement<T>> adds, IEnumerable<LWW_SetElement<T>> removes)
+        public void LocalAdd(T value, long timestamp)
         {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new LWW_Set<T>(existingAdds, existingRemoves);
 
-            set = set.Merge(adds.ToImmutableHashSet(), removes.ToImmutableHashSet());
+                set = set.Add(value, timestamp);
 
-            _repository.PersistAdds(set.Adds);
-            _repository.PersistRemoves(set.Removes);
+                _repository.PersistAdds(set.Adds);
+            }
+        }
+
+        public void LocalRemove(T value, long timestamp)
+        {
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
+
+                var set = new LWW_Set<T>(existingAdds, existingRemoves);
+
+                set = set.Remove(value, timestamp);
+
+                _repository.PersistRemoves(set.Removes);
+            }
+        }
+        public void Merge(ImmutableHashSet<LWW_SetElement<T>> adds, ImmutableHashSet<LWW_SetElement<T>> removes)
+        {
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
+
+                var set = new LWW_Set<T>(existingAdds, existingRemoves);
+
+                set = set.Merge(adds, removes);
+
+                _repository.PersistAdds(set.Adds);
+                _repository.PersistRemoves(set.Removes);
+            }
         }
 
         public bool Lookup(T value)
@@ -34,11 +67,14 @@ namespace CRDT.Application.Convergent.Set
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new LWW_Set<T>(existingAdds, existingRemoves);
 
             var lookup = set.Lookup(value);
 
             return lookup;
         }
+
+        public (ImmutableHashSet<LWW_SetElement<T>>, ImmutableHashSet<LWW_SetElement<T>>) State =>
+            (_repository.GetAdds(), _repository.GetRemoves());
     }
 }

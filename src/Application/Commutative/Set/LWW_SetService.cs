@@ -8,34 +8,71 @@ namespace CRDT.Application.Commutative.Set
     public class LWW_SetService<T> where T : DistributedEntity
     {
         private readonly ILWW_SetRepository<T> _repository;
+        private readonly object _lockObject = new();
 
         public LWW_SetService(ILWW_SetRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Add(T value, long timestamp)
+        public void LocalAdd(T value, long timestamp)
         {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            set = set.Add(value, timestamp);
+                set = set.Add(value, timestamp);
 
-            _repository.PersistAdds(set.Adds);
+                _repository.PersistAdds(set.Adds);
+            }
         }
 
-        public void Remove(T value, long timestamp)
+        public void LocalRemove(T value, long timestamp)
         {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
 
-            set = set.Remove(value, timestamp);
+                set = set.Remove(value, timestamp);
 
-            _repository.PersistRemoves(set.Removes);
+                _repository.PersistRemoves(set.Removes);
+            }
+        }
+
+        public void DownstreamAdd(T value, long timestamp)
+        {
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
+
+                var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+
+                set = set.Add(value, timestamp);
+
+                _repository.PersistAdds(set.Adds);
+            }
+        }
+
+        public void DownstreamRemove(T value, long timestamp)
+        {
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
+
+                var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+
+                set = set.Remove(value, timestamp);
+
+                _repository.PersistRemoves(set.Removes);
+            }
         }
 
         public bool Lookup(T value)

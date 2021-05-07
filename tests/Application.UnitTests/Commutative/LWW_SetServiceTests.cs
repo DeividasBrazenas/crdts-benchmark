@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Commutative.Set;
@@ -25,7 +26,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, long timestamp)
         {
-            _lwwSetService.Add(value, timestamp);
+            _lwwSetService.DownstreamAdd(value, timestamp);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(value, repositoryValues.Select(v => v.Value));
@@ -33,11 +34,11 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<LWW_SetElement<TestType>> adds, TestType value, long timestamp)
+        public void Add_WithExistingValues_AddsElementToTheRepository(HashSet<LWW_SetElement<TestType>> adds, TestType value, long timestamp)
         {
-            _repository.PersistAdds(adds);
+            _repository.PersistAdds(adds.ToImmutableHashSet());
 
-            _lwwSetService.Add(value, timestamp);
+            _lwwSetService.DownstreamAdd(value, timestamp);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(value, repositoryValues.Select(v => v.Value));
@@ -47,7 +48,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value, long timestamp)
         {
-            _lwwSetService.Remove(value, timestamp);
+            _lwwSetService.DownstreamRemove(value, timestamp);
 
             var repositoryValues = _repository.GetRemoves();
             Assert.DoesNotContain(value, repositoryValues.Select(v => v.Value));
@@ -57,8 +58,8 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_AddExistsWithLowerTimestamp_AddsElementToTheRepository(TestType value, long timestamp)
         {
-            _lwwSetService.Add(value, timestamp);
-            _lwwSetService.Remove(value, timestamp + 10);
+            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamRemove(value, timestamp + 10);
 
             var repositoryValues = _repository.GetRemoves();
             Assert.Contains(value, repositoryValues.Select(v => v.Value));
@@ -66,12 +67,12 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_Added_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
+        public void Lookup_Added_ReturnsTrue(HashSet<LWW_SetElement<TestType>> existingAdds, HashSet<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.Add(value, timestamp);
+            _lwwSetService.DownstreamAdd(value, timestamp);
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -80,13 +81,13 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_Removed_ReturnsFalse(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
+        public void Lookup_Removed_ReturnsFalse(HashSet<LWW_SetElement<TestType>> existingAdds, HashSet<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.Add(value, timestamp);
-            _lwwSetService.Remove(value, timestamp + 100);
+            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamRemove(value, timestamp + 100);
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -95,14 +96,14 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Lookup_ReAdded_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
+        public void Lookup_ReAdded_ReturnsTrue(HashSet<LWW_SetElement<TestType>> existingAdds, HashSet<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.Add(value, timestamp);
-            _lwwSetService.Remove(value, timestamp + 100);
-            _lwwSetService.Add(value, timestamp + 200);
+            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamRemove(value, timestamp + 100);
+            _lwwSetService.DownstreamAdd(value, timestamp + 200);
 
             var lookup = _lwwSetService.Lookup(value);
 

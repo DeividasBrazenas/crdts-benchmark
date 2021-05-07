@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent.Set;
@@ -25,7 +26,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Add_NoExistingValues_AddsElementToTheRepository(LWW_SetElement<TestType> element)
         {
-            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { element }, new List<LWW_SetElement<TestType>>());
+            _lwwSetService.Merge(new HashSet<LWW_SetElement<TestType>> { element }.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(element, repositoryValues);
@@ -33,24 +34,14 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<LWW_SetElement<TestType>> adds, LWW_SetElement<TestType> element)
+        public void Add_WithExistingValues_AddsElementToTheRepository(HashSet<LWW_SetElement<TestType>> adds, LWW_SetElement<TestType> element)
         {
-            _repository.PersistAdds(adds);
+            _repository.PersistAdds(adds.ToImmutableHashSet());
 
-            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { element }, new List<LWW_SetElement<TestType>>());
+            _lwwSetService.Merge(new HashSet<LWW_SetElement<TestType>> { element }.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(element, repositoryValues);
-        }
-
-        [Theory]
-        [AutoData]
-        public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(LWW_SetElement<TestType> element)
-        {
-            _lwwSetService.Merge(new List<LWW_SetElement<TestType>>(), new List<LWW_SetElement<TestType>> { element });
-
-            var repositoryValues = _repository.GetRemoves();
-            Assert.DoesNotContain(element, repositoryValues);
         }
 
         [Theory]
@@ -60,7 +51,7 @@ namespace CRDT.Application.UnitTests.Convergent
             var addElement = new LWW_SetElement<TestType>(value, timestamp);
             var removeElement = new LWW_SetElement<TestType>(value, timestamp + 10);
 
-            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { addElement }, new List<LWW_SetElement<TestType>> { removeElement });
+            _lwwSetService.Merge(new HashSet<LWW_SetElement<TestType>> { addElement }.ToImmutableHashSet(), new HashSet<LWW_SetElement<TestType>> { removeElement }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             Assert.Contains(value, repositoryValues.Select(v => v.Value));
@@ -68,9 +59,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_NoExistingValues_AddsElementsToTheRepository(List<LWW_SetElement<TestType>> values)
+        public void Merge_NoExistingValues_AddsElementsToTheRepository(HashSet<LWW_SetElement<TestType>> values)
         {
-            _lwwSetService.Merge(values, values);
+            _lwwSetService.Merge(values.ToImmutableHashSet(), values.ToImmutableHashSet());
 
             var repositoryAdds = _repository.GetAdds();
             var repositoryRemoves = _repository.GetRemoves();
@@ -81,12 +72,12 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_WithExistingValues_AddsElementsToTheRepository(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, List<LWW_SetElement<TestType>> values)
+        public void Merge_WithExistingValues_AddsElementsToTheRepository(HashSet<LWW_SetElement<TestType>> existingAdds, HashSet<LWW_SetElement<TestType>> existingRemoves, HashSet<LWW_SetElement<TestType>> values)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.Merge(values, values);
+            _lwwSetService.Merge(values.ToImmutableHashSet(), values.ToImmutableHashSet());
 
             var repositoryAdds = _repository.GetAdds();
             var repositoryRemoves = _repository.GetRemoves();
@@ -97,14 +88,14 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_IsIdempotent(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, List<LWW_SetElement<TestType>> values)
+        public void Merge_IsIdempotent(HashSet<LWW_SetElement<TestType>> existingAdds, HashSet<LWW_SetElement<TestType>> existingRemoves, HashSet<LWW_SetElement<TestType>> values)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.Merge(values, values);
-            _lwwSetService.Merge(values, values);
-            _lwwSetService.Merge(values, values);
+            _lwwSetService.Merge(values.ToImmutableHashSet(), values.ToImmutableHashSet());
+            _lwwSetService.Merge(values.ToImmutableHashSet(), values.ToImmutableHashSet());
+            _lwwSetService.Merge(values.ToImmutableHashSet(), values.ToImmutableHashSet());
 
             var repositoryAdds = _repository.GetAdds();
             var repositoryRemoves = _repository.GetRemoves();
@@ -115,12 +106,12 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Lookup_Added_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, LWW_SetElement<TestType> element)
+        public void Lookup_Added_ReturnsTrue(HashSet<LWW_SetElement<TestType>> existingAdds, HashSet<LWW_SetElement<TestType>> existingRemoves, LWW_SetElement<TestType> element)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { element }, new List<LWW_SetElement<TestType>>());
+            _lwwSetService.Merge(new HashSet<LWW_SetElement<TestType>> { element }.ToImmutableHashSet(), ImmutableHashSet<LWW_SetElement<TestType>>.Empty);
 
             var lookup = _lwwSetService.Lookup(element.Value);
 
@@ -129,15 +120,15 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Lookup_Removed_ReturnsFalse(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
+        public void Lookup_Removed_ReturnsFalse(HashSet<LWW_SetElement<TestType>> existingAdds, HashSet<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
             var addElement = new LWW_SetElement<TestType>(value, timestamp);
             var removeElement = new LWW_SetElement<TestType>(value, timestamp + 100);
 
-            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { addElement }, new List<LWW_SetElement<TestType>> { removeElement });
+            _lwwSetService.Merge(new HashSet<LWW_SetElement<TestType>> { addElement }.ToImmutableHashSet(), new HashSet<LWW_SetElement<TestType>> { removeElement }.ToImmutableHashSet());
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -146,29 +137,21 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Lookup_ReAdded_ReturnsTrue(List<LWW_SetElement<TestType>> existingAdds, List<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
+        public void Lookup_ReAdded_ReturnsTrue(HashSet<LWW_SetElement<TestType>> existingAdds, HashSet<LWW_SetElement<TestType>> existingRemoves, TestType value, long timestamp)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            var addElement = new LWW_SetElement<TestType>(value, timestamp);
-            var removeElement = new LWW_SetElement<TestType>(value, timestamp + 100);
-            var reAddElement = new LWW_SetElement<TestType>(value, timestamp + 200);
-
-            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { addElement }, new List<LWW_SetElement<TestType>> { removeElement });
+            _lwwSetService.LocalAdd(value, timestamp);
+            _lwwSetService.LocalRemove(value, timestamp + 100);
+            _lwwSetService.LocalAdd(value, timestamp + 200);
 
             var lookup = _lwwSetService.Lookup(value);
-
-            Assert.False(lookup);
-
-            _lwwSetService.Merge(new List<LWW_SetElement<TestType>> { reAddElement }, new List<LWW_SetElement<TestType>>());
-
-            lookup = _lwwSetService.Lookup(value);
 
             Assert.True(lookup);
         }
 
-        private void AssertContains(List<LWW_SetElement<TestType>> expectedValues, IEnumerable<LWW_SetElement<TestType>> actualValues)
+        private void AssertContains(HashSet<LWW_SetElement<TestType>> expectedValues, IEnumerable<LWW_SetElement<TestType>> actualValues)
         {
             foreach (var value in expectedValues)
             {
