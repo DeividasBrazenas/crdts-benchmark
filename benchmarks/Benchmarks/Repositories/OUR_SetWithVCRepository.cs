@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Benchmarks.TestTypes;
 using CRDT.Application.Interfaces;
@@ -8,43 +9,27 @@ namespace Benchmarks.Repositories
 {
     public class OUR_SetWithVCRepository : IOUR_SetWithVCRepository<TestType>
     {
-        public List<OUR_SetWithVCElement<TestType>> Adds { get; }
-        public List<OUR_SetWithVCElement<TestType>> Removes { get; }
+        public ImmutableHashSet<OUR_SetWithVCElement<TestType>> Adds { get; private set; }
+        public ImmutableHashSet<OUR_SetWithVCElement<TestType>> Removes { get; private set; }
 
         public OUR_SetWithVCRepository()
         {
-            Adds = new List<OUR_SetWithVCElement<TestType>>();
-            Removes = new List<OUR_SetWithVCElement<TestType>>();
+            Adds = ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty;
+            Removes = ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty;
         }
 
-        public IEnumerable<OUR_SetWithVCElement<TestType>> GetAdds() => Adds;
+        public ImmutableHashSet<OUR_SetWithVCElement<TestType>> GetAdds() => Adds;
 
-        public IEnumerable<OUR_SetWithVCElement<TestType>> GetRemoves() => Removes;
+        public ImmutableHashSet<OUR_SetWithVCElement<TestType>> GetRemoves() => Removes;
 
-        public void PersistAdds(IEnumerable<OUR_SetWithVCElement<TestType>> values)
+        public void PersistAdds(ImmutableHashSet<OUR_SetWithVCElement<TestType>> values)
         {
-            foreach (var value in values)
-            {
-                var entity = Adds.FirstOrDefault(a => a.Value.Id == value.Value.Id && a.Tag == value.Tag);
-
-                if (entity is not null)
-                {
-                    Adds.Remove(entity);
-                }
-
-                Adds.Add(value);
-            }
+            Adds = values;
         }
 
-        public void PersistRemoves(IEnumerable<OUR_SetWithVCElement<TestType>> values)
+        public void PersistRemoves(ImmutableHashSet<OUR_SetWithVCElement<TestType>> values)
         {
-            foreach (var value in values)
-            {
-                if (!Removes.Any(e => Equals(e, value)))
-                {
-                    Removes.Add(value);
-                }
-            }
+            Removes = values;
         }
     }
 }

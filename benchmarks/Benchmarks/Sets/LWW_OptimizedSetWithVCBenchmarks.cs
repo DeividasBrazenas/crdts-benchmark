@@ -53,8 +53,8 @@ namespace Benchmarks.Sets
                     value = _objects[i * Iterations + j];
 
                     replica.LocalAdd(value, clock);
-                    clock = clock.Increment(_nodes[i]);
                     ConvergentDownstreamMerge(replica.State, downstreamReplicas);
+                    clock = clock.Increment(_nodes[i]);
                 }
             }
         }
@@ -77,8 +77,8 @@ namespace Benchmarks.Sets
                     value = _objects[i * Iterations + j];
 
                     replica.LocalAdd(value, clock);
-                    clock = clock.Increment(_nodes[i]);
                     CommutativeDownstreamAdd(value, clock, downstreamReplicas);
+                    clock = clock.Increment(_nodes[i]);
                 }
             }
         }
@@ -101,12 +101,12 @@ namespace Benchmarks.Sets
                     value = _objects[i * Iterations + j];
 
                     replica.LocalAdd(value, clock);
-                    clock = clock.Increment(_nodes[i]);
                     ConvergentDownstreamMerge(replica.State, downstreamReplicas);
+                    clock = clock.Increment(_nodes[i]);
 
                     replica.LocalRemove(value, clock);
-                    clock = clock.Increment(_nodes[i]);
                     ConvergentDownstreamMerge(replica.State, downstreamReplicas);
+                    clock = clock.Increment(_nodes[i]);
                 }
             }
         }
@@ -129,13 +129,13 @@ namespace Benchmarks.Sets
                     value = _objects[i * Iterations + j];
 
                     replica.LocalAdd(value, clock);
-                    clock = clock.Increment(_nodes[i]);
                     CommutativeDownstreamAdd(value, clock, downstreamReplicas);
+                    clock = clock.Increment(_nodes[i]);
 
 
                     replica.LocalRemove(value, clock);
-                    clock = clock.Increment(_nodes[i]);
                     CommutativeDownstreamRemove(value, clock, downstreamReplicas);
+                    clock = clock.Increment(_nodes[i]);
                 }
             }
         }

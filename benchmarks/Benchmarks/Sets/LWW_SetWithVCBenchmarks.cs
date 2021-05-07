@@ -81,9 +81,9 @@ namespace Benchmarks.Sets
 
                     replica.LocalAdd(value, clock);
 
-                    clock = clock.Increment(_nodes[i]);
-
                     CommutativeDownstreamAdd(value, clock, downstreamReplicas);
+
+                    clock = clock.Increment(_nodes[i]);
                 }
             }
         }
@@ -106,21 +106,15 @@ namespace Benchmarks.Sets
                     value = _object[i * Iterations + j];
 
                     replica.LocalAdd(value, clock);
-
-                    clock = clock.Increment(_nodes[i]);
-
                     var (adds, removes) = replica.State;
-
                     ConvergentDownstreamMerge(adds, removes, downstreamReplicas);
+                    clock = clock.Increment(_nodes[i]);
 
 
                     replica.LocalRemove(value, clock);
-
-                    clock = clock.Increment(_nodes[i]);
-
                     (adds, removes) = replica.State;
-
                     ConvergentDownstreamMerge(adds, removes, downstreamReplicas);
+                    clock = clock.Increment(_nodes[i]);
                 }
             }
         }
@@ -143,17 +137,13 @@ namespace Benchmarks.Sets
                     value = _object[i * Iterations + j];
 
                     replica.LocalAdd(value, clock);
-
-                    clock = clock.Increment(_nodes[i]);
-
                     CommutativeDownstreamAdd(value, clock, downstreamReplicas);
+                    clock = clock.Increment(_nodes[i]);
 
 
                     replica.LocalRemove(value, clock);
-
-                    clock = clock.Increment(_nodes[i]);
-
                     CommutativeDownstreamRemove(value, clock, downstreamReplicas);
+                    clock = clock.Increment(_nodes[i]);
                 }
             }
         }

@@ -34,7 +34,7 @@ namespace CRDT.Application.UnitTests.Convergent
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
             var element = new OUR_SetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0)));
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { element }, new List<OUR_SetWithVCElement<TestType>>());
+            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { element }.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -44,7 +44,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeAdds_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(List<OUR_SetWithVCElement<TestType>> values)
         {
-            _orSetService.Merge(values, new List<OUR_SetWithVCElement<TestType>>());
+            _orSetService.Merge(values.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             AssertContains(values, repositoryValues);
@@ -58,11 +58,11 @@ namespace CRDT.Application.UnitTests.Convergent
 
             var element = new OUR_SetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0)));
 
-            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { element });
+            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { element }.ToImmutableHashSet());
 
             var newElement = new OUR_SetWithVCElement<TestType>(_builder.Build(value.Id), tag, new VectorClock(clock.Add(node, 1)));
 
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { newElement }, new List<OUR_SetWithVCElement<TestType>>());
+            _orSetService.LocalAdd(newElement.Value, newElement.Tag, newElement.VectorClock);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Equal(0, repositoryValues.Count(x => Equals(x, element)));
@@ -77,11 +77,11 @@ namespace CRDT.Application.UnitTests.Convergent
 
             var element = new OUR_SetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 1)));
 
-            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { element });
+            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { element }.ToImmutableHashSet());
 
             var newElement = new OUR_SetWithVCElement<TestType>(_builder.Build(value.Id), tag, new VectorClock(clock.Add(node, 0)));
 
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { newElement }, new List<OUR_SetWithVCElement<TestType>>());
+            _orSetService.LocalAdd(newElement.Value, newElement.Tag, newElement.VectorClock);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -93,10 +93,10 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _repository.PersistAdds(existingValues);
+            _repository.PersistAdds(existingValues.ToImmutableHashSet());
 
             var element = new OUR_SetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0)));
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { element }, new List<OUR_SetWithVCElement<TestType>>());
+            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { element }.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -106,9 +106,9 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeAdds_SeveralElements_AddsElementsToTheRepository(List<OUR_SetWithVCElement<TestType>> existingValues, List<OUR_SetWithVCElement<TestType>> values)
         {
-            _repository.PersistAdds(existingValues);
+            _repository.PersistAdds(existingValues.ToImmutableHashSet());
 
-            _orSetService.Merge(values, new List<OUR_SetWithVCElement<TestType>>());
+            _orSetService.Merge(values.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             AssertContains(values, repositoryValues);
@@ -120,15 +120,15 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _repository.PersistAdds(values);
+            _repository.PersistAdds(values.ToImmutableHashSet());
 
             var element = new OUR_SetWithVCElement<TestType>(value, tag, new VectorClock(clock.Add(node, 0)));
 
             values.Add(element);
 
-            _orSetService.Merge(values, new List<OUR_SetWithVCElement<TestType>>());
-            _orSetService.Merge(values, new List<OUR_SetWithVCElement<TestType>>());
-            _orSetService.Merge(values, new List<OUR_SetWithVCElement<TestType>>());
+            _orSetService.Merge(values.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
+            _orSetService.Merge(values.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
+            _orSetService.Merge(values.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             AssertContains(values, repositoryValues);
@@ -149,16 +149,16 @@ namespace CRDT.Application.UnitTests.Convergent
             var firstRepository = new OUR_SetWithVCRepository();
             var firstService = new OUR_SetWithVCService<TestType>(firstRepository);
 
-            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { firstElement, secondElement, thirdElement });
-            firstService.Merge(new List<OUR_SetWithVCElement<TestType>> { fourthElement, fifthElement }, new List<OUR_SetWithVCElement<TestType>>());
+            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
+            firstService.Merge(new List<OUR_SetWithVCElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
 
             var firstRepositoryValues = firstRepository.GetAdds();
 
             var secondRepository = new OUR_SetWithVCRepository();
             var secondService = new OUR_SetWithVCService<TestType>(secondRepository);
 
-            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { fourthElement, fifthElement });
-            secondService.Merge(new List<OUR_SetWithVCElement<TestType>> { firstElement, secondElement, thirdElement }, new List<OUR_SetWithVCElement<TestType>>());
+            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
+            secondService.Merge(new List<OUR_SetWithVCElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
 
             var secondRepositoryValues = firstRepository.GetAdds();
 
@@ -167,20 +167,10 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeRemoves_WithoutExistingAdds_DoesNotAddToRepository(OUR_SetWithVCElement<TestType> value)
-        {
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>>(), new List<OUR_SetWithVCElement<TestType>> { value });
-
-            var repositoryValues = _repository.GetRemoves();
-            Assert.Equal(0, repositoryValues.Count(x => Equals(x, value)));
-        }
-
-        [Theory]
-        [AutoData]
         public void MergeRemoves_SingleValueWithEmptyRepository_AddsElementsToTheRepository(OUR_SetWithVCElement<TestType> value)
         {
-            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { value });
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>>(), new List<OUR_SetWithVCElement<TestType>> { value });
+            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { value }.ToImmutableHashSet());
+            _orSetService.Merge(ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty, new List<OUR_SetWithVCElement<TestType>> { value }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, value)));
@@ -190,8 +180,8 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeRemoves_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(List<OUR_SetWithVCElement<TestType>> values)
         {
-            _repository.PersistAdds(values);
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>>(), values);
+            _repository.PersistAdds(values.ToImmutableHashSet());
+            _orSetService.Merge(ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty, values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             AssertContains(values, repositoryValues);
@@ -201,10 +191,10 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeRemoves_SingleElement_AddsElementsToTheRepository(List<OUR_SetWithVCElement<TestType>> existingValues, OUR_SetWithVCElement<TestType> value)
         {
-            _repository.PersistRemoves(existingValues);
-            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { value });
+            _repository.PersistRemoves(existingValues.ToImmutableHashSet());
+            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { value }.ToImmutableHashSet());
 
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>>(), new List<OUR_SetWithVCElement<TestType>> { value });
+            _orSetService.Merge(ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty, new List<OUR_SetWithVCElement<TestType>> { value }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, value)));
@@ -214,10 +204,10 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeRemoves_SeveralElements_AddsElementsToTheRepository(List<OUR_SetWithVCElement<TestType>> existingValues, List<OUR_SetWithVCElement<TestType>> values)
         {
-            _repository.PersistRemoves(existingValues);
-            _repository.PersistAdds(values);
+            _repository.PersistRemoves(existingValues.ToImmutableHashSet());
+            _repository.PersistAdds(values.ToImmutableHashSet());
 
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>>(), values);
+            _orSetService.Merge(ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty, values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             AssertContains(values, repositoryValues);
@@ -227,14 +217,14 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeRemoves_IsIdempotent(List<OUR_SetWithVCElement<TestType>> values, OUR_SetWithVCElement<TestType> value)
         {
-            _repository.PersistRemoves(values);
-            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { value });
+            _repository.PersistRemoves(values.ToImmutableHashSet());
+            _repository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { value }.ToImmutableHashSet());
 
             values.Add(value);
 
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>>(), values);
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>>(), values);
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>>(), values);
+            _orSetService.Merge(ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty, values.ToImmutableHashSet());
+            _orSetService.Merge(ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty, values.ToImmutableHashSet());
+            _orSetService.Merge(ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty, values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             AssertContains(values, repositoryValues);
@@ -255,18 +245,18 @@ namespace CRDT.Application.UnitTests.Convergent
             var firstRepository = new OUR_SetWithVCRepository();
             var firstService = new OUR_SetWithVCService<TestType>(firstRepository);
 
-            firstRepository.PersistRemoves(new List<OUR_SetWithVCElement<TestType>> { firstElement, secondElement, thirdElement });
-            firstRepository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { fourthElement, fifthElement });
-            firstService.Merge(new List<OUR_SetWithVCElement<TestType>>(), new List<OUR_SetWithVCElement<TestType>> { fourthElement, fifthElement });
+            firstRepository.PersistRemoves(new List<OUR_SetWithVCElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
+            firstRepository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
+            firstService.Merge(ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty, new List<OUR_SetWithVCElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
 
             var firstRepositoryValues = firstRepository.GetRemoves();
 
             var secondRepository = new OUR_SetWithVCRepository();
             var secondService = new OUR_SetWithVCService<TestType>(secondRepository);
 
-            secondRepository.PersistRemoves(new List<OUR_SetWithVCElement<TestType>> { fourthElement, fifthElement });
-            secondRepository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { firstElement, secondElement, thirdElement });
-            secondService.Merge(new List<OUR_SetWithVCElement<TestType>>(), new List<OUR_SetWithVCElement<TestType>> { firstElement, secondElement, thirdElement });
+            secondRepository.PersistRemoves(new List<OUR_SetWithVCElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
+            secondRepository.PersistAdds(new List<OUR_SetWithVCElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
+            secondService.Merge(ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty, new List<OUR_SetWithVCElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
 
             var secondRepositoryValues = firstRepository.GetRemoves();
 
@@ -275,27 +265,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAddsAndRemoves_OnlyMergesRemovesWithAdds(OUR_SetWithVCElement<TestType> firstValue, OUR_SetWithVCElement<TestType> secondValue, OUR_SetWithVCElement<TestType> thirdValue)
-        {
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { firstValue, thirdValue }, new List<OUR_SetWithVCElement<TestType>> { secondValue, thirdValue });
-
-            var repositoryAdds = _repository.GetAdds();
-            var repositoryRemoves = _repository.GetRemoves();
-
-            Assert.Equal(1, repositoryAdds.Count(x => Equals(x, firstValue)));
-            Assert.Equal(0, repositoryAdds.Count(x => Equals(x, secondValue)));
-            Assert.Equal(1, repositoryAdds.Count(x => Equals(x, thirdValue)));
-            Assert.Equal(0, repositoryRemoves.Count(x => Equals(x, firstValue)));
-            Assert.Equal(0, repositoryRemoves.Count(x => Equals(x, secondValue)));
-            Assert.Equal(1, repositoryRemoves.Count(x => Equals(x, thirdValue)));
-        }
-
-
-        [Theory]
-        [AutoData]
         public void Lookup_SingleElementAdded_ReturnsTrue(OUR_SetWithVCElement<TestType> value)
         {
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { value }, new List<OUR_SetWithVCElement<TestType>>());
+            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { value }.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
 
             var lookup = _orSetService.Lookup(value.Value);
 
@@ -313,7 +285,7 @@ namespace CRDT.Application.UnitTests.Convergent
                 new (value, firstTag, new VectorClock(clock.Add(node, 0))),
                 new (value, secondTag, new VectorClock(clock.Add(node, 0)))
             };
-            _orSetService.Merge(elements, new List<OUR_SetWithVCElement<TestType>>());
+            _orSetService.Merge(elements.ToImmutableHashSet(), ImmutableHashSet<OUR_SetWithVCElement<TestType>>.Empty);
 
             var lookup = _orSetService.Lookup(value);
 
@@ -324,7 +296,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_NonExistingElement_ReturnsFalse(OUR_SetWithVCElement<TestType> value)
         {
-            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { value }, new List<OUR_SetWithVCElement<TestType>> { value });
+            _orSetService.Merge(new List<OUR_SetWithVCElement<TestType>> { value }.ToImmutableHashSet(), new List<OUR_SetWithVCElement<TestType>> { value }.ToImmutableHashSet());
 
             var lookup = _orSetService.Lookup(value.Value);
 
@@ -342,7 +314,7 @@ namespace CRDT.Application.UnitTests.Convergent
                 new (value, firstTag, new VectorClock(clock.Add(node, 0))),
                 new (value, secondTag, new VectorClock(clock.Add(node, 0)))
             };
-            _orSetService.Merge(elements, elements);
+            _orSetService.Merge(elements.ToImmutableHashSet(), elements.ToImmutableHashSet());
 
             var lookup = _orSetService.Lookup(value);
 
