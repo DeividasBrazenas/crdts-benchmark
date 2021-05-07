@@ -18,36 +18,42 @@ namespace CRDT.Sets.Convergent.LastWriterWins
         {
         }
 
-        public LWW_OptimizedSet<T> Merge(ImmutableHashSet<LWW_OptimizedSetElement<T>> elements)
+        public LWW_OptimizedSet<T> Add(T value, long timestamp)
         {
-            var union = Elements.Union(elements);
+            var existingElement = Elements.FirstOrDefault(a => a.Value.Id == value.Id);
 
-            var validElements = new HashSet<LWW_OptimizedSetElement<T>>();
-
-            foreach (var element in union)
+            if (existingElement is not null && existingElement.Timestamp < timestamp)
             {
-                if (!element.Removed)
-                {
-                    if (union.Any(e => Equals(element.Value, e.Value) && e.Removed && e.Timestamp > element.Timestamp))
-                    {
-                        continue;
-                    }
-                }
-                else
-                {
-                    if (union.Any(e => Equals(element.Value, e.Value) && !e.Removed && e.Timestamp > element.Timestamp))
-                    {
-                        continue;
-                    }
-                }
+                var elements = Elements.Remove(existingElement);
 
-                validElements.Add(element);
+                return new(elements.Add(new LWW_OptimizedSetElement<T>(value, timestamp, false)));
             }
 
-            var filteredElements = validElements
-                .Where(a => !validElements.Any(oa => a.Value.Id == oa.Value.Id && a.Timestamp < oa.Timestamp));
+            if (existingElement is null)
+            {
+                return new(Elements.Add(new LWW_OptimizedSetElement<T>(value, timestamp, false)));
+            }
 
-            return new(filteredElements.ToImmutableHashSet());
+            return this;
+        }
+
+        public LWW_OptimizedSet<T> Remove(T value, long timestamp)
+        {
+            var add = Elements.FirstOrDefault(e => Equals(e.Value, value));
+
+            if (add is not null && add.Timestamp < timestamp)
+            {
+                var elements = Elements.Remove(add);
+
+                return new(elements.Add(new LWW_OptimizedSetElement<T>(value, timestamp, true)));
+            }
+
+            return this;
+        }
+
+        public LWW_OptimizedSet<T> Merge(ImmutableHashSet<LWW_OptimizedSetElement<T>> elements)
+        {
+            return new(Elements.Union(elements));
         }
     }
 }

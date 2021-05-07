@@ -8,39 +8,74 @@ namespace CRDT.Application.Commutative.Set
     public class LWW_OptimizedSetService<T> where T : DistributedEntity
     {
         private readonly ILWW_OptimizedSetRepository<T> _repository;
+        private readonly object _lockObject = new();
 
         public LWW_OptimizedSetService(ILWW_OptimizedSetRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Add(T value, long timestamp)
+        public void LocalAdd(T value, long timestamp)
         {
-            var existingElements = _repository.GetElements();
+            lock (_lockObject)
+            {
+                var existingElements = _repository.GetElements();
 
-            var set = new LWW_OptimizedSet<T>(existingElements.ToImmutableHashSet());
+                var set = new LWW_OptimizedSet<T>(existingElements);
 
-            set = set.Add(value, timestamp);
+                set = set.Add(value, timestamp);
 
-            _repository.PersistElements(set.Elements);
+                _repository.PersistElements(set.Elements);
+            }
         }
 
-        public void Remove(T value, long timestamp)
+        public void LocalRemove(T value, long timestamp)
         {
-            var existingElements = _repository.GetElements();
+            lock (_lockObject)
+            {
+                var existingElements = _repository.GetElements();
 
-            var set = new LWW_OptimizedSet<T>(existingElements.ToImmutableHashSet());
+                var set = new LWW_OptimizedSet<T>(existingElements);
 
-            set = set.Remove(value, timestamp);
+                set = set.Remove(value, timestamp);
 
-            _repository.PersistElements(set.Elements);
+                _repository.PersistElements(set.Elements);
+            }
+        }
+
+        public void DownstreamAdd(T value, long timestamp)
+        {
+            lock (_lockObject)
+            {
+                var existingElements = _repository.GetElements();
+
+                var set = new LWW_OptimizedSet<T>(existingElements);
+
+                set = set.Add(value, timestamp);
+
+                _repository.PersistElements(set.Elements);
+            }
+        }
+
+        public void DownstreamRemove(T value, long timestamp)
+        {
+            lock (_lockObject)
+            {
+                var existingElements = _repository.GetElements();
+
+                var set = new LWW_OptimizedSet<T>(existingElements);
+
+                set = set.Remove(value, timestamp);
+
+                _repository.PersistElements(set.Elements);
+            }
         }
 
         public bool Lookup(T value)
         {
             var existingElements = _repository.GetElements();
 
-            var set = new LWW_OptimizedSet<T>(existingElements.ToImmutableHashSet());
+            var set = new LWW_OptimizedSet<T>(existingElements);
 
             var lookup = set.Lookup(value);
 

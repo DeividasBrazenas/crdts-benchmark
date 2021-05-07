@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent.Set;
 using CRDT.Application.Interfaces;
@@ -25,7 +26,7 @@ namespace CRDT.Application.UnitTests.Convergent
         public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, long timestamp)
         {
             var element = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { element });
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { element }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Contains(element, repositoryValues);
@@ -33,12 +34,12 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<LWW_OptimizedSetElement<TestType>> elements, TestType value, long timestamp)
+        public void Add_WithExistingValues_AddsElementToTheRepository(HashSet<LWW_OptimizedSetElement<TestType>> elements, TestType value, long timestamp)
         {
-            _repository.PersistElements(elements);
+            _repository.PersistElements(elements.ToImmutableHashSet());
 
             var element = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { element });
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { element }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Contains(element, repositoryValues);
@@ -48,11 +49,10 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Remove_AddExistsWithLowerTimestamp_AddsElementToTheRepository(TestType value, long timestamp)
         {
-            var addElement = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
             var removeElement = new LWW_OptimizedSetElement<TestType>(value, timestamp + 10, true);
 
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { addElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { removeElement });
+            _lwwSetService.LocalAdd(value, timestamp);
+            _lwwSetService.LocalRemove(value, timestamp + 10);
 
             var repositoryValues = _repository.GetElements();
 
@@ -64,13 +64,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Merge_IsIdempotent(TestType value, long timestamp)
         {
-            var addElement = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
-            var removeElement = new LWW_OptimizedSetElement<TestType>(value, timestamp + 10, true);
+            var removeElement = new LWW_OptimizedSetElement<TestType>(value, timestamp, true);
 
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { addElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { removeElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { removeElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { removeElement });
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { removeElement }.ToImmutableHashSet());
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { removeElement }.ToImmutableHashSet());
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { removeElement }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
         
@@ -84,7 +82,7 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var addElement = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
 
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { addElement });
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { addElement }.ToImmutableHashSet());
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -95,11 +93,8 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_Removed_ReturnsFalse(TestType value, long timestamp)
         {
-            var addElement = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
-            var removeElement = new LWW_OptimizedSetElement<TestType>(value, timestamp + 10, true);
-
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { addElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { removeElement });
+            _lwwSetService.LocalAdd(value, timestamp);
+            _lwwSetService.LocalRemove(value, timestamp + 10);
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -114,9 +109,9 @@ namespace CRDT.Application.UnitTests.Convergent
             var removeElement = new LWW_OptimizedSetElement<TestType>(value, timestamp + 10, true);
             var reAddElement = new LWW_OptimizedSetElement<TestType>(value, timestamp + 20, false);
 
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { addElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { removeElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetElement<TestType>> { reAddElement });
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { addElement }.ToImmutableHashSet());
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { removeElement }.ToImmutableHashSet());
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { reAddElement }.ToImmutableHashSet());
 
             var lookup = _lwwSetService.Lookup(value);
 

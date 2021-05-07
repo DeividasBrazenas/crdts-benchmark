@@ -68,7 +68,7 @@ namespace CRDT.Sets.UnitTests.Convergent
 
             var newLwwSet = lwwSet.Merge(new[] { elementThree, elementFour, elementFive }.ToImmutableHashSet());
 
-            Assert.Equal(3, newLwwSet.Elements.Count);
+            Assert.Equal(5, newLwwSet.Elements.Count);
             Assert.Contains(newLwwSet.Elements, e => Equals(e, elementTwo));
             Assert.Contains(newLwwSet.Elements, e => Equals(e, elementThree));
             Assert.Contains(newLwwSet.Elements, e => Equals(e, elementFour));
