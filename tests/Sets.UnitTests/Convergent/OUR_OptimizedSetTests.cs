@@ -47,8 +47,8 @@ namespace CRDT.Sets.UnitTests.Convergent
         public void Lookup_AddedAndRemoved_ReturnsFalse(TestType value, Guid tag, long timestamp)
         {
             var ourSet = new OUR_OptimizedSet<TestType>();
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(value, tag, timestamp, false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(value, tag, timestamp + 1, true) }.ToImmutableHashSet());
+            ourSet = ourSet.Add(value, tag, timestamp);
+            ourSet = ourSet.Remove(value, tag, timestamp + 1);
 
             var lookup = ourSet.Lookup(value);
 
@@ -95,16 +95,16 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var ourSet = new OUR_OptimizedSet<TestType>();
 
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(one, tagOne, timestamp, false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(one, tagOne, timestamp + 1, false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(one, tagTwo, timestamp + 2, true) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(two, tagTwo, timestamp + 3, false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(two, tagTwo, timestamp + 4, false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(two, tagOne, timestamp + 5, false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(two, tagOne, timestamp + 6, true) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(three, tagThree, timestamp + 7, true) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(three, tagThree, timestamp + 8, false) }.ToImmutableHashSet());
-            ourSet = ourSet.Merge(new[] { new OUR_OptimizedSetElement<TestType>(three, tagThree, timestamp + 9, true) }.ToImmutableHashSet());
+            ourSet = ourSet.Add(one, tagOne, timestamp);
+            ourSet = ourSet.Add(one, tagOne, timestamp + 1);
+            ourSet = ourSet.Remove(one, tagTwo, timestamp + 2);
+            ourSet = ourSet.Add(two, tagTwo, timestamp + 3);
+            ourSet = ourSet.Add(two, tagTwo, timestamp + 4);
+            ourSet = ourSet.Add(two, tagOne, timestamp + 5);
+            ourSet = ourSet.Remove(two, tagOne, timestamp + 6);
+            ourSet = ourSet.Remove(three, tagThree, timestamp + 7);
+            ourSet = ourSet.Add(three, tagThree, timestamp + 8);
+            ourSet = ourSet.Remove(three, tagThree, timestamp + 9);
 
             var actualValues = ourSet.Values;
 
@@ -130,7 +130,7 @@ namespace CRDT.Sets.UnitTests.Convergent
                 new OUR_OptimizedSetElement<TestType>(three, tagThree, timestamp + 7, false),
             }.ToImmutableHashSet());
 
-            Assert.Equal(4, newOrSet.Elements.Count);
+            Assert.Equal(7, newOrSet.Elements.Count);
             Assert.Contains(new OUR_OptimizedSetElement<TestType>(one, tagOne, timestamp + 4, false), newOrSet.Elements);
             Assert.Contains(new OUR_OptimizedSetElement<TestType>(two, tagOne, timestamp + 7, true), newOrSet.Elements);
             Assert.Contains(new OUR_OptimizedSetElement<TestType>(three, tagThree, timestamp + 7, false), newOrSet.Elements);
