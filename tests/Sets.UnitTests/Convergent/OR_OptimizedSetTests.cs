@@ -46,8 +46,8 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var orSet = new OR_OptimizedSet<TestType>();
 
-            orSet = orSet.Merge(new[] { new OR_OptimizedSetElement<TestType>(value, tag, false) }.ToImmutableHashSet());
-            orSet = orSet.Merge(new[] { new OR_OptimizedSetElement<TestType>(value, tag, true) }.ToImmutableHashSet());
+            orSet = orSet.Add(value, tag);
+            orSet = orSet.Remove(value, tag);
 
             var lookup = orSet.Lookup(value);
 
@@ -75,13 +75,13 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var orSet = new OR_OptimizedSet<TestType>();
 
-            orSet = orSet.Merge(new[] { new OR_OptimizedSetElement<TestType>(one, tagOne, false) }.ToImmutableHashSet());
-            orSet = orSet.Merge(new[] { new OR_OptimizedSetElement<TestType>(one, tagOne, false) }.ToImmutableHashSet());
-            orSet = orSet.Merge(new[] { new OR_OptimizedSetElement<TestType>(one, tagTwo, true) }.ToImmutableHashSet());
-            orSet = orSet.Merge(new[] { new OR_OptimizedSetElement<TestType>(two, tagThree, false) }.ToImmutableHashSet());
-            orSet = orSet.Merge(new[] { new OR_OptimizedSetElement<TestType>(three, tagThree, true) }.ToImmutableHashSet());
-            orSet = orSet.Merge(new[] { new OR_OptimizedSetElement<TestType>(three, tagThree, false) }.ToImmutableHashSet());
-            orSet = orSet.Merge(new[] { new OR_OptimizedSetElement<TestType>(three, tagThree, true) }.ToImmutableHashSet());
+            orSet = orSet.Add(one, tagOne);
+            orSet = orSet.Add(one, tagOne);
+            orSet = orSet.Remove(one, tagTwo);
+            orSet = orSet.Add(two, tagThree);
+            orSet = orSet.Remove(three, tagThree);
+            orSet = orSet.Add(three, tagThree);
+            orSet = orSet.Remove(three, tagThree);
 
             var actualValues = orSet.Values;
 
@@ -107,7 +107,7 @@ namespace CRDT.Sets.UnitTests.Convergent
                 new OR_OptimizedSetElement<TestType>(three, tagThree, false),
             }.ToImmutableHashSet());
 
-            Assert.Equal(4, newOrSet.Elements.Count);
+            Assert.Equal(5, newOrSet.Elements.Count);
             Assert.Contains(new OR_OptimizedSetElement<TestType>(one, tagOne, false), newOrSet.Elements);
             Assert.Contains(new OR_OptimizedSetElement<TestType>(two, tagOne, true), newOrSet.Elements);
             Assert.Contains(new OR_OptimizedSetElement<TestType>(three, tagThree, false), newOrSet.Elements);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent.Set;
@@ -30,7 +31,7 @@ namespace CRDT.Application.UnitTests.Convergent
         public void MergeAdds_SingleValueWithEmptyRepository_AddsElementsToTheRepository(TestType value, Guid tag)
         {
             var element = new OR_OptimizedSetElement<TestType>(value, tag, false);
-            _orSetService.Merge(new List<OR_OptimizedSetElement<TestType>> { element });
+            _orSetService.Merge(new HashSet<OR_OptimizedSetElement<TestType>> { element }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -38,9 +39,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAdds_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(List<OR_OptimizedSetElement<TestType>> values)
+        public void MergeAdds_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(HashSet<OR_OptimizedSetElement<TestType>> values)
         {
-            _orSetService.Merge(values);
+            _orSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             AssertContains(values, repositoryValues);
@@ -48,12 +49,12 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAdds_SingleElement_AddsElementsToTheRepository(List<OR_OptimizedSetElement<TestType>> existingValues, TestType value, Guid tag)
+        public void MergeAdds_SingleElement_AddsElementsToTheRepository(HashSet<OR_OptimizedSetElement<TestType>> existingValues, TestType value, Guid tag)
         {
-            _repository.PersistElements(existingValues);
+            _repository.PersistElements(existingValues.ToImmutableHashSet());
 
             var element = new OR_OptimizedSetElement<TestType>(value, tag, false);
-            _orSetService.Merge(new List<OR_OptimizedSetElement<TestType>> { element });
+            _orSetService.Merge(new HashSet<OR_OptimizedSetElement<TestType>> { element }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -61,11 +62,11 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAdds_SeveralElements_AddsElementsToTheRepository(List<OR_OptimizedSetElement<TestType>> existingValues, List<OR_OptimizedSetElement<TestType>> values)
+        public void MergeAdds_SeveralElements_AddsElementsToTheRepository(HashSet<OR_OptimizedSetElement<TestType>> existingValues, HashSet<OR_OptimizedSetElement<TestType>> values)
         {
-            _repository.PersistElements(existingValues);
+            _repository.PersistElements(existingValues.ToImmutableHashSet());
 
-            _orSetService.Merge(values);
+            _orSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             AssertContains(values, repositoryValues);
@@ -73,13 +74,13 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_IsIdempotent(List<OR_OptimizedSetElement<TestType>> values)
+        public void Merge_IsIdempotent(HashSet<OR_OptimizedSetElement<TestType>> values)
         {
-            _repository.PersistElements(values);
+            _repository.PersistElements(values.ToImmutableHashSet());
 
-            _orSetService.Merge(values);
-            _orSetService.Merge(values);
-            _orSetService.Merge(values);
+            _orSetService.Merge(values.ToImmutableHashSet());
+            _orSetService.Merge(values.ToImmutableHashSet());
+            _orSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             AssertContains(values, repositoryValues);
@@ -98,16 +99,16 @@ namespace CRDT.Application.UnitTests.Convergent
             var firstRepository = new OR_OptimizedSetRepository();
             var firstService = new OR_OptimizedSetService<TestType>(firstRepository);
 
-            _repository.PersistElements(new List<OR_OptimizedSetElement<TestType>> { firstElement, secondElement, thirdElement });
-            firstService.Merge(new List<OR_OptimizedSetElement<TestType>> { fourthElement, fifthElement });
+            _repository.PersistElements(new HashSet<OR_OptimizedSetElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
+            firstService.Merge(new HashSet<OR_OptimizedSetElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
 
             var firstRepositoryValues = firstRepository.GetElements();
 
             var secondRepository = new OR_OptimizedSetRepository();
             var secondService = new OR_OptimizedSetService<TestType>(secondRepository);
 
-            _repository.PersistElements(new List<OR_OptimizedSetElement<TestType>> { fourthElement, fifthElement });
-            secondService.Merge(new List<OR_OptimizedSetElement<TestType>> { firstElement, secondElement, thirdElement });
+            _repository.PersistElements(new HashSet<OR_OptimizedSetElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
+            secondService.Merge(new HashSet<OR_OptimizedSetElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
 
             var secondRepositoryValues = firstRepository.GetElements();
 
@@ -118,8 +119,8 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void MergeRemoves_SingleValueWithEmptyRepository_AddsElementsToTheRepository(TestType value, Guid tag)
         {
-            _repository.PersistElements(new List<OR_OptimizedSetElement<TestType>> { new(value, tag, false) });
-            _orSetService.Merge(new List<OR_OptimizedSetElement<TestType>> { new(value, tag, true) });
+            _repository.PersistElements(new HashSet<OR_OptimizedSetElement<TestType>> { new(value, tag, false) }.ToImmutableHashSet());
+            _orSetService.Merge(new HashSet<OR_OptimizedSetElement<TestType>> { new(value, tag, true) }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x.Value, value) && x.Removed));
@@ -127,10 +128,10 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeRemoves_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(List<OR_OptimizedSetElement<TestType>> values)
+        public void MergeRemoves_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(HashSet<OR_OptimizedSetElement<TestType>> values)
         {
-            _repository.PersistElements(values);
-            _orSetService.Merge(values);
+            _repository.PersistElements(values.ToImmutableHashSet());
+            _orSetService.Merge(values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             AssertContains(values, repositoryValues);
@@ -138,12 +139,12 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeRemoves_SingleElement_AddsElementsToTheRepository(List<OR_OptimizedSetElement<TestType>> existingValues, TestType value, Guid tag)
+        public void MergeRemoves_SingleElement_AddsElementsToTheRepository(HashSet<OR_OptimizedSetElement<TestType>> existingValues, TestType value, Guid tag)
         {
-            _repository.PersistElements(existingValues);
-            _repository.PersistElements(new List<OR_OptimizedSetElement<TestType>> { new(value, tag, false) });
+            _repository.PersistElements(existingValues.ToImmutableHashSet());
+            _repository.PersistElements(new HashSet<OR_OptimizedSetElement<TestType>> { new(value, tag, false) }.ToImmutableHashSet());
 
-            _orSetService.Merge(new List<OR_OptimizedSetElement<TestType>> { new(value, tag, true) });
+            _orSetService.Merge(new HashSet<OR_OptimizedSetElement<TestType>> { new(value, tag, true) }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x.Value, value) && x.Removed));
@@ -153,7 +154,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_OptimizedSingleElementAdded_ReturnsTrue(TestType value, Guid tag)
         {
-            _orSetService.Merge(new List<OR_OptimizedSetElement<TestType>> { new(value, tag, false) });
+            _orSetService.Merge(new HashSet<OR_OptimizedSetElement<TestType>> { new(value, tag, false) }.ToImmutableHashSet());
 
             var lookup = _orSetService.Lookup(value);
 
@@ -164,12 +165,12 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_OptimizedSeveralElementsWithDifferentTags_ReturnsTrue(TestType value, Guid firstTag, Guid secondTag)
         {
-            var elements = new List<OR_OptimizedSetElement<TestType>>
+            var elements = new HashSet<OR_OptimizedSetElement<TestType>>
             {
                 new (value, firstTag, false),
                 new (value, secondTag, false)
             };
-            _orSetService.Merge(elements);
+            _orSetService.Merge(elements.ToImmutableHashSet());
 
             var lookup = _orSetService.Lookup(value);
 
@@ -180,7 +181,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_NonExistingElement_ReturnsFalse(TestType value, Guid id)
         {
-            _orSetService.Merge(new List<OR_OptimizedSetElement<TestType>> { new(value, id, true) });
+            _orSetService.Merge(new HashSet<OR_OptimizedSetElement<TestType>> { new(value, id, true) }.ToImmutableHashSet());
 
             var lookup = _orSetService.Lookup(value);
 
@@ -191,20 +192,20 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_AllTagsRemoved_ReturnsFalse(TestType value, Guid firstTag, Guid secondTag)
         {
-            var elements = new List<OR_OptimizedSetElement<TestType>>
+            var elements = new HashSet<OR_OptimizedSetElement<TestType>>
             {
                 new(value, firstTag, true),
                 new(value, secondTag, true)
             };
 
-            _orSetService.Merge(elements);
+            _orSetService.Merge(elements.ToImmutableHashSet());
 
             var lookup = _orSetService.Lookup(value);
 
             Assert.False(lookup);
         }
 
-        private void AssertContains(List<OR_OptimizedSetElement<TestType>> expectedValues, IEnumerable<OR_OptimizedSetElement<TestType>> actualValues)
+        private void AssertContains(HashSet<OR_OptimizedSetElement<TestType>> expectedValues, IEnumerable<OR_OptimizedSetElement<TestType>> actualValues)
         {
             foreach (var value in expectedValues)
             {

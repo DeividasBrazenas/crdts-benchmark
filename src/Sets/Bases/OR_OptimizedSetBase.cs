@@ -19,9 +19,14 @@ namespace CRDT.Sets.Bases
             Elements = elements;
         }
 
-        public ImmutableHashSet<T> Values =>
+        public ImmutableHashSet<OR_OptimizedSetElement<T>> ValidElements =>
             Elements
                 .Where(a => !a.Removed)
+                .Distinct()
+                .ToImmutableHashSet();
+
+        public ImmutableHashSet<T> Values =>
+            ValidElements
                 .Select(e => e.Value)
                 .Distinct()
                 .ToImmutableHashSet();

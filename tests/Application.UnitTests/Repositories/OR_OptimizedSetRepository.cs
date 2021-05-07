@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Application.Interfaces;
 using CRDT.Sets.Entities;
@@ -8,28 +9,18 @@ namespace CRDT.Application.UnitTests.Repositories
 {
     public class OR_OptimizedSetRepository : IOR_OptimizedSetRepository<TestType>
     {
-        public List<OR_OptimizedSetElement<TestType>> Elements { get; }
+        public ImmutableHashSet<OR_OptimizedSetElement<TestType>> Elements { get; private set; }
 
         public OR_OptimizedSetRepository()
         {
-            Elements = new List<OR_OptimizedSetElement<TestType>>();
+            Elements = ImmutableHashSet<OR_OptimizedSetElement<TestType>>.Empty;
         }
 
-        public IEnumerable<OR_OptimizedSetElement<TestType>> GetElements() => Elements;
+        public ImmutableHashSet<OR_OptimizedSetElement<TestType>> GetElements() => Elements;
 
-        public void PersistElements(IEnumerable<OR_OptimizedSetElement<TestType>> elements)
+        public void PersistElements(ImmutableHashSet<OR_OptimizedSetElement<TestType>> elements)
         {
-            foreach (var element in elements)
-            {
-                var existingElement = Elements.FirstOrDefault(e => Equals(e.Value, element.Value) && e.Tag == element.Tag);
-
-                if (existingElement is not null)
-                {
-                    Elements.Remove(existingElement);
-                }
-
-                Elements.Add(element);
-            }
+            Elements = elements;
         }
     }
 }

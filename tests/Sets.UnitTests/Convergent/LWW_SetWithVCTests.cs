@@ -75,11 +75,9 @@ namespace CRDT.Sets.UnitTests.Convergent
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
             var lwwSet = new LWW_SetWithVC<TestType>();
 
-            var add = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)));
-            var remove = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
-            var reAdd = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 2)));
-
-            lwwSet = lwwSet.Merge(new[] { add, reAdd }.ToImmutableHashSet(), new[] { remove }.ToImmutableHashSet());
+            lwwSet = lwwSet.Add(value, new VectorClock(clock.Add(node, 0)));
+            lwwSet = lwwSet.Remove(value, new VectorClock(clock.Add(node, 1)));
+            lwwSet = lwwSet.Add(value, new VectorClock(clock.Add(node, 2)));
 
             var lookup = lwwSet.Lookup(value);
 
