@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Benchmarks.TestTypes;
 using CRDT.Application.Interfaces;
@@ -8,43 +9,27 @@ namespace Benchmarks.Repositories
 {
     public class OUR_SetRepository : IOUR_SetRepository<TestType>
     {
-        public List<OUR_SetElement<TestType>> Adds { get; }
-        public List<OUR_SetElement<TestType>> Removes { get; }
+        public ImmutableHashSet<OUR_SetElement<TestType>> Adds { get; private set; }
+        public ImmutableHashSet<OUR_SetElement<TestType>> Removes { get; private set; }
 
         public OUR_SetRepository()
         {
-            Adds = new List<OUR_SetElement<TestType>>();
-            Removes = new List<OUR_SetElement<TestType>>();
+            Adds = ImmutableHashSet<OUR_SetElement<TestType>>.Empty;
+            Removes = ImmutableHashSet<OUR_SetElement<TestType>>.Empty;
         }
 
-        public IEnumerable<OUR_SetElement<TestType>> GetAdds() => Adds;
+        public ImmutableHashSet<OUR_SetElement<TestType>> GetAdds() => Adds;
 
-        public IEnumerable<OUR_SetElement<TestType>> GetRemoves() => Removes;
+        public ImmutableHashSet<OUR_SetElement<TestType>> GetRemoves() => Removes;
 
-        public void PersistAdds(IEnumerable<OUR_SetElement<TestType>> values)
+        public void PersistAdds(ImmutableHashSet<OUR_SetElement<TestType>> values)
         {
-            foreach (var value in values)
-            {
-                var entity = Adds.FirstOrDefault(a => a.Value.Id == value.Value.Id && a.Tag == value.Tag);
-
-                if (entity is not null)
-                {
-                    Adds.Remove(entity);
-                }
-
-                Adds.Add(value);
-            }
+            Adds = values;
         }
 
-        public void PersistRemoves(IEnumerable<OUR_SetElement<TestType>> values)
+        public void PersistRemoves(ImmutableHashSet<OUR_SetElement<TestType>> values)
         {
-            foreach (var value in values)
-            {
-                if (!Removes.Any(e => Equals(e, value)))
-                {
-                    Removes.Add(value);
-                }
-            }
+            Removes = values;
         }
     }
 }

@@ -128,12 +128,13 @@ namespace CRDT.Sets.UnitTests.Convergent
             var newOrSet = ourSet.Merge(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
 
             Assert.Equal(4, newOrSet.Adds.Count);
-            Assert.Equal(1, newOrSet.Removes.Count);
+            Assert.Equal(2, newOrSet.Removes.Count);
             Assert.Contains(one, newOrSet.Adds);
             Assert.Contains(two, newOrSet.Adds);
             Assert.Contains(three, newOrSet.Adds);
             Assert.Contains(four, newOrSet.Adds);
             Assert.Contains(three, newOrSet.Removes);
+            Assert.Contains(five, newOrSet.Removes);
         }
     }
 }

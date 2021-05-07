@@ -20,7 +20,8 @@ namespace Benchmarks
             //BenchmarkRunner.Run<LWW_OptimizedSetBenchmarks>();
             //BenchmarkRunner.Run<LWW_OptimizedSetWithVCBenchmarks>();
             //BenchmarkRunner.Run<OR_SetBenchmarks>();
-            BenchmarkRunner.Run<OR_OptimizedSetBenchmarks>();
+            //BenchmarkRunner.Run<OR_OptimizedSetBenchmarks>();
+            BenchmarkRunner.Run<OUR_SetBenchmarks>();
         }
     }
 }

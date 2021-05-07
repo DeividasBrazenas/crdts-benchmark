@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Entities;
 
@@ -6,12 +7,12 @@ namespace CRDT.Application.Interfaces
 {
     public interface IOUR_SetRepository<T> where T : DistributedEntity
     {
-        IEnumerable<OUR_SetElement<T>> GetAdds();
+        ImmutableHashSet<OUR_SetElement<T>> GetAdds();
 
-        IEnumerable<OUR_SetElement<T>> GetRemoves();
+        ImmutableHashSet<OUR_SetElement<T>> GetRemoves();
 
-        void PersistAdds(IEnumerable<OUR_SetElement<T>> values);
+        void PersistAdds(ImmutableHashSet<OUR_SetElement<T>> values);
 
-        void PersistRemoves(IEnumerable<OUR_SetElement<T>> values);
+        void PersistRemoves(ImmutableHashSet<OUR_SetElement<T>> values);
     }
 }
