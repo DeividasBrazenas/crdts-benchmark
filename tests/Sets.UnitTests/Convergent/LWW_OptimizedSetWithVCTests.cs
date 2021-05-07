@@ -49,13 +49,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
             var lwwSet = new LWW_OptimizedSetWithVC<TestType>();
 
-            var add = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
-            var remove = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
-            var reAdd = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 2)), false);
-
-            lwwSet = lwwSet.Merge(new[] { new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false) }.ToImmutableHashSet());
-            lwwSet = lwwSet.Merge(new[] { new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true) }.ToImmutableHashSet());
-            lwwSet = lwwSet.Merge(new[] { new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 2)), false) }.ToImmutableHashSet());
+            lwwSet = lwwSet.Add(value, new VectorClock(clock.Add(node, 0)));
+            lwwSet = lwwSet.Remove(value, new VectorClock(clock.Add(node, 1)));
+            lwwSet = lwwSet.Add(value, new VectorClock(clock.Add(node, 2)));
 
             var lookup = lwwSet.Lookup(value);
 

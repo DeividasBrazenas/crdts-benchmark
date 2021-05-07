@@ -23,9 +23,14 @@ namespace CRDT.Sets.Bases
             Removes = removes;
         }
 
-        public ImmutableHashSet<T> Values =>
+        public ImmutableHashSet<OR_SetElement<T>> Elements =>
             Adds
                 .Where(a => !Removes.Any(r => Equals(r, a) && a.Tag == r.Tag))
+                .Distinct()
+                .ToImmutableHashSet();
+
+        public ImmutableHashSet<T> Values =>
+            Elements
                 .Select(e => e.Value)
                 .Distinct()
                 .ToImmutableHashSet();

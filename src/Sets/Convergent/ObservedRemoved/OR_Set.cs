@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
@@ -17,15 +18,21 @@ namespace CRDT.Sets.Convergent.ObservedRemoved
         {
         }
 
+        public OR_Set<T> Add(T value, Guid tag) => new(Adds.Add(new OR_SetElement<T>(value, tag)), Removes);
+
+        public OR_Set<T> Remove(T value, Guid tag)
+        {
+            if (Adds.Any(e => Equals(e.Value, value) && e.Tag == tag))
+            {
+                return new(Adds, Removes.Add(new OR_SetElement<T>(value, tag)));
+            }
+
+            return this;
+        }
+
         public OR_Set<T> Merge(ImmutableHashSet<OR_SetElement<T>> adds, ImmutableHashSet<OR_SetElement<T>> removes)
         {
-            var addsUnion = Adds.Union(adds);
-
-            var removesUnion = Removes.Union(removes);
-
-            var validRemoves = removesUnion.Where(r => addsUnion.Any(a => Equals(a, r)));
-
-            return new(addsUnion.ToImmutableHashSet(), validRemoves.ToImmutableHashSet());
+            return new(Adds.Union(adds), Removes.Union(removes));
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Commutative.Set;
@@ -26,7 +27,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, Guid tag)
         {
-            _orSetService.Add(value, tag);
+            _orSetService.DownstreamAdd(value, tag);
 
             var repositoryValues = _repository.GetAdds();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag);
@@ -36,11 +37,11 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<OR_SetElement<TestType>> adds, TestType value, Guid tag)
+        public void Add_WithExistingValues_AddsElementToTheRepository(HashSet<OR_SetElement<TestType>> adds, TestType value, Guid tag)
         {
-            _repository.PersistAdds(adds);
+            _repository.PersistAdds(adds.ToImmutableHashSet());
 
-            _orSetService.Add(value, tag);
+            _orSetService.DownstreamAdd(value, tag);
 
             var repositoryValues = _repository.GetAdds();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag);
@@ -50,12 +51,12 @@ namespace CRDT.Application.UnitTests.Commutative
 
         [Theory]
         [AutoData]
-        public void Add_WithDifferentTag_AddsElementToTheRepository(List<OR_SetElement<TestType>> adds, TestType value, Guid tag, Guid otherTag)
+        public void Add_WithDifferentTag_AddsElementToTheRepository(HashSet<OR_SetElement<TestType>> adds, TestType value, Guid tag, Guid otherTag)
         {
-            _repository.PersistAdds(adds);
+            _repository.PersistAdds(adds.ToImmutableHashSet());
 
-            _orSetService.Add(value, tag);
-            _orSetService.Add(value, otherTag);
+            _orSetService.DownstreamAdd(value, tag);
+            _orSetService.DownstreamAdd(value, otherTag);
 
             var repositoryValues = _repository.GetAdds();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value));
@@ -67,9 +68,9 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Add_IsIdempotent(TestType value, Guid tag)
         {
-            _orSetService.Add(value, tag);
-            _orSetService.Add(value, tag);
-            _orSetService.Add(value, tag);
+            _orSetService.DownstreamAdd(value, tag);
+            _orSetService.DownstreamAdd(value, tag);
+            _orSetService.DownstreamAdd(value, tag);
 
             var repositoryValues = _repository.GetAdds();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value));
@@ -81,7 +82,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(TestType value, Guid tag)
         {
-            _orSetService.Remove(value, new[] { tag });
+            _orSetService.DownstreamRemove(value, new[] { tag });
 
             var repositoryValues = _repository.GetRemoves();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value));
@@ -93,8 +94,8 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_AddExists_AddsElementToTheRepository(TestType value, Guid tag)
         {
-            _orSetService.Add(value, tag);
-            _orSetService.Remove(value, new[] { tag });
+            _orSetService.DownstreamAdd(value, tag);
+            _orSetService.DownstreamRemove(value, new[] { tag });
 
             var repositoryValues = _repository.GetRemoves();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag);
@@ -106,10 +107,10 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_IsIdempotent(TestType value, Guid tag)
         {
-            _orSetService.Add(value, tag);
-            _orSetService.Remove(value, new[] { tag });
-            _orSetService.Remove(value, new[] { tag });
-            _orSetService.Remove(value, new[] { tag });
+            _orSetService.DownstreamAdd(value, tag);
+            _orSetService.DownstreamRemove(value, new[] { tag });
+            _orSetService.DownstreamRemove(value, new[] { tag });
+            _orSetService.DownstreamRemove(value, new[] { tag });
 
             var repositoryValues = _repository.GetRemoves();
             var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag);
@@ -121,7 +122,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_SingleElementAdded_ReturnsTrue(TestType value, Guid tag)
         {
-            _orSetService.Add(value, tag);
+            _orSetService.DownstreamAdd(value, tag);
 
             var lookup = _orSetService.Lookup(value);
 
@@ -132,8 +133,8 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_SeveralElementsWithDifferentTags_ReturnsTrue(TestType value, Guid tag, Guid otherTag)
         {
-            _orSetService.Add(value, tag);
-            _orSetService.Add(value, otherTag);
+            _orSetService.DownstreamAdd(value, tag);
+            _orSetService.DownstreamAdd(value, otherTag);
 
             var lookup = _orSetService.Lookup(value);
 
@@ -153,9 +154,9 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_AllTagsRemoved_ReturnsFalse(TestType value, Guid tag, Guid otherTag)
         {
-            _orSetService.Add(value, tag);
-            _orSetService.Add(value, otherTag);
-            _orSetService.Remove(value, new []{tag, otherTag});
+            _orSetService.DownstreamAdd(value, tag);
+            _orSetService.DownstreamAdd(value, otherTag);
+            _orSetService.DownstreamRemove(value, new []{tag, otherTag});
 
             var lookup = _orSetService.Lookup(value);
 

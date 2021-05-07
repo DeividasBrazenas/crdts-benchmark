@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Benchmarks.TestTypes;
 using CRDT.Application.Interfaces;
@@ -8,39 +9,27 @@ namespace Benchmarks.Repositories
 {
     public class OR_SetRepository : IOR_SetRepository<TestType>
     {
-        public List<OR_SetElement<TestType>> Adds { get; }
-        public List<OR_SetElement<TestType>> Removes { get; }
+        public ImmutableHashSet<OR_SetElement<TestType>> Adds { get; private set; }
+        public ImmutableHashSet<OR_SetElement<TestType>> Removes { get; private set; }
 
         public OR_SetRepository()
         {
-            Adds = new List<OR_SetElement<TestType>>();
-            Removes = new List<OR_SetElement<TestType>>();
+            Adds = ImmutableHashSet<OR_SetElement<TestType>>.Empty;
+            Removes = ImmutableHashSet<OR_SetElement<TestType>>.Empty;
         }
 
-        public IEnumerable<OR_SetElement<TestType>> GetAdds() => Adds;
+        public ImmutableHashSet<OR_SetElement<TestType>> GetAdds() => Adds;
 
-        public IEnumerable<OR_SetElement<TestType>> GetRemoves() => Removes;
+        public ImmutableHashSet<OR_SetElement<TestType>> GetRemoves() => Removes;
 
-        public void PersistAdds(IEnumerable<OR_SetElement<TestType>> values)
+        public void PersistAdds(ImmutableHashSet<OR_SetElement<TestType>> values)
         {
-            foreach (var value in values)
-            {
-                if (!Adds.Any(e => Equals(e, value)))
-                {
-                    Adds.Add(value);
-                }
-            }
+            Adds = values;
         }
 
-        public void PersistRemoves(IEnumerable<OR_SetElement<TestType>> values)
+        public void PersistRemoves(ImmutableHashSet<OR_SetElement<TestType>> values)
         {
-            foreach (var value in values)
-            {
-                if (!Removes.Any(e => Equals(e, value)))
-                {
-                    Removes.Add(value);
-                }
-            }
+            Removes = values;
         }
     }
 }

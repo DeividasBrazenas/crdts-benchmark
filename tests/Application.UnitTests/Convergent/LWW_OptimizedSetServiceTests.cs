@@ -105,13 +105,9 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_ReAdded_ReturnsTrue(TestType value, long timestamp)
         {
-            var addElement = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
-            var removeElement = new LWW_OptimizedSetElement<TestType>(value, timestamp + 10, true);
-            var reAddElement = new LWW_OptimizedSetElement<TestType>(value, timestamp + 20, false);
-
-            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { addElement }.ToImmutableHashSet());
-            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { removeElement }.ToImmutableHashSet());
-            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetElement<TestType>> { reAddElement }.ToImmutableHashSet());
+            _lwwSetService.LocalAdd(value, timestamp);
+            _lwwSetService.LocalRemove(value, timestamp + 10);
+            _lwwSetService.LocalAdd(value, timestamp + 20);
 
             var lookup = _lwwSetService.Lookup(value);
 

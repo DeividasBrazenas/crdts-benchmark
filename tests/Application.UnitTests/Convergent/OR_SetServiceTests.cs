@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using AutoFixture.Xunit2;
 using CRDT.Application.Convergent.Set;
@@ -29,7 +30,7 @@ namespace CRDT.Application.UnitTests.Convergent
         public void MergeAdds_SingleValueWithEmptyRepository_AddsElementsToTheRepository(TestType value, Guid tag)
         {
             var element = new OR_SetElement<TestType>(value, tag);
-            _orSetService.Merge(new List<OR_SetElement<TestType>> { element }, new List<OR_SetElement<TestType>>());
+            _orSetService.Merge(new HashSet<OR_SetElement<TestType>> { element }.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -37,9 +38,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAdds_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(List<OR_SetElement<TestType>> values)
+        public void MergeAdds_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(HashSet<OR_SetElement<TestType>> values)
         {
-            _orSetService.Merge(values, new List<OR_SetElement<TestType>>());
+            _orSetService.Merge(values.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             AssertContains(values, repositoryValues);
@@ -47,12 +48,12 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAdds_SingleElement_AddsElementsToTheRepository(List<OR_SetElement<TestType>> existingValues, TestType value, Guid tag)
+        public void MergeAdds_SingleElement_AddsElementsToTheRepository(HashSet<OR_SetElement<TestType>> existingValues, TestType value, Guid tag)
         {
-            _repository.PersistAdds(existingValues);
+            _repository.PersistAdds(existingValues.ToImmutableHashSet());
 
             var element = new OR_SetElement<TestType>(value, tag);
-            _orSetService.Merge(new List<OR_SetElement<TestType>> { element }, new List<OR_SetElement<TestType>>());
+            _orSetService.Merge(new HashSet<OR_SetElement<TestType>> { element }.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, element)));
@@ -60,11 +61,11 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAdds_SeveralElements_AddsElementsToTheRepository(List<OR_SetElement<TestType>> existingValues, List<OR_SetElement<TestType>> values)
+        public void MergeAdds_SeveralElements_AddsElementsToTheRepository(HashSet<OR_SetElement<TestType>> existingValues, HashSet<OR_SetElement<TestType>> values)
         {
-            _repository.PersistAdds(existingValues);
+            _repository.PersistAdds(existingValues.ToImmutableHashSet());
 
-            _orSetService.Merge(values, new List<OR_SetElement<TestType>>());
+            _orSetService.Merge(values.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             AssertContains(values, repositoryValues);
@@ -72,17 +73,17 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeAdds_IsIdempotent(List<OR_SetElement<TestType>> values, TestType value, Guid tag)
+        public void MergeAdds_IsIdempotent(HashSet<OR_SetElement<TestType>> values, TestType value, Guid tag)
         {
-            _repository.PersistAdds(values);
+            _repository.PersistAdds(values.ToImmutableHashSet());
 
             var element = new OR_SetElement<TestType>(value, tag);
 
             values.Add(element);
 
-            _orSetService.Merge(values, new List<OR_SetElement<TestType>>());
-            _orSetService.Merge(values, new List<OR_SetElement<TestType>>());
-            _orSetService.Merge(values, new List<OR_SetElement<TestType>>());
+            _orSetService.Merge(values.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
+            _orSetService.Merge(values.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
+            _orSetService.Merge(values.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             AssertContains(values, repositoryValues);
@@ -101,16 +102,16 @@ namespace CRDT.Application.UnitTests.Convergent
             var firstRepository = new OR_SetRepository();
             var firstService = new OR_SetService<TestType>(firstRepository);
 
-            _repository.PersistAdds(new List<OR_SetElement<TestType>> { firstElement, secondElement, thirdElement });
-            firstService.Merge(new List<OR_SetElement<TestType>> { fourthElement, fifthElement }, new List<OR_SetElement<TestType>>());
+            _repository.PersistAdds(new HashSet<OR_SetElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
+            firstService.Merge(new HashSet<OR_SetElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
 
             var firstRepositoryValues = firstRepository.GetAdds();
 
             var secondRepository = new OR_SetRepository();
             var secondService = new OR_SetService<TestType>(secondRepository);
 
-            _repository.PersistAdds(new List<OR_SetElement<TestType>> { fourthElement, fifthElement });
-            secondService.Merge(new List<OR_SetElement<TestType>> { firstElement, secondElement, thirdElement }, new List<OR_SetElement<TestType>>());
+            _repository.PersistAdds(new HashSet<OR_SetElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
+            secondService.Merge(new HashSet<OR_SetElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
 
             var secondRepositoryValues = firstRepository.GetAdds();
 
@@ -119,20 +120,10 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeRemoves_WithoutExistingAdds_DoesNotAddToRepository(OR_SetElement<TestType> value)
-        {
-            _orSetService.Merge(new List<OR_SetElement<TestType>>(), new List<OR_SetElement<TestType>> { value });
-
-            var repositoryValues = _repository.GetRemoves();
-            Assert.Equal(0, repositoryValues.Count(x => Equals(x, value)));
-        }
-
-        [Theory]
-        [AutoData]
         public void MergeRemoves_SingleValueWithEmptyRepository_AddsElementsToTheRepository(OR_SetElement<TestType> value)
         {
-            _repository.PersistAdds(new List<OR_SetElement<TestType>> { value });
-            _orSetService.Merge(new List<OR_SetElement<TestType>>(), new List<OR_SetElement<TestType>> { value });
+            _repository.PersistAdds(new HashSet<OR_SetElement<TestType>> { value }.ToImmutableHashSet());
+            _orSetService.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, new HashSet<OR_SetElement<TestType>> { value }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, value)));
@@ -140,10 +131,10 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeRemoves_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(List<OR_SetElement<TestType>> values)
+        public void MergeRemoves_SeveralElementsWithEmptyRepository_AddsElementsToTheRepository(HashSet<OR_SetElement<TestType>> values)
         {
-            _repository.PersistAdds(values);
-            _orSetService.Merge(new List<OR_SetElement<TestType>>(), values);
+            _repository.PersistAdds(values.ToImmutableHashSet());
+            _orSetService.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             AssertContains(values, repositoryValues);
@@ -151,12 +142,12 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeRemoves_SingleElement_AddsElementsToTheRepository(List<OR_SetElement<TestType>> existingValues, OR_SetElement<TestType> value)
+        public void MergeRemoves_SingleElement_AddsElementsToTheRepository(HashSet<OR_SetElement<TestType>> existingValues, OR_SetElement<TestType> value)
         {
-            _repository.PersistRemoves(existingValues);
-            _repository.PersistAdds(new List<OR_SetElement<TestType>> { value });
+            _repository.PersistRemoves(existingValues.ToImmutableHashSet());
+            _repository.PersistAdds(new HashSet<OR_SetElement<TestType>> { value }.ToImmutableHashSet());
 
-            _orSetService.Merge(new List<OR_SetElement<TestType>>(), new List<OR_SetElement<TestType>> { value });
+            _orSetService.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, new HashSet<OR_SetElement<TestType>> { value }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             Assert.Equal(1, repositoryValues.Count(x => Equals(x, value)));
@@ -164,12 +155,12 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeRemoves_SeveralElements_AddsElementsToTheRepository(List<OR_SetElement<TestType>> existingValues, List<OR_SetElement<TestType>> values)
+        public void MergeRemoves_SeveralElements_AddsElementsToTheRepository(HashSet<OR_SetElement<TestType>> existingValues, HashSet<OR_SetElement<TestType>> values)
         {
-            _repository.PersistRemoves(existingValues);
-            _repository.PersistAdds(values);
+            _repository.PersistRemoves(existingValues.ToImmutableHashSet());
+            _repository.PersistAdds(values.ToImmutableHashSet());
 
-            _orSetService.Merge(new List<OR_SetElement<TestType>>(), values);
+            _orSetService.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             AssertContains(values, repositoryValues);
@@ -177,16 +168,16 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void MergeRemoves_IsIdempotent(List<OR_SetElement<TestType>> values, OR_SetElement<TestType> value)
+        public void MergeRemoves_IsIdempotent(HashSet<OR_SetElement<TestType>> values, OR_SetElement<TestType> value)
         {
-            _repository.PersistRemoves(values);
-            _repository.PersistAdds(new List<OR_SetElement<TestType>> { value });
+            _repository.PersistRemoves(values.ToImmutableHashSet());
+            _repository.PersistAdds(new HashSet<OR_SetElement<TestType>> { value }.ToImmutableHashSet());
 
             values.Add(value);
 
-            _orSetService.Merge(new List<OR_SetElement<TestType>>(), values);
-            _orSetService.Merge(new List<OR_SetElement<TestType>>(), values);
-            _orSetService.Merge(new List<OR_SetElement<TestType>>(), values);
+            _orSetService.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, values.ToImmutableHashSet());
+            _orSetService.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, values.ToImmutableHashSet());
+            _orSetService.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, values.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             AssertContains(values, repositoryValues);
@@ -205,39 +196,22 @@ namespace CRDT.Application.UnitTests.Convergent
             var firstRepository = new OR_SetRepository();
             var firstService = new OR_SetService<TestType>(firstRepository);
 
-            firstRepository.PersistRemoves(new List<OR_SetElement<TestType>> { firstElement, secondElement, thirdElement });
-            firstRepository.PersistAdds(new List<OR_SetElement<TestType>> { fourthElement, fifthElement });
-            firstService.Merge(new List<OR_SetElement<TestType>>(), new List<OR_SetElement<TestType>> { fourthElement, fifthElement });
+            firstRepository.PersistRemoves(new HashSet<OR_SetElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
+            firstRepository.PersistAdds(new HashSet<OR_SetElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
+            firstService.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, new HashSet<OR_SetElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
 
             var firstRepositoryValues = firstRepository.GetRemoves();
 
             var secondRepository = new OR_SetRepository();
             var secondService = new OR_SetService<TestType>(secondRepository);
 
-            secondRepository.PersistRemoves(new List<OR_SetElement<TestType>> { fourthElement, fifthElement });
-            secondRepository.PersistAdds(new List<OR_SetElement<TestType>> { firstElement, secondElement, thirdElement });
-            secondService.Merge(new List<OR_SetElement<TestType>>(), new List<OR_SetElement<TestType>> { firstElement, secondElement, thirdElement });
+            secondRepository.PersistRemoves(new HashSet<OR_SetElement<TestType>> { fourthElement, fifthElement }.ToImmutableHashSet());
+            secondRepository.PersistAdds(new HashSet<OR_SetElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
+            secondService.Merge(ImmutableHashSet<OR_SetElement<TestType>>.Empty, new HashSet<OR_SetElement<TestType>> { firstElement, secondElement, thirdElement }.ToImmutableHashSet());
 
             var secondRepositoryValues = firstRepository.GetRemoves();
 
             Assert.Equal(firstRepositoryValues, secondRepositoryValues);
-        }
-
-        [Theory]
-        [AutoData]
-        public void MergeAddsAndRemoves_OnlyMergesRemovesWithAdds(OR_SetElement<TestType> firstValue, OR_SetElement<TestType> secondValue, OR_SetElement<TestType> thirdValue)
-        {
-            _orSetService.Merge(new List<OR_SetElement<TestType>> { firstValue, thirdValue }, new List<OR_SetElement<TestType>> { secondValue, thirdValue });
-
-            var repositoryAdds = _repository.GetAdds();
-            var repositoryRemoves = _repository.GetRemoves();
-
-            Assert.Equal(1, repositoryAdds.Count(x => Equals(x, firstValue)));
-            Assert.Equal(0, repositoryAdds.Count(x => Equals(x, secondValue)));
-            Assert.Equal(1, repositoryAdds.Count(x => Equals(x, thirdValue)));
-            Assert.Equal(0, repositoryRemoves.Count(x => Equals(x, firstValue)));
-            Assert.Equal(0, repositoryRemoves.Count(x => Equals(x, secondValue)));
-            Assert.Equal(1, repositoryRemoves.Count(x => Equals(x, thirdValue)));
         }
 
 
@@ -245,7 +219,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_SingleElementAdded_ReturnsTrue(OR_SetElement<TestType> value)
         {
-            _orSetService.Merge(new List<OR_SetElement<TestType>>{value}, new List<OR_SetElement<TestType>>());
+            _orSetService.Merge(new HashSet<OR_SetElement<TestType>> { value }.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
 
             var lookup = _orSetService.Lookup(value.Value);
 
@@ -256,12 +230,12 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_SeveralElementsWithDifferentTags_ReturnsTrue(TestType value, Guid firstTag, Guid secondTag)
         {
-            var elements = new List<OR_SetElement<TestType>>
+            var elements = new HashSet<OR_SetElement<TestType>>
             {
                 new (value, firstTag),
                 new (value, secondTag)
             };
-            _orSetService.Merge(elements, new List<OR_SetElement<TestType>>());
+            _orSetService.Merge(elements.ToImmutableHashSet(), ImmutableHashSet<OR_SetElement<TestType>>.Empty);
 
             var lookup = _orSetService.Lookup(value);
 
@@ -272,7 +246,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_NonExistingElement_ReturnsFalse(OR_SetElement<TestType> value)
         {
-            _orSetService.Merge(new List<OR_SetElement<TestType>> { value }, new List<OR_SetElement<TestType>>{value});
+            _orSetService.Merge(new HashSet<OR_SetElement<TestType>> { value }.ToImmutableHashSet(), new HashSet<OR_SetElement<TestType>> { value }.ToImmutableHashSet());
 
             var lookup = _orSetService.Lookup(value.Value);
 
@@ -283,19 +257,19 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_AllTagsRemoved_ReturnsFalse(TestType value, Guid firstTag, Guid secondTag)
         {
-            var elements = new List<OR_SetElement<TestType>>
+            var elements = new HashSet<OR_SetElement<TestType>>
             {
                 new (value, firstTag),
                 new (value, secondTag)
             };
-            _orSetService.Merge(elements, elements);
+            _orSetService.Merge(elements.ToImmutableHashSet(), elements.ToImmutableHashSet());
 
             var lookup = _orSetService.Lookup(value);
 
             Assert.False(lookup);
         }
 
-        private void AssertContains(List<OR_SetElement<TestType>> expectedValues, IEnumerable<OR_SetElement<TestType>> actualValues)
+        private void AssertContains(HashSet<OR_SetElement<TestType>> expectedValues, IEnumerable<OR_SetElement<TestType>> actualValues)
         {
             foreach (var value in expectedValues)
             {
