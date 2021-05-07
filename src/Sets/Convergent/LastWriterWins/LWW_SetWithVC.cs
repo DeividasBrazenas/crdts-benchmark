@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
+using CRDT.Core.DistributedTime;
 using CRDT.Sets.Bases;
 using CRDT.Sets.Entities;
 
@@ -16,18 +17,46 @@ namespace CRDT.Sets.Convergent.LastWriterWins
         {
         }
 
+        public LWW_SetWithVC<T> Add(T value, VectorClock vectorClock)
+        {
+            var existingElement = Adds.FirstOrDefault(a => a.Value.Id == value.Id);
+
+            if (existingElement is not null && existingElement.VectorClock < vectorClock)
+            {
+                var elements = Adds.Remove(existingElement);
+
+                return new(elements.Add(new LWW_SetWithVCElement<T>(value, vectorClock)), Removes);
+            }
+
+            if (existingElement is null)
+            {
+                return new(Adds.Add(new LWW_SetWithVCElement<T>(value, vectorClock)), Removes);
+            }
+
+            return this;
+        }
+
+        public LWW_SetWithVC<T> Remove(T value, VectorClock vectorClock)
+        {
+            if (Adds.Any(a => Equals(a.Value, value) && a.VectorClock < vectorClock))
+            {
+                var element = Removes.FirstOrDefault(r => r.Value.Id == value.Id);
+
+                ImmutableHashSet<LWW_SetWithVCElement<T>> elements = Removes;
+
+                if (element is not null)
+                {
+                    elements = Removes.Remove(element);
+                }
+
+                return new(Adds, elements.Add(new LWW_SetWithVCElement<T>(value, vectorClock)));
+            }
+
+            return this;
+        }
         public LWW_SetWithVC<T> Merge(ImmutableHashSet<LWW_SetWithVCElement<T>> adds, ImmutableHashSet<LWW_SetWithVCElement<T>> removes)
         {
-            var addsUnion = Adds.Union(adds);
-            var removesUnion = Removes.Union(removes);
-
-            var filteredAdds = addsUnion
-                .Where(a => !addsUnion.Any(oa => a.Value.Id == oa.Value.Id && a.VectorClock < oa.VectorClock));
-            var filteredRemoves = removesUnion
-                .Where(r => filteredAdds.Any(a => Equals(a.Value, r.Value)))
-                .Where(a => !removesUnion.Any(oa => a.Value.Id == oa.Value.Id && a.VectorClock < oa.VectorClock));
-
-            return new(filteredAdds.ToImmutableHashSet(), filteredRemoves.ToImmutableHashSet());
+            return new(Adds.Union(adds), Removes.Union(removes));
         }
     }
 }

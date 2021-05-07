@@ -9,34 +9,71 @@ namespace CRDT.Application.Commutative.Set
     public class LWW_SetWithVCService<T> where T : DistributedEntity
     {
         private readonly ILWW_SetWithVCRepository<T> _repository;
+        private readonly object _lockObject = new();
 
         public LWW_SetWithVCService(ILWW_SetWithVCRepository<T> repository)
         {
             _repository = repository;
         }
 
-        public void Add(T value, VectorClock vectorClock)
+        public void LocalAdd(T value, VectorClock vectorClock)
         {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_SetWithVC<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new LWW_SetWithVC<T>(existingAdds, existingRemoves);
 
-            set = set.Add(value, vectorClock);
+                set = set.Add(value, vectorClock);
 
-            _repository.PersistAdds(set.Adds);
+                _repository.PersistAdds(set.Adds);
+            }
         }
 
-        public void Remove(T value, VectorClock vectorClock)
+        public void LocalRemove(T value, VectorClock vectorClock)
         {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_SetWithVC<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new LWW_SetWithVC<T>(existingAdds, existingRemoves);
 
-            set = set.Remove(value, vectorClock);
+                set = set.Remove(value, vectorClock);
 
-            _repository.PersistRemoves(set.Removes);
+                _repository.PersistRemoves(set.Removes);
+            }
+        }
+
+        public void DownstreamAdd(T value, VectorClock vectorClock)
+        {
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
+
+                var set = new LWW_SetWithVC<T>(existingAdds, existingRemoves);
+
+                set = set.Add(value, vectorClock);
+
+                _repository.PersistAdds(set.Adds);
+            }
+        }
+
+        public void DownstreamRemove(T value, VectorClock vectorClock)
+        {
+            lock (_lockObject)
+            {
+                var existingAdds = _repository.GetAdds();
+                var existingRemoves = _repository.GetRemoves();
+
+                var set = new LWW_SetWithVC<T>(existingAdds, existingRemoves);
+
+                set = set.Remove(value, vectorClock);
+
+                _repository.PersistRemoves(set.Removes);
+            }
         }
 
         public bool Lookup(T value)
@@ -44,7 +81,7 @@ namespace CRDT.Application.Commutative.Set
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_SetWithVC<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new LWW_SetWithVC<T>(existingAdds, existingRemoves);
 
             var lookup = set.Lookup(value);
 

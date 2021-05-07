@@ -23,7 +23,7 @@ namespace CRDT.Registers.UnitTests.Commutative
             result = result.Assign(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), 4);
             result = result.Assign(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), 5);
 
-            Assert.Equal(5, result.Element.Timestamp.Value);
+            Assert.Equal(5, result.Element.Timestamp);
             Assert.Equal(stringValue, result.Element.Value.StringValue);
             Assert.Equal(intValue, result.Element.Value.IntValue);
             Assert.Equal(decimalValue, result.Element.Value.DecimalValue);
@@ -61,7 +61,7 @@ namespace CRDT.Registers.UnitTests.Commutative
             result = result.Assign(JToken.Parse($"{{\"NullableLongValue\": {longValue}}}"), 8);
             result = result.Assign(JToken.Parse($"{{\"GuidValue\": \"{guidValue}\"}}"), 9);
 
-            Assert.Equal(9, result.Element.Timestamp.Value);
+            Assert.Equal(9, result.Element.Timestamp);
             Assert.Equal(value.StringValue, result.Element.Value.StringValue);
             Assert.Equal(value.IntValue, result.Element.Value.IntValue);
             Assert.Equal(value.DecimalValue, result.Element.Value.DecimalValue);

@@ -28,7 +28,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Add_NoExistingValues_AddsElementToTheRepository(LWW_SetWithVCElement<TestType> element)
         {
-            _lwwSetService.Merge(new List<LWW_SetWithVCElement<TestType>> { element }, new List<LWW_SetWithVCElement<TestType>>());
+            _lwwSetService.Merge(new HashSet<LWW_SetWithVCElement<TestType>> { element }.ToImmutableHashSet(), ImmutableHashSet<LWW_SetWithVCElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(element, repositoryValues);
@@ -36,25 +36,16 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<LWW_SetWithVCElement<TestType>> adds, LWW_SetWithVCElement<TestType> element)
+        public void Add_WithExistingValues_AddsElementToTheRepository(HashSet<LWW_SetWithVCElement<TestType>> adds, LWW_SetWithVCElement<TestType> element)
         {
-            _repository.PersistAdds(adds);
+            _repository.PersistAdds(adds.ToImmutableHashSet());
 
-            _lwwSetService.Merge(new List<LWW_SetWithVCElement<TestType>> { element }, new List<LWW_SetWithVCElement<TestType>>());
+            _lwwSetService.Merge(new HashSet<LWW_SetWithVCElement<TestType>> { element }.ToImmutableHashSet(), ImmutableHashSet<LWW_SetWithVCElement<TestType>>.Empty);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(element, repositoryValues);
         }
 
-        [Theory]
-        [AutoData]
-        public void Remove_AddDoesNotExist_DoesNotAddElementToTheRepository(LWW_SetWithVCElement<TestType> element)
-        {
-            _lwwSetService.Merge(new List<LWW_SetWithVCElement<TestType>>(), new List<LWW_SetWithVCElement<TestType>> { element });
-
-            var repositoryValues = _repository.GetRemoves();
-            Assert.DoesNotContain(element, repositoryValues);
-        }
 
         [Theory]
         [AutoData]
@@ -65,7 +56,7 @@ namespace CRDT.Application.UnitTests.Convergent
             var addElement = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)));
             var removeElement = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
 
-            _lwwSetService.Merge(new List<LWW_SetWithVCElement<TestType>> { addElement }, new List<LWW_SetWithVCElement<TestType>> { removeElement });
+            _lwwSetService.Merge(new HashSet<LWW_SetWithVCElement<TestType>> { addElement }.ToImmutableHashSet(), new HashSet<LWW_SetWithVCElement<TestType>> { removeElement }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetRemoves();
             Assert.Contains(value, repositoryValues.Select(v => v.Value));
@@ -73,9 +64,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_NoExistingValues_AddsElementsToTheRepository(List<LWW_SetWithVCElement<TestType>> values)
+        public void Merge_NoExistingValues_AddsElementsToTheRepository(HashSet<LWW_SetWithVCElement<TestType>> values)
         {
-            _lwwSetService.Merge(values, values);
+            _lwwSetService.Merge(values.ToImmutableHashSet(), values.ToImmutableHashSet());
 
             var repositoryAdds = _repository.GetAdds();
             var repositoryRemoves = _repository.GetRemoves();
@@ -86,12 +77,12 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_WithExistingValues_AddsElementsToTheRepository(List<LWW_SetWithVCElement<TestType>> existingAdds, List<LWW_SetWithVCElement<TestType>> existingRemoves, List<LWW_SetWithVCElement<TestType>> values)
+        public void Merge_WithExistingValues_AddsElementsToTheRepository(HashSet<LWW_SetWithVCElement<TestType>> existingAdds, HashSet<LWW_SetWithVCElement<TestType>> existingRemoves, HashSet<LWW_SetWithVCElement<TestType>> values)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.Merge(values, values);
+            _lwwSetService.Merge(values.ToImmutableHashSet(), values.ToImmutableHashSet());
 
             var repositoryAdds = _repository.GetAdds();
             var repositoryRemoves = _repository.GetRemoves();
@@ -102,14 +93,14 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Merge_IsIdempotent(List<LWW_SetWithVCElement<TestType>> existingAdds, List<LWW_SetWithVCElement<TestType>> existingRemoves, List<LWW_SetWithVCElement<TestType>> values)
+        public void Merge_IsIdempotent(HashSet<LWW_SetWithVCElement<TestType>> existingAdds, HashSet<LWW_SetWithVCElement<TestType>> existingRemoves, HashSet<LWW_SetWithVCElement<TestType>> values)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.Merge(values, values);
-            _lwwSetService.Merge(values, values);
-            _lwwSetService.Merge(values, values);
+            _lwwSetService.Merge(values.ToImmutableHashSet(), values.ToImmutableHashSet());
+            _lwwSetService.Merge(values.ToImmutableHashSet(), values.ToImmutableHashSet());
+            _lwwSetService.Merge(values.ToImmutableHashSet(), values.ToImmutableHashSet());
 
             var repositoryAdds = _repository.GetAdds();
             var repositoryRemoves = _repository.GetRemoves();
@@ -120,12 +111,12 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Lookup_Added_ReturnsTrue(List<LWW_SetWithVCElement<TestType>> existingAdds, List<LWW_SetWithVCElement<TestType>> existingRemoves, LWW_SetWithVCElement<TestType> element)
+        public void Lookup_Added_ReturnsTrue(HashSet<LWW_SetWithVCElement<TestType>> existingAdds, HashSet<LWW_SetWithVCElement<TestType>> existingRemoves, LWW_SetWithVCElement<TestType> element)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.Merge(new List<LWW_SetWithVCElement<TestType>> { element }, new List<LWW_SetWithVCElement<TestType>>());
+            _lwwSetService.Merge(new HashSet<LWW_SetWithVCElement<TestType>> { element }.ToImmutableHashSet(), ImmutableHashSet<LWW_SetWithVCElement<TestType>>.Empty);
 
             var lookup = _lwwSetService.Lookup(element.Value);
 
@@ -134,17 +125,17 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Lookup_Removed_ReturnsFalse(List<LWW_SetWithVCElement<TestType>> existingAdds, List<LWW_SetWithVCElement<TestType>> existingRemoves, TestType value, Node node)
+        public void Lookup_Removed_ReturnsFalse(HashSet<LWW_SetWithVCElement<TestType>> existingAdds, HashSet<LWW_SetWithVCElement<TestType>> existingRemoves, TestType value, Node node)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
             var addElement = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)));
             var removeElement = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
 
-            _lwwSetService.Merge(new List<LWW_SetWithVCElement<TestType>> { addElement }, new List<LWW_SetWithVCElement<TestType>> { removeElement });
+            _lwwSetService.Merge(new HashSet<LWW_SetWithVCElement<TestType>> { addElement }.ToImmutableHashSet(), new HashSet<LWW_SetWithVCElement<TestType>> { removeElement }.ToImmutableHashSet());
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -153,31 +144,23 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Lookup_ReAdded_ReturnsTrue(List<LWW_SetWithVCElement<TestType>> existingAdds, List<LWW_SetWithVCElement<TestType>> existingRemoves, TestType value, Node node)
+        public void Lookup_ReAdded_ReturnsTrue(HashSet<LWW_SetWithVCElement<TestType>> existingAdds, HashSet<LWW_SetWithVCElement<TestType>> existingRemoves, TestType value, Node node)
         {
-            _repository.PersistAdds(existingAdds);
-            _repository.PersistRemoves(existingRemoves);
+            _repository.PersistAdds(existingAdds.ToImmutableHashSet());
+            _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            var addElement = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)));
-            var removeElement = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
-            var reAddElement = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 2)));
-
-            _lwwSetService.Merge(new List<LWW_SetWithVCElement<TestType>> { addElement }, new List<LWW_SetWithVCElement<TestType>> { removeElement });
+            _lwwSetService.LocalAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.LocalRemove(value, new VectorClock(clock.Add(node, 1)));
+            _lwwSetService.LocalAdd(value, new VectorClock(clock.Add(node, 2)));
 
             var lookup = _lwwSetService.Lookup(value);
-
-            Assert.False(lookup);
-
-            _lwwSetService.Merge(new List<LWW_SetWithVCElement<TestType>> { reAddElement }, new List<LWW_SetWithVCElement<TestType>>());
-
-            lookup = _lwwSetService.Lookup(value);
 
             Assert.True(lookup);
         }
 
-        private void AssertContains(List<LWW_SetWithVCElement<TestType>> expectedValues, IEnumerable<LWW_SetWithVCElement<TestType>> actualValues)
+        private void AssertContains(HashSet<LWW_SetWithVCElement<TestType>> expectedValues, IEnumerable<LWW_SetWithVCElement<TestType>> actualValues)
         {
             foreach (var value in expectedValues)
             {

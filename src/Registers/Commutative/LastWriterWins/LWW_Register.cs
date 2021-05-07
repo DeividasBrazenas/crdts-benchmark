@@ -16,9 +16,7 @@ namespace CRDT.Registers.Commutative.LastWriterWins
 
         public LWW_Register<T> Assign(JToken value, long timestamp)
         {
-            var timestampObject = new Timestamp(timestamp);
-
-            if (Element.Timestamp < timestampObject)
+            if (Element.Timestamp < timestamp)
             {
                 return AssignValue(value, timestamp);
             }

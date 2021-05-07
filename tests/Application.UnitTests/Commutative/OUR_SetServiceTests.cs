@@ -31,7 +31,7 @@ namespace CRDT.Application.UnitTests.Commutative
             _ourSetService.Add(value, tag, timestamp);
 
             var repositoryValues = _repository.GetAdds();
-            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag && v.Timestamp.Value == timestamp);
+            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag && v.Timestamp == timestamp);
 
             Assert.Single(actualValues);
         }
@@ -45,7 +45,7 @@ namespace CRDT.Application.UnitTests.Commutative
             _ourSetService.Add(value, tag, timestamp);
 
             var repositoryValues = _repository.GetAdds();
-            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag && v.Timestamp.Value == timestamp);
+            var actualValues = repositoryValues.Where(v => Equals(v.Value, value) && v.Tag == tag && v.Timestamp == timestamp);
 
             Assert.Single(actualValues);
         }

@@ -25,7 +25,7 @@ namespace CRDT.Application.Convergent.Register
                 LWW_Register<T> existingRegister;
                 if (existingEntity is null)
                 {
-                    existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, null));
+                    existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, 0));
                 }
                 else
                 {
@@ -47,7 +47,7 @@ namespace CRDT.Application.Convergent.Register
                 LWW_Register<T> existingRegister;
                 if (existingEntity is null)
                 {
-                    existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, null));
+                    existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, 0));
                 }
                 else
                 {

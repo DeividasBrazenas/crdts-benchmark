@@ -8,7 +8,7 @@ namespace CRDT.Sets.Entities
     {
         public T Value { get; }
 
-        public Timestamp Timestamp { get; }
+        public long Timestamp { get; }
 
         public bool Removed { get; }
 
@@ -16,15 +16,9 @@ namespace CRDT.Sets.Entities
         {
             Value = value;
             Removed = removed;
-            Timestamp = new Timestamp(timestamp);
+            Timestamp = timestamp;
         }
 
-        public LWW_OptimizedSetElement(T value, Timestamp timestamp, bool removed)
-        {
-            Value = value;
-            Timestamp = timestamp;
-            Removed = removed;
-        }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {

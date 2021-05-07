@@ -35,7 +35,7 @@ namespace CRDT.Sets.Commutative.ObservedUpdatedRemoved
         {
             var elementToUpdate = Adds.FirstOrDefault(a => a.Value.Id == value.Id && a.Tag == tag);
 
-            if (elementToUpdate is null || elementToUpdate?.Timestamp > new Timestamp(timestamp))
+            if (elementToUpdate is null || elementToUpdate?.Timestamp > timestamp)
             {
                 return this;
             }
@@ -50,7 +50,7 @@ namespace CRDT.Sets.Commutative.ObservedUpdatedRemoved
         {
             var elementToRemove = Adds.FirstOrDefault(a => Equals(a.Value, value) && a.Tag == tag);
 
-            if (elementToRemove is null || elementToRemove?.Timestamp > new Timestamp(timestamp))
+            if (elementToRemove is null || elementToRemove?.Timestamp > timestamp)
             {
                 return this;
             }

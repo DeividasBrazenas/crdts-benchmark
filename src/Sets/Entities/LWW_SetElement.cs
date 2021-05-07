@@ -8,15 +8,9 @@ namespace CRDT.Sets.Entities
     {
         public T Value { get; }
 
-        public Timestamp Timestamp { get; set; }
+        public long Timestamp { get; set; }
 
         public LWW_SetElement(T value, long timestamp)
-        {
-            Value = value;
-            Timestamp = new Timestamp(timestamp);
-        }
-
-        public LWW_SetElement(T value, Timestamp timestamp)
         {
             Value = value;
             Timestamp = timestamp;

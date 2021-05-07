@@ -18,7 +18,7 @@ namespace CRDT.Registers.Convergent.LastWriterWins
                 return this;
             }
 
-            if (Element.Timestamp < new Timestamp(timestamp))
+            if (Element.Timestamp < timestamp)
             {
                 return new LWW_Register<T>(new LWW_RegisterElement<T>(value, timestamp));
             }

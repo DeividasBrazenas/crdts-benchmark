@@ -22,7 +22,7 @@ namespace CRDT.Sets.Commutative.LastWriterWins
         {
             var existingElement = Adds.FirstOrDefault(a => a.Value.Id == value.Id);
 
-            if (existingElement is not null && existingElement.Timestamp < new Timestamp(timestamp))
+            if (existingElement is not null && existingElement.Timestamp < timestamp)
             {
                 var elements = Adds.Remove(existingElement);
 
@@ -39,7 +39,7 @@ namespace CRDT.Sets.Commutative.LastWriterWins
 
         public LWW_Set<T> Remove(T value, long timestamp)
         {
-            if (Adds.Any(a => Equals(a.Value, value) && a.Timestamp < new Timestamp(timestamp)))
+            if (Adds.Any(a => Equals(a.Value, value) && a.Timestamp < timestamp))
             {
                 var element = Removes.FirstOrDefault(r => r.Value.Id == value.Id);
 

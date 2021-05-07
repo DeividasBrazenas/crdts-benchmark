@@ -29,10 +29,16 @@ namespace CRDT.Sets.Bases
             var added = Adds.FirstOrDefault(a => Equals(a.Value, value));
             var removed = Removes.FirstOrDefault(r => Equals(r.Value, value));
 
-            if (added is not null && added?.Timestamp > removed?.Timestamp)
+            if (added is not null && removed is null)
             {
                 return true;
             }
+
+            if (added is not null && added.Timestamp > removed.Timestamp)
+            {
+                return true;
+            }
+
 
             return false;
         }

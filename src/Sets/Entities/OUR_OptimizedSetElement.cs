@@ -11,7 +11,7 @@ namespace CRDT.Sets.Entities
 
         public Guid Tag { get; }
 
-        public Timestamp Timestamp { get; }
+        public long Timestamp { get; }
 
         public bool Removed { get; }
 
@@ -19,18 +19,9 @@ namespace CRDT.Sets.Entities
         {
             Value = value;
             Tag = tag;
-            Removed = removed;
-            Timestamp = new Timestamp(timestamp);
-        }
-
-        public OUR_OptimizedSetElement(T value, Guid tag, Timestamp timestamp, bool removed)
-        {
-            Value = value;
-            Tag = tag;
             Timestamp = timestamp;
             Removed = removed;
         }
-
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;

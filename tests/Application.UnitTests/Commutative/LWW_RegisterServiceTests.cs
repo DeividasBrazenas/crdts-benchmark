@@ -188,7 +188,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var initialValue = _builder.Build();
             var valueId = initialValue.Id;
 
-            long ts = 0;
+            long ts = 1;
 
             var firstReplica = commutativeReplicas.First();
             firstReplica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), ts);
@@ -259,14 +259,14 @@ namespace CRDT.Application.UnitTests.Commutative
         private void AssertExistsInRepository(TestType value, long timestamp)
         {
             Assert.Equal(1, _repository.GetElements().Count(e => Equals(e.Value, value) &&
-                                                            e.Timestamp.Value == timestamp));
+                                                            e.Timestamp == timestamp));
         }
 
         private void AssertDoesNotExistInRepository(TestType value, long timestamp)
         {
             Assert.DoesNotContain(_repository.GetElements(),
                 e => Equals(e.Value, value) &&
-                     e.Timestamp.Value == timestamp);
+                     e.Timestamp == timestamp);
         }
     }
 }

@@ -114,7 +114,7 @@ namespace CRDT.Application.UnitTests.Convergent
             var initialValue = _builder.Build();
             var valueId = initialValue.Id;
 
-            long ts = 0;
+            long ts = 1;
 
             var firstReplica = convergentReplicas.First();
             firstReplica.Value.LocalAssign(valueId, initialValue, ts);
@@ -146,14 +146,14 @@ namespace CRDT.Application.UnitTests.Convergent
         private void AssertExistsInRepository(TestType value, long timestamp)
         {
             Assert.Equal(1, _repository.GetElements().Count(e => Equals(e.Value, value) &&
-                                                                 e.Timestamp.Value == timestamp));
+                                                                 e.Timestamp == timestamp));
         }
 
         private void AssertDoesNotExistInRepository(TestType value, long timestamp)
         {
             Assert.DoesNotContain(_repository.GetElements(),
                 e => Equals(e.Value, value) &&
-                     e.Timestamp.Value == timestamp);
+                     e.Timestamp == timestamp);
         }
 
         private List<Node> CreateNodes(int count)

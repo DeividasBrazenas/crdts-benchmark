@@ -26,7 +26,7 @@ namespace CRDT.Application.Commutative.Register
                 LWW_Register<T> register;
                 if (existingEntity is null)
                 {
-                    var element = new LWW_RegisterElement<T>(BaseObject(id), null);
+                    var element = new LWW_RegisterElement<T>(BaseObject(id), 0);
                     register = new LWW_Register<T>(element);
                 }
                 else
@@ -49,7 +49,7 @@ namespace CRDT.Application.Commutative.Register
                 LWW_Register<T> register;
                 if (existingEntity is null)
                 {
-                    var element = new LWW_RegisterElement<T>(BaseObject(id), null);
+                    var element = new LWW_RegisterElement<T>(BaseObject(id), 0);
                     register = new LWW_Register<T>(element);
                 }
                 else

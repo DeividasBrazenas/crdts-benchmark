@@ -8,15 +8,9 @@ namespace CRDT.Registers.Entities
     {
         public T Value { get; }
 
-        public Timestamp Timestamp { get; set; }
+        public long Timestamp { get; set; }
 
         public LWW_RegisterElement(T value, long timestamp)
-        {
-            Value = value;
-            Timestamp = new Timestamp(timestamp);
-        }
-
-        public LWW_RegisterElement(T value, Timestamp timestamp)
         {
             Value = value;
             Timestamp = timestamp;

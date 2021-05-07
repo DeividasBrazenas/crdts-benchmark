@@ -95,12 +95,13 @@ namespace CRDT.Sets.UnitTests.Convergent
             var newLwwSet = lwwSet.Merge(new[] { three, four }.ToImmutableHashSet(), new[] { five }.ToImmutableHashSet());
 
             Assert.Equal(4, newLwwSet.Adds.Count);
-            Assert.Equal(1, newLwwSet.Removes.Count);
+            Assert.Equal(2, newLwwSet.Removes.Count);
             Assert.Contains(one, newLwwSet.Adds);
             Assert.Contains(two, newLwwSet.Adds);
             Assert.Contains(three, newLwwSet.Adds);
             Assert.Contains(four, newLwwSet.Adds);
             Assert.Contains(three, newLwwSet.Removes);
+            Assert.Contains(five, newLwwSet.Removes);
         }
     }
 }

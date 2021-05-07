@@ -11,17 +11,9 @@ namespace CRDT.Sets.Entities
 
         public Guid Tag { get; }
 
-        public Timestamp Timestamp { get; }
-
+        public long Timestamp { get; }
 
         public OUR_SetElement(T value, Guid tag, long timestamp)
-        {
-            Value = value;
-            Tag = tag;
-            Timestamp = new Timestamp(timestamp);
-        }
-
-        public OUR_SetElement(T value, Guid tag, Timestamp timestamp)
         {
             Value = value;
             Tag = tag;
