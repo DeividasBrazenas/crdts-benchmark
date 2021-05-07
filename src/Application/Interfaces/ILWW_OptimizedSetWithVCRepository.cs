@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Entities;
 
@@ -6,8 +7,8 @@ namespace CRDT.Application.Interfaces
 {
     public interface ILWW_OptimizedSetWithVCRepository<T> where T : DistributedEntity
     {
-        IEnumerable<LWW_OptimizedSetWithVCElement<T>> GetElements();
+        ImmutableHashSet<LWW_OptimizedSetWithVCElement<T>> GetElements();
 
-        void PersistElements(IEnumerable<LWW_OptimizedSetWithVCElement<T>> elements);
+        void PersistElements(ImmutableHashSet<LWW_OptimizedSetWithVCElement<T>> elements);
     }
 }

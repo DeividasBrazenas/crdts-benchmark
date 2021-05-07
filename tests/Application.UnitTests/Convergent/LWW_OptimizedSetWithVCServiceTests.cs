@@ -30,7 +30,7 @@ namespace CRDT.Application.UnitTests.Convergent
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
             var element = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { element });
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { element }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Contains(element, repositoryValues);
@@ -38,14 +38,14 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Add_WithExistingValues_AddsElementToTheRepository(List<LWW_OptimizedSetWithVCElement<TestType>> elements, TestType value, Node node)
+        public void Add_WithExistingValues_AddsElementToTheRepository(HashSet<LWW_OptimizedSetWithVCElement<TestType>> elements, TestType value, Node node)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _repository.PersistElements(elements);
+            _repository.PersistElements(elements.ToImmutableHashSet());
 
             var element = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { element });
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { element }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
             Assert.Contains(element, repositoryValues);
@@ -57,11 +57,10 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            var addElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
             var removeElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
 
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { addElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { removeElement });
+            _lwwSetService.LocalAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.LocalRemove(value, new VectorClock(clock.Add(node, 1)));
 
             var repositoryValues = _repository.GetElements();
 
@@ -75,13 +74,11 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            var addElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
             var removeElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
 
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { addElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { removeElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { removeElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { removeElement });
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { removeElement }.ToImmutableHashSet());
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { removeElement }.ToImmutableHashSet());
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { removeElement }.ToImmutableHashSet());
 
             var repositoryValues = _repository.GetElements();
         
@@ -97,7 +94,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             var addElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
 
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { addElement });
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { addElement }.ToImmutableHashSet());
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -110,11 +107,8 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            var addElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
-            var removeElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
-
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { addElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { removeElement });
+            _lwwSetService.LocalAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.LocalRemove(value, new VectorClock(clock.Add(node, 1)));
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -131,9 +125,9 @@ namespace CRDT.Application.UnitTests.Convergent
             var removeElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
             var reAddElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 2)), false);
 
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { addElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { removeElement });
-            _lwwSetService.Merge(new List<LWW_OptimizedSetWithVCElement<TestType>> { reAddElement });
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { addElement }.ToImmutableHashSet());
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { removeElement }.ToImmutableHashSet());
+            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { reAddElement }.ToImmutableHashSet());
 
             var lookup = _lwwSetService.Lookup(value);
 

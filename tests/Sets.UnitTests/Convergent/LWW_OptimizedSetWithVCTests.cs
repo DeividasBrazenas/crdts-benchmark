@@ -33,8 +33,8 @@ namespace CRDT.Sets.UnitTests.Convergent
 
             var lwwSet = new LWW_OptimizedSetWithVC<TestType>();
 
-            lwwSet = lwwSet.Merge(new[] { new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false) }.ToImmutableHashSet());
-            lwwSet = lwwSet.Merge(new[] { new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true) }.ToImmutableHashSet());
+            lwwSet.Add(value, new VectorClock(clock.Add(node, 0)));
+            lwwSet.Remove(value, new VectorClock(clock.Add(node, 1)));
 
             var lookup = lwwSet.Lookup(value);
 
@@ -78,7 +78,7 @@ namespace CRDT.Sets.UnitTests.Convergent
 
             var newLwwSet = lwwSet.Merge(new[] { elementThree, elementFour, elementFive }.ToImmutableHashSet());
 
-            Assert.Equal(3, newLwwSet.Elements.Count);
+            Assert.Equal(5, newLwwSet.Elements.Count);
             Assert.Contains(newLwwSet.Elements, e => Equals(e, elementTwo));
             Assert.Contains(newLwwSet.Elements, e => Equals(e, elementThree));
             Assert.Contains(newLwwSet.Elements, e => Equals(e, elementFour));

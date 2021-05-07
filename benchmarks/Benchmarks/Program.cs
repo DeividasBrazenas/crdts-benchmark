@@ -17,7 +17,8 @@ namespace Benchmarks
             //BenchmarkRunner.Run<U_SetBenchmarks>();
             //BenchmarkRunner.Run<LWW_SetBenchmarks>();
             //BenchmarkRunner.Run<LWW_SetWithVCBenchmarks>();
-            BenchmarkRunner.Run<LWW_OptimizedSetBenchmarks>();
+            //BenchmarkRunner.Run<LWW_OptimizedSetBenchmarks>();
+            BenchmarkRunner.Run<LWW_OptimizedSetWithVCBenchmarks>();
         }
     }
 }

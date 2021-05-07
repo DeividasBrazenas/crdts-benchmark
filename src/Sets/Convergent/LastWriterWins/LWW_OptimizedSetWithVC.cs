@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Core.Abstractions;
+using CRDT.Core.DistributedTime;
 using CRDT.Sets.Bases;
 using CRDT.Sets.Entities;
 
@@ -18,36 +19,42 @@ namespace CRDT.Sets.Convergent.LastWriterWins
         {
         }
 
-        public LWW_OptimizedSetWithVC<T> Merge(ImmutableHashSet<LWW_OptimizedSetWithVCElement<T>> elements)
+        public LWW_OptimizedSetWithVC<T> Add(T value, VectorClock vectorClock)
         {
-            var union = Elements.Union(elements);
+            var existingElement = Elements.FirstOrDefault(a => a.Value.Id == value.Id);
 
-            var validElements = new HashSet<LWW_OptimizedSetWithVCElement<T>>();
-
-            foreach (var element in union)
+            if (existingElement is not null && existingElement.VectorClock < vectorClock)
             {
-                if (!element.Removed)
-                {
-                    if (union.Any(e => Equals(element.Value, e.Value) && e.Removed && e.VectorClock > element.VectorClock))
-                    {
-                        continue;
-                    }
-                }
-                else
-                {
-                    if (union.Any(e => Equals(element.Value, e.Value) && !e.Removed && e.VectorClock > element.VectorClock))
-                    {
-                        continue;
-                    }
-                }
+                var elements = Elements.Remove(existingElement);
 
-                validElements.Add(element);
+                return new(elements.Add(new LWW_OptimizedSetWithVCElement<T>(value, vectorClock, false)));
             }
 
-            var filteredElements = validElements
-                .Where(a => !validElements.Any(oa => a.Value.Id == oa.Value.Id && a.VectorClock < oa.VectorClock));
+            if (existingElement is null)
+            {
+                return new(Elements.Add(new LWW_OptimizedSetWithVCElement<T>(value, vectorClock, false)));
+            }
 
-            return new(filteredElements.ToImmutableHashSet());
+            return this;
+        }
+
+        public LWW_OptimizedSetWithVC<T> Remove(T value, VectorClock vectorClock)
+        {
+            var add = Elements.FirstOrDefault(e => Equals(e.Value, value));
+
+            if (add is not null && add.VectorClock < vectorClock)
+            {
+                var elements = Elements.Remove(add);
+
+                return new(elements.Add(new LWW_OptimizedSetWithVCElement<T>(value, vectorClock, true)));
+            }
+
+            return this;
+        }
+
+        public LWW_OptimizedSetWithVC<T> Merge(ImmutableHashSet<LWW_OptimizedSetWithVCElement<T>> elements)
+        {
+            return new(Elements.Union(elements));
         }
     }
 }
