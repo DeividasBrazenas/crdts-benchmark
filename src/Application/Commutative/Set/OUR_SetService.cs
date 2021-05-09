@@ -95,7 +95,7 @@ namespace CRDT.Application.Commutative.Set
 
                 foreach (var tag in tags)
                 {
-                    set = set.Remove(value, tag, timestamp);
+                    set = set.Update(value, tag, timestamp);
                 }
 
                 _repository.PersistAdds(set.Adds);

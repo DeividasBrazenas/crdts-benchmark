@@ -16,11 +16,22 @@ namespace CRDT.Sets.Convergent.TwoPhase
         {
         }
 
-        public P_Set<T> Add(T value) => new(Adds.Add(value), Removes);
+        public P_Set<T> Add(T value)
+        {
+            var add = Adds.FirstOrDefault(e => e.Id == value.Id);
+            var remove = Removes.FirstOrDefault(e => e.Id == value.Id);
+
+            if (add is not null || remove is not null)
+            {
+                return this;
+            }
+
+            return new(Adds.Add(value), Removes);
+        }
 
         public P_Set<T> Remove(T value)
         {
-            if (Adds.Any(e => Equals(e, value)))
+            if (Adds.Any(e => e.Id == value.Id))
             {
                 return new(Adds, Removes.Add(value));
             }
