@@ -30,7 +30,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Counters", "src\Counters\Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Counters.UnitTests", "tests\Counters.UnitTests\Counters.UnitTests.csproj", "{D0D57E21-256F-4650-8B9C-A3660237E7C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "benchmarks\Benchmarks\Benchmarks.csproj", "{730C1A92-32B6-45AB-BB7F-ECD05D0B9A07}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "benchmarks\Benchmarks\Benchmarks.csproj", "{730C1A92-32B6-45AB-BB7F-ECD05D0B9A07}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

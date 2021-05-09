@@ -24,6 +24,21 @@ namespace CRDT.Registers.Commutative.LastWriterWins
             return this;
         }
 
+        public LWW_Register<T> Remove(T value, long timestamp)
+        {
+            if (Element is null || Element.Value.Id != value.Id)
+            {
+                return this;
+            }
+
+            if (Element.Timestamp < timestamp)
+            {
+                return new LWW_Register<T>(new LWW_RegisterElement<T>(value, timestamp, true));
+            }
+
+            return this;
+        }
+
         private LWW_Register<T> AssignValue(JToken value, long timestamp)
         {
             var currentValue = JObject.FromObject(Element.Value);
@@ -42,7 +57,7 @@ namespace CRDT.Registers.Commutative.LastWriterWins
                 return this;
             }
 
-            return new LWW_Register<T>(new LWW_RegisterElement<T>(newValue, timestamp));
+            return new LWW_Register<T>(new LWW_RegisterElement<T>(newValue, timestamp, false));
         }
 
         protected override IEnumerable<object> GetEqualityComponents()

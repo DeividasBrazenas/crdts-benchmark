@@ -40,7 +40,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Update_SameValueExistsWithLowerTimestamp_DoesNotDoAnything(TestType value, long timestamp)
         {
-            _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp - 100));
+            _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp - 100, false));
 
             _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp);
 
@@ -51,7 +51,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Update_SameValueExistsWithHigherTimestamp_DoesNotDoAnything(TestType value, long timestamp)
         {
-            _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp));
+            _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp, false));
 
             _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), timestamp - 100);
 
@@ -65,7 +65,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var value = _builder.Build(id);
             var newValue = _builder.Build(id);
 
-            _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp));
+            _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp, false));
 
             _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(newValue)), timestamp + 100);
 
@@ -80,7 +80,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var value = _builder.Build(id);
             var newValue = _builder.Build(id);
 
-            _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp + 100));
+            _repository.PersistElement(new LWW_RegisterElement<TestType>(value, timestamp + 100, false));
 
             _service.DownstreamAssign(id, JToken.Parse(JsonConvert.SerializeObject(newValue)), timestamp);
 
@@ -176,7 +176,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             var actualValue = _service.GetValue(value.Id);
 
-            Assert.Equal(value, actualValue);
+            Assert.Equal(value, actualValue.Value);
         }
 
         [Fact]
@@ -193,7 +193,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var firstReplica = commutativeReplicas.First();
             firstReplica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), ts);
 
-            CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), ts, commutativeReplicas);
+            CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId).Value), ts, commutativeReplicas);
 
             ts++;
 
@@ -215,7 +215,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             foreach (var replica in commutativeReplicas)
             {
-                Assert.Equal(initialValue, replica.Value.GetValue(valueId));
+                Assert.Equal(initialValue, replica.Value.GetValue(valueId).Value);
             }
         }
 

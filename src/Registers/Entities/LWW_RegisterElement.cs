@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using CRDT.Core.Abstractions;
-using CRDT.Core.DistributedTime;
 
 namespace CRDT.Registers.Entities
 {
@@ -8,20 +7,23 @@ namespace CRDT.Registers.Entities
     {
         public T Value { get; }
 
-        public long Timestamp { get; set; }
+        public long Timestamp { get; }
 
-        //TODO Add removed
+        public bool Removed { get; }
 
-        public LWW_RegisterElement(T value, long timestamp)
+
+        public LWW_RegisterElement(T value, long timestamp, bool removed)
         {
             Value = value;
             Timestamp = timestamp;
+            Removed = removed;
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
             yield return Timestamp;
+            yield return Removed;
         }
     }
 }

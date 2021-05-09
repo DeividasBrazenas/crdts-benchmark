@@ -16,16 +16,16 @@ namespace CRDT.Application.Convergent.Register
             _repository = repository;
         }
 
-        public void LocalAssign(Guid id, T value, long timestamp)
+        public void LocalAssign(T value, long timestamp)
         {
             lock (_lockObject)
             {
-                var existingEntity = _repository.GetElement(id);
+                var existingEntity = _repository.GetElement(value.Id);
 
                 LWW_Register<T> existingRegister;
                 if (existingEntity is null)
                 {
-                    existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, 0));
+                    existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, 0, false));
                 }
                 else
                 {
@@ -38,16 +38,38 @@ namespace CRDT.Application.Convergent.Register
             }
         }
 
-        public void DownstreamAssign(Guid id, T value, long timestamp)
+        public void LocalRemove(T value, long timestamp)
+        {
+            lock (_lockObject)
+            {
+                var existingEntity = _repository.GetElement(value.Id);
+
+                LWW_Register<T> existingRegister;
+                if (existingEntity is null)
+                {
+                    existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, 0, false));
+                }
+                else
+                {
+                    existingRegister = new LWW_Register<T>(existingEntity);
+                }
+
+                var register = existingRegister.Remove(value, timestamp);
+
+                _repository.PersistElement(register.Element);
+            }
+        }
+
+        public void DownstreamAssign(T value, long timestamp)
         {
             lock(_lockObject)
             {
-                var existingEntity = _repository.GetElement(id);
+                var existingEntity = _repository.GetElement(value.Id);
 
                 LWW_Register<T> existingRegister;
                 if (existingEntity is null)
                 {
-                    existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, 0));
+                    existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, 0, false));
                 }
                 else
                 {
@@ -60,11 +82,28 @@ namespace CRDT.Application.Convergent.Register
             }
         }
 
-        public T GetValue(Guid id)
+        public void DownstreamRemove(T value, long timestamp)
         {
-            var entity = _repository.GetElement(id);
+            lock (_lockObject)
+            {
+                var existingEntity = _repository.GetElement(value.Id);
 
-            return entity?.Value;
+                LWW_Register<T> existingRegister;
+                if (existingEntity is null)
+                {
+                    existingRegister = new LWW_Register<T>(new LWW_RegisterElement<T>(null, 0, false));
+                }
+                else
+                {
+                    existingRegister = new LWW_Register<T>(existingEntity);
+                }
+
+                var register = existingRegister.Remove(value, timestamp);
+
+                _repository.PersistElement(register.Element);
+            }
         }
+
+        public LWW_RegisterElement<T> GetValue(Guid id) => _repository.GetElement(id);
     }
 }

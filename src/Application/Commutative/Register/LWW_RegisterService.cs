@@ -26,7 +26,7 @@ namespace CRDT.Application.Commutative.Register
                 LWW_Register<T> register;
                 if (existingEntity is null)
                 {
-                    var element = new LWW_RegisterElement<T>(BaseObject(id), 0);
+                    var element = new LWW_RegisterElement<T>(BaseObject(id), 0, false);
                     register = new LWW_Register<T>(element);
                 }
                 else
@@ -35,6 +35,29 @@ namespace CRDT.Application.Commutative.Register
                 }
 
                 register = register.Assign(value, timestamp);
+
+                _repository.PersistElement(register.Element);
+            }
+        }
+
+        public void LocalRemove(T value, long timestamp)
+        {
+            lock (_lockObject)
+            {
+                var existingEntity = _repository.GetElement(value.Id);
+
+                LWW_Register<T> register;
+                if (existingEntity is null)
+                {
+                    var element = new LWW_RegisterElement<T>(BaseObject(value.Id), 0, false);
+                    register = new LWW_Register<T>(element);
+                }
+                else
+                {
+                    register = new LWW_Register<T>(existingEntity);
+                }
+
+                register = register.Remove(value, timestamp);
 
                 _repository.PersistElement(register.Element);
             }
@@ -49,7 +72,7 @@ namespace CRDT.Application.Commutative.Register
                 LWW_Register<T> register;
                 if (existingEntity is null)
                 {
-                    var element = new LWW_RegisterElement<T>(BaseObject(id), 0);
+                    var element = new LWW_RegisterElement<T>(BaseObject(id), 0, false);
                     register = new LWW_Register<T>(element);
                 }
                 else
@@ -63,12 +86,30 @@ namespace CRDT.Application.Commutative.Register
             }
         }
 
-        public T GetValue(Guid id)
+        public void DownstreamRemove(T value, long timestamp)
         {
-            var entity = _repository.GetElement(id);
+            lock (_lockObject)
+            {
+                var existingEntity = _repository.GetElement(value.Id);
 
-            return entity?.Value;
+                LWW_Register<T> register;
+                if (existingEntity is null)
+                {
+                    var element = new LWW_RegisterElement<T>(BaseObject(value.Id), 0, false);
+                    register = new LWW_Register<T>(element);
+                }
+                else
+                {
+                    register = new LWW_Register<T>(existingEntity);
+                }
+
+                register = register.Remove(value, timestamp);
+
+                _repository.PersistElement(register.Element);
+            }
         }
+
+        public LWW_RegisterElement<T> GetValue(Guid id) => _repository.GetElement(id);
 
         private T BaseObject(Guid id)
         {

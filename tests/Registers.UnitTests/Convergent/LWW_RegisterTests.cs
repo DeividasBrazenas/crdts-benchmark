@@ -13,7 +13,7 @@ namespace CRDT.Registers.UnitTests.Convergent
         public void Merge_LeftClockWithHigherTimestamp_ReturnsLeftObject(
             TestType leftValue, TestType rightValue)
         {
-            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(leftValue, 1));
+            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(leftValue, 1, false));
             var result = lww.Assign(rightValue, 0);
 
             Assert.Same(lww, result);
@@ -25,7 +25,7 @@ namespace CRDT.Registers.UnitTests.Convergent
         public void Merge_RightClockWithHigherTimestamp_ReturnsRightObject(
             TestType leftValue, TestType rightValue)
         {
-            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(leftValue, 0));
+            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(leftValue, 0, false));
             var result = lww.Assign(rightValue, 1);
 
             Assert.Same(rightValue, result.Element.Value);

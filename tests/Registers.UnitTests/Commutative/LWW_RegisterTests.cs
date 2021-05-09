@@ -15,7 +15,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         public void Update_PrimitiveValues_SetsNewValues(TestType value,
             string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
-            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0));
+            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0, false));
 
             var result = lww.Assign(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), 1);
             result = result.Assign(JToken.Parse($"{{\"IntValue\": {intValue}}}"), 2);
@@ -36,7 +36,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         public void Update_OperationsWithLowerTimestamp_DoNotTakeEffect(TestType value, 
             string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
-            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 10));
+            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 10, false));
 
             var result = lww.Assign(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), 1);
             result = result.Assign(JToken.Parse($"{{\"IntValue\": {intValue}}}"), 2);
@@ -53,7 +53,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         public void Update_PrimitiveValuesWithMixedTimestamps_SetsNewValues(TestType value,
             string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
-            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 5));
+            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 5, false));
 
             var result = lww.Assign(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), 1);
             result = result.Assign(JToken.Parse($"{{\"IntValue\": {intValue}}}"), 2);
@@ -73,7 +73,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         [AutoData]
         public void Update_NullableValues_SetsNulls(TestType value)
         {
-            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0));
+            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0, false));
 
             var result = lww.Assign(JToken.Parse("{\"StringValue\": null}"), 1);
             result = result.Assign(JToken.Parse("{\"NullableLongValue\": null}"), 2);
@@ -89,7 +89,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         public void Update_InnerObjectValues_SetsNewValues(TestType value,
             string stringValue, int intValue, decimal decimalValue)
         {
-            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0));
+            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0, false));
 
             var result = lww.Assign(JToken.Parse($"{{\"ObjectValue\": {{ \"StringValue\": \"{stringValue}\", " +
                                                               $"\"DecimalValue\": {decimalValue}, \"IntValue\": {intValue}," +
@@ -106,7 +106,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         public void Update_NonExistingValues_DoNotTakeEffectForValues(TestType value,
             string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
-            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0));
+            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0, false));
 
             var result = lww.Assign(JToken.Parse($"{{\"FooStringValue\": \"{stringValue}\"}}"), 1);
             result = result.Assign(JToken.Parse($"{{\"FooIntValue\": {intValue}}}"), 2);
@@ -122,7 +122,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         [AutoData]
         public void Update_ArrayValues_SetsNewValues(TestType value)
         {
-            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0));
+            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0, false));
 
             var result = lww.Assign(JToken.Parse("{\"IntArray\": [1, 2, 3, 4, 5]}"), 1);
             result = result.Assign(JToken.Parse("{\"LongList\": []}"), 2);
@@ -135,7 +135,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         [AutoData]
         public void Update_ListValues_SetsNewValues(TestType value)
         {
-            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0));
+            var lww = new LWW_Register<TestType>(new LWW_RegisterElement<TestType>(value, 0, false));
 
             var result = lww.Assign(JToken.Parse("{\"IntArray\": []}"), 1);
             result = result.Assign(JToken.Parse("{\"LongList\": [-1000, 100, 200, 300, 400, 500]}"), 2);

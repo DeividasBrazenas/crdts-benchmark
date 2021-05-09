@@ -92,7 +92,7 @@ namespace Benchmarks.Framework
             TCRDT replica;
             List<TCRDT> downstreamReplicas;
 
-            var ts = 0;
+            var ts = 1;
 
             for (int i = 0; i < _nodes.Count; i++)
             {
@@ -115,7 +115,7 @@ namespace Benchmarks.Framework
             TCRDT replica;
             List<TCRDT> downstreamReplicas;
 
-            var ts = 0;
+            var ts = 1;
 
             for (int i = 0; i < _nodes.Count; i++)
             {
@@ -143,7 +143,7 @@ namespace Benchmarks.Framework
             TCRDT replica;
             List<TCRDT> downstreamReplicas;
 
-            var ts = 0;
+            var ts = 1;
 
             for (int i = 0; i < _nodes.Count; i++)
             {
@@ -170,7 +170,7 @@ namespace Benchmarks.Framework
             TCRDT replica;
             List<TCRDT> downstreamReplicas;
 
-            var ts = 0;
+            var ts = 1;
 
             for (int i = 0; i < _nodes.Count; i++)
             {

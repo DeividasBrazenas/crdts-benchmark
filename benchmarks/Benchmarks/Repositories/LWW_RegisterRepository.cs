@@ -20,7 +20,7 @@ namespace Benchmarks.Repositories
 
         public LWW_RegisterElement<TestType> GetElement(Guid id)
         {
-            return Elements.FirstOrDefault(e => e.Value.Id == id);
+            return Elements.FirstOrDefault(e => e.Value?.Id == id);
         }
 
         public void PersistElement(LWW_RegisterElement<TestType> element)
