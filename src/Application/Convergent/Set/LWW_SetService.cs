@@ -17,7 +17,7 @@ namespace CRDT.Application.Convergent.Set
             _repository = repository;
         }
 
-        public void LocalAdd(T value, long timestamp)
+        public void LocalAssign(T value, long timestamp)
         {
             lock (_lockObject)
             {
@@ -26,7 +26,7 @@ namespace CRDT.Application.Convergent.Set
 
                 var set = new LWW_Set<T>(existingAdds, existingRemoves);
 
-                set = set.Add(value, timestamp);
+                set = set.Assign(value, timestamp);
 
                 _repository.PersistAdds(set.Adds);
             }

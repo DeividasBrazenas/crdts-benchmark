@@ -26,7 +26,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, long timestamp)
         {
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(value, repositoryValues.Select(v => v.Value));
@@ -38,7 +38,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             _repository.PersistAdds(adds.ToImmutableHashSet());
 
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(value, repositoryValues.Select(v => v.Value));
@@ -58,7 +58,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_AddExistsWithLowerTimestamp_AddsElementToTheRepository(TestType value, long timestamp)
         {
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
             _lwwSetService.DownstreamRemove(value, timestamp + 10);
 
             var repositoryValues = _repository.GetRemoves();
@@ -72,7 +72,7 @@ namespace CRDT.Application.UnitTests.Commutative
             _repository.PersistAdds(existingAdds.ToImmutableHashSet());
             _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -86,7 +86,7 @@ namespace CRDT.Application.UnitTests.Commutative
             _repository.PersistAdds(existingAdds.ToImmutableHashSet());
             _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
             _lwwSetService.DownstreamRemove(value, timestamp + 100);
 
             var lookup = _lwwSetService.Lookup(value);
@@ -101,9 +101,9 @@ namespace CRDT.Application.UnitTests.Commutative
             _repository.PersistAdds(existingAdds.ToImmutableHashSet());
             _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
             _lwwSetService.DownstreamRemove(value, timestamp + 100);
-            _lwwSetService.DownstreamAdd(value, timestamp + 200);
+            _lwwSetService.DownstreamAssign(value, timestamp + 200);
 
             var lookup = _lwwSetService.Lookup(value);
 

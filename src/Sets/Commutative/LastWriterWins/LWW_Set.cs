@@ -18,7 +18,7 @@ namespace CRDT.Sets.Commutative.LastWriterWins
         {
         }
 
-        public LWW_Set<T> Add(T value, long timestamp)
+        public LWW_Set<T> Assign(T value, long timestamp)
         {
             var existingElement = Adds.FirstOrDefault(a => a.Value.Id == value.Id);
 

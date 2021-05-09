@@ -142,9 +142,9 @@ namespace CRDT.Application.UnitTests.Convergent
             _repository.PersistAdds(existingAdds.ToImmutableHashSet());
             _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.LocalAdd(value, timestamp);
+            _lwwSetService.LocalAssign(value, timestamp);
             _lwwSetService.LocalRemove(value, timestamp + 100);
-            _lwwSetService.LocalAdd(value, timestamp + 200);
+            _lwwSetService.LocalAssign(value, timestamp + 200);
 
             var lookup = _lwwSetService.Lookup(value);
 
