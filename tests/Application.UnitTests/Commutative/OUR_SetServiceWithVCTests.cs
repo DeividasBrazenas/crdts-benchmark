@@ -197,7 +197,7 @@ namespace CRDT.Application.UnitTests.Commutative
             _ourSetService.DownstreamAdd(value, tag, new VectorClock(clock.Add(node, 0)));
 
             var newValue = _builder.Build(value.Id);
-            _ourSetService.DownstreamUpdate(newValue, tag, new VectorClock(clock.Add(node, 3)));
+            _ourSetService.DownstreamUpdate(newValue, new[] { tag }, new VectorClock(clock.Add(node, 3)));
 
             var lookup = _ourSetService.Lookup(newValue);
             Assert.True(lookup);
@@ -212,7 +212,7 @@ namespace CRDT.Application.UnitTests.Commutative
             _ourSetService.DownstreamAdd(value, tag, new VectorClock(clock.Add(node, 0)));
 
             var newValue = _builder.Build(value.Id);
-            _ourSetService.DownstreamUpdate(newValue, tag, new VectorClock(clock.Add(node, 3)));
+            _ourSetService.DownstreamUpdate(newValue, new[] { tag }, new VectorClock(clock.Add(node, 3)));
 
             var lookup = _ourSetService.Lookup(value);
             Assert.False(lookup);

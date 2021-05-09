@@ -25,12 +25,12 @@ namespace Benchmarks.Repositories
 
         public ImmutableHashSet<OUR_SetElement<TestType>> GetAdds(Guid id)
         {
-            return Adds.Where(x => x.Value.Id == id).ToImmutableHashSet();
+            return Adds.Where(x => x.ValueId == id).ToImmutableHashSet();
         }
 
         public ImmutableHashSet<OUR_SetElement<TestType>> GetRemoves(Guid id)
         {
-            return Removes.Where(x => x.Value.Id == id).ToImmutableHashSet();
+            return Removes.Where(x => x.ValueId == id).ToImmutableHashSet();
         }
 
         public void PersistAdds(ImmutableHashSet<OUR_SetElement<TestType>> values)

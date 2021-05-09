@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using CRDT.Application.Interfaces;
@@ -17,6 +18,11 @@ namespace CRDT.Application.UnitTests.Repositories
         }
 
         public ImmutableHashSet<OUR_OptimizedSetElement<TestType>> GetElements() => Elements;
+
+        public ImmutableHashSet<OUR_OptimizedSetElement<TestType>> GetElements(Guid id)
+        {
+            return Elements.Where(e => e.ValueId == id).ToImmutableHashSet();
+        }
 
         public void PersistElements(ImmutableHashSet<OUR_OptimizedSetElement<TestType>> elements)
         {

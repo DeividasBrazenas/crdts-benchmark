@@ -7,6 +7,8 @@ namespace CRDT.Sets.Entities
 {
     public class OUR_SetWithVCElement<T> : ValueObject where T : DistributedEntity
     {
+        public Guid ValueId { get; }
+
         public T Value { get; }
 
         public Guid Tag { get; }
@@ -15,6 +17,7 @@ namespace CRDT.Sets.Entities
 
         public OUR_SetWithVCElement(T value, Guid tag, VectorClock timestamp)
         {
+            ValueId = value.Id;
             Value = value;
             Tag = tag;
             VectorClock = timestamp;
@@ -22,6 +25,7 @@ namespace CRDT.Sets.Entities
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
+            yield return ValueId;
             yield return Value;
             yield return Tag;
             yield return VectorClock;

@@ -12,7 +12,8 @@ namespace Benchmarks.Framework
         private int _iterations;
         private readonly List<Node> _nodes;
         private readonly Dictionary<Node, TCRDT> _replicas;
-        private readonly List<TestType> _objects;
+        private readonly List<TestType> _addObjects;
+        private readonly List<TestType> _updateObjects;
 
         public Action<TCRDT, TestType, long, List<TCRDT>> Add { get; set; }
         public Action<TCRDT, TestType, long, List<TCRDT>> Update { get; set; }
@@ -26,13 +27,17 @@ namespace Benchmarks.Framework
         public Action<TCRDT, TestType, VectorClock, List<TCRDT>> UpdateWithVectorClock { get; set; }
         public Action<TCRDT, TestType, VectorClock, List<TCRDT>> RemoveWithVectorClock { get; set; }
 
-        public CRDT_Set_Benchmarker(int iterations, List<Node> nodes, Dictionary<Node, TCRDT> replicas, List<TestType> objects)
+        public CRDT_Set_Benchmarker(int iterations, List<Node> nodes, Dictionary<Node, TCRDT> replicas)
         {
             _iterations = iterations;
             _nodes = nodes;
             _replicas = replicas;
-            _objects = objects;
+            var objectIds = GenerateGuids(iterations * _nodes.Count);
+            var random = new Random();
+            _addObjects = GenerateObjects(random, objectIds);
+            _updateObjects = GenerateObjects(random, objectIds);
         }
+
 
         #region WithTimestamp
 
@@ -52,7 +57,7 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Add
-                    value = _objects[i * _iterations + j];
+                    value = _addObjects[i * _iterations + j];
                     AddWithTimestamp(replica, value, ts, downstreamReplicas);
                     ts++;
                 }
@@ -75,12 +80,12 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Add
-                    value = _objects[i * _iterations + j];
+                    value = _addObjects[i * _iterations + j];
                     AddWithTimestamp(replica, value, ts, downstreamReplicas);
                     ts++;
 
                     // Update
-                    value = _objects[2 * i * _iterations + j];
+                    value = _updateObjects[i * _iterations + j];
                     UpdateWithTimestamp(replica, value, ts, downstreamReplicas);
                     ts++;
                 }
@@ -104,7 +109,7 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Add
-                    value = _objects[i * _iterations + j];
+                    value = _addObjects[i * _iterations + j];
                     AddWithTimestamp(replica, value, ts, downstreamReplicas);
                     ts++;
 
@@ -131,12 +136,12 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Add
-                    value = _objects[i * _iterations + j];
+                    value = _addObjects[i * _iterations + j];
                     AddWithTimestamp(replica, value, ts, downstreamReplicas);
                     ts++;
 
                     // Update
-                    value = _objects[2 * i * _iterations + j];
+                    value = _updateObjects[i * _iterations + j];
                     UpdateWithTimestamp(replica, value, ts, downstreamReplicas);
                     ts++;
 
@@ -167,7 +172,7 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Add
-                    value = _objects[i * _iterations + j];
+                    value = _addObjects[i * _iterations + j];
                     AddWithVectorClock(replica, value, clock, downstreamReplicas);
                     clock = clock.Increment(_nodes[i]);
                 }
@@ -190,12 +195,12 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Add
-                    value = _objects[i * _iterations + j];
+                    value = _addObjects[i * _iterations + j];
                     AddWithVectorClock(replica, value, clock, downstreamReplicas);
                     clock = clock.Increment(_nodes[i]);
 
                     // Update
-                    value = _objects[2 * i * _iterations + j];
+                    value = _updateObjects[i * _iterations + j];
                     UpdateWithVectorClock(replica, value, clock, downstreamReplicas);
                     clock = clock.Increment(_nodes[i]);
                 }
@@ -219,7 +224,7 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Add
-                    value = _objects[i * _iterations + j];
+                    value = _addObjects[i * _iterations + j];
                     AddWithVectorClock(replica, value, clock, downstreamReplicas);
                     clock = clock.Increment(_nodes[i]);
 
@@ -246,12 +251,12 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Add
-                    value = _objects[i * _iterations + j];
+                    value = _addObjects[i * _iterations + j];
                     AddWithVectorClock(replica, value, clock, downstreamReplicas);
                     clock = clock.Increment(_nodes[i]);
 
                     // Update
-                    value = _objects[2 * i * _iterations + j];
+                    value = _updateObjects[i * _iterations + j];
                     UpdateWithVectorClock(replica, value, clock, downstreamReplicas);
                     clock = clock.Increment(_nodes[i]);
 
@@ -264,5 +269,25 @@ namespace Benchmarks.Framework
 
         #endregion
 
+        private List<Guid> GenerateGuids(int count)
+        {
+            var guids = new List<Guid>(count);
+
+            for (int i = 0; i < count; i++)
+            {
+                guids.Add(Guid.NewGuid());
+            }
+
+            return guids;
+        }
+
+        private List<TestType> GenerateObjects(Random random, List<Guid> ids)
+        {
+            var objects = new List<TestType>(ids.Count);
+
+            objects.AddRange(ids.Select(id => new TestTypeBuilder(random).Build(id)));
+
+            return objects;
+        }
     }
 }

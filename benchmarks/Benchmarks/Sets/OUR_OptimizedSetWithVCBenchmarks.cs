@@ -16,7 +16,6 @@ namespace Benchmarks.Sets
     public class OUR_OptimizedSetWithVCBenchmarks
     {
         private List<Node> _nodes;
-        private List<TestType> _objects;
         private CRDT_Set_Benchmarker<CRDT.Application.Convergent.Set.OUR_OptimizedSetWithVCService<TestType>> _convergentBenchmarker;
         private CRDT_Set_Benchmarker<CRDT.Application.Commutative.Set.OUR_OptimizedSetWithVCService<TestType>> _commutativeBenchmarker;
 
@@ -27,11 +26,10 @@ namespace Benchmarks.Sets
         public void Setup()
         {
             _nodes = Node.CreateNodes(3);
-            _objects = new TestTypeBuilder(new Random()).Build(Guid.NewGuid(), _nodes.Count * Iterations * 2);
 
             _convergentBenchmarker =
                 new CRDT_Set_Benchmarker<CRDT.Application.Convergent.Set.OUR_OptimizedSetWithVCService<TestType>>(
-                    Iterations, _nodes, CreateConvergentReplicas(_nodes), _objects)
+                    Iterations, _nodes, CreateConvergentReplicas(_nodes))
                 {
                     AddWithVectorClock = ConvergentAdd,
                     UpdateWithVectorClock = ConvergentUpdate,
@@ -40,7 +38,7 @@ namespace Benchmarks.Sets
 
             _commutativeBenchmarker =
                 new CRDT_Set_Benchmarker<CRDT.Application.Commutative.Set.OUR_OptimizedSetWithVCService<TestType>>(
-                    Iterations, _nodes, CreateCommutativeReplicas(_nodes), _objects)
+                    Iterations, _nodes, CreateCommutativeReplicas(_nodes))
                 {
                     AddWithVectorClock = CommutativeAdd,
                     UpdateWithVectorClock = CommutativeUpdate,
