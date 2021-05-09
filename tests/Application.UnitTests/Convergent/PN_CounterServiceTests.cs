@@ -25,11 +25,11 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Merge_TakesMaxValues(Guid nodeOneId, Guid nodeTwoId, Guid nodeThreeId, Guid nodeFourId)
         {
-            var additions = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) };
-            var otherAdditions = new List<CounterElement> { new(3, nodeTwoId), new(42, nodeThreeId), new(10, nodeFourId) };
+            var additions = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) }.ToImmutableHashSet();
+            var otherAdditions = new List<CounterElement> { new(3, nodeTwoId), new(42, nodeThreeId), new(10, nodeFourId) }.ToImmutableHashSet();
 
-            var subtractions = new List<CounterElement> { new(2, nodeOneId), new(9, nodeTwoId), new(5, nodeThreeId) };
-            var otherSubtractions = new List<CounterElement> { new(3, nodeTwoId), new(11, nodeThreeId), new(7, nodeFourId) };
+            var subtractions = new List<CounterElement> { new(2, nodeOneId), new(9, nodeTwoId), new(5, nodeThreeId) }.ToImmutableHashSet();
+            var otherSubtractions = new List<CounterElement> { new(3, nodeTwoId), new(11, nodeThreeId), new(7, nodeFourId) }.ToImmutableHashSet();
 
             _repository.PersistAdditions(additions);
             _repository.PersistSubtractions(subtractions);
@@ -53,19 +53,19 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Merge_IsCommutative(Guid nodeOneId, Guid nodeTwoId, Guid nodeThreeId, Guid nodeFourId)
         {
-            var additions = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) };
-            var otherAdditions = new List<CounterElement> { new(3, nodeTwoId), new(42, nodeThreeId), new(10, nodeFourId) };
+            var additions = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) }.ToImmutableHashSet();
+            var otherAdditions = new List<CounterElement> { new(3, nodeTwoId), new(42, nodeThreeId), new(10, nodeFourId) }.ToImmutableHashSet();
 
-            var subtractions = new List<CounterElement> { new(2, nodeOneId), new(9, nodeTwoId), new(5, nodeThreeId) };
-            var otherSubtractions = new List<CounterElement> { new(3, nodeTwoId), new(11, nodeThreeId), new(7, nodeFourId) };
+            var subtractions = new List<CounterElement> { new(2, nodeOneId), new(9, nodeTwoId), new(5, nodeThreeId) }.ToImmutableHashSet();
+            var otherSubtractions = new List<CounterElement> { new(3, nodeTwoId), new(11, nodeThreeId), new(7, nodeFourId) }.ToImmutableHashSet();
 
             _repository.PersistAdditions(additions);
             _repository.PersistSubtractions(subtractions);
 
-            _service.Merge(otherAdditions.ToImmutableHashSet(), otherSubtractions.ToImmutableHashSet());
-            _service.Merge(otherAdditions.ToImmutableHashSet(), otherSubtractions.ToImmutableHashSet());
-            _service.Merge(otherAdditions.ToImmutableHashSet(), otherSubtractions.ToImmutableHashSet());
-            _service.Merge(otherAdditions.ToImmutableHashSet(), otherSubtractions.ToImmutableHashSet());
+            _service.Merge(otherAdditions, otherSubtractions);
+            _service.Merge(otherAdditions, otherSubtractions);
+            _service.Merge(otherAdditions, otherSubtractions);
+            _service.Merge(otherAdditions, otherSubtractions);
 
             Assert.Equal(4, _repository.Additions.ToList().Count);
             Assert.Contains(_repository.Additions, e => e.Value == 7 && e.Node.Id == nodeOneId);
@@ -84,8 +84,8 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Sum_TakesSumOfElements(Guid nodeOneId, Guid nodeTwoId, Guid nodeThreeId)
         {
-            var additions = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) };
-            var subtractions = new List<CounterElement> { new(2, nodeOneId), new(3, nodeTwoId), new(1, nodeThreeId) };
+            var additions = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) }.ToImmutableHashSet();
+            var subtractions = new List<CounterElement> { new(2, nodeOneId), new(3, nodeTwoId), new(1, nodeThreeId) }.ToImmutableHashSet();
 
             _repository.PersistAdditions(additions);
             _repository.PersistSubtractions(subtractions);

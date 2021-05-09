@@ -19,7 +19,7 @@ namespace CRDT.Registers.UnitTests.Commutative
             string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
-            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
+            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
 
             var result = lww.Assign(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), new VectorClock(clock.Add(node, 1)));
             result = result.Assign(JToken.Parse($"{{\"IntValue\": {intValue}}}"), new VectorClock(clock.Add(node, 2)));
@@ -41,7 +41,7 @@ namespace CRDT.Registers.UnitTests.Commutative
             string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
-            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 10))));
+            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 10)), false));
 
             var result = lww.Assign(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), new VectorClock(clock.Add(node, 1)));
             result = result.Assign(JToken.Parse($"{{\"IntValue\": {intValue}}}"), new VectorClock(clock.Add(node, 2)));
@@ -59,7 +59,7 @@ namespace CRDT.Registers.UnitTests.Commutative
             string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
-            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 5))));
+            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 5)), false));
 
             var result = lww.Assign(JToken.Parse($"{{\"StringValue\": \"{stringValue}\"}}"), new VectorClock(clock.Add(node, 1)));
             result = result.Assign(JToken.Parse($"{{\"IntValue\": {intValue}}}"), new VectorClock(clock.Add(node, 2)));
@@ -80,7 +80,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         public void Update_NullableValues_SetsNulls(TestType value, Node node)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
-            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
+            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
 
             var result = lww.Assign(JToken.Parse("{\"StringValue\": null}"), new VectorClock(clock.Add(node, 1)));
             result = result.Assign(JToken.Parse("{\"NullableLongValue\": null}"), new VectorClock(clock.Add(node, 2)));
@@ -97,7 +97,7 @@ namespace CRDT.Registers.UnitTests.Commutative
             string stringValue, int intValue, decimal decimalValue)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
-            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
+            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
 
             var result = lww.Assign(JToken.Parse($"{{\"ObjectValue\": {{ \"StringValue\": \"{stringValue}\", " +
                                                               $"\"DecimalValue\": {decimalValue}, \"IntValue\": {intValue}," +
@@ -115,7 +115,7 @@ namespace CRDT.Registers.UnitTests.Commutative
             string stringValue, int intValue, decimal decimalValue, long longValue, Guid guidValue)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
-            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
+            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
 
             var result = lww.Assign(JToken.Parse($"{{\"FooStringValue\": \"{stringValue}\"}}"), new VectorClock(clock.Add(node, 1)));
             result = result.Assign(JToken.Parse($"{{\"FooIntValue\": {intValue}}}"), new VectorClock(clock.Add(node, 2)));
@@ -132,7 +132,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         public void Update_ArrayValues_SetsNewValues(TestType value, Node node)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
-            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
+            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
 
             var result = lww.Assign(JToken.Parse("{\"IntArray\": [1, 2, 3, 4, 5]}"), new VectorClock(clock.Add(node, 1)));
             result = result.Assign(JToken.Parse("{\"LongList\": []}"), new VectorClock(clock.Add(node, 2)));
@@ -146,7 +146,7 @@ namespace CRDT.Registers.UnitTests.Commutative
         public void Update_ListValues_SetsNewValues(TestType value, Node node)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
-            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
+            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
 
             var result = lww.Assign(JToken.Parse("{\"IntArray\": []}"), new VectorClock(clock.Add(node, 1)));
             result = result.Assign(JToken.Parse("{\"LongList\": [-1000, 100, 200, 300, 400, 500]}"), new VectorClock(clock.Add(node, 2)));

@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using CRDT.Counters.Entities;
 
 namespace CRDT.Application.Interfaces
 {
     public interface IPN_CounterRepository
     {
-        IEnumerable<CounterElement> GetAdditions();
+        ImmutableHashSet<CounterElement> GetAdditions();
 
-        IEnumerable<CounterElement> GetSubtractions();
+        ImmutableHashSet<CounterElement> GetSubtractions();
 
-        void PersistAdditions(IEnumerable<CounterElement> additions);
+        void PersistAdditions(ImmutableHashSet<CounterElement> additions);
 
-        void PersistSubtractions(IEnumerable<CounterElement> subtractions);
+        void PersistSubtractions(ImmutableHashSet<CounterElement> subtractions);
     }
 }

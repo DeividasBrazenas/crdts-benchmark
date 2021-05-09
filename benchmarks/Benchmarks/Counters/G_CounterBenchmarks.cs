@@ -1,83 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
+using Benchmarks.Framework;
 using Benchmarks.Repositories;
+using Benchmarks.TestTypes;
 using CRDT.Core.Cluster;
 using CRDT.Counters.Entities;
+using Newtonsoft.Json.Linq;
 
 namespace Benchmarks.Counters
 {
-    [SimpleJob(RunStrategy.Monitoring, RuntimeMoniker.NetCoreApp50, 1, 10, 100)]
+    [SimpleJob(RunStrategy.Monitoring, RuntimeMoniker.NetCoreApp50, 1, 5, 10)]
+    [MemoryDiagnoser]
     public class G_CounterBenchmarks
     {
         private List<Node> _nodes;
-        private Dictionary<Node, CRDT.Application.Commutative.Counter.G_CounterService> _commutativeReplicas;
-        private Dictionary<Node, CRDT.Application.Convergent.Counter.G_CounterService> _convergentReplicas;
+        private CRDT_Counter_Benchmarker<CRDT.Application.Convergent.Counter.G_CounterService> _convergentBenchmarker;
+        private CRDT_Counter_Benchmarker<CRDT.Application.Commutative.Counter.G_CounterService> _commutativeBenchmarker;
+
+        [Params(100)]
+        public int Iterations;
 
         [IterationSetup]
         public void Setup()
         {
-            _nodes = CreateNodes(3);
-            _commutativeReplicas = CreateCommutativeReplicas(_nodes);
-            _convergentReplicas = CreateConvergentReplicas(_nodes);
+            _nodes = Node.CreateNodes(3);
+
+            _convergentBenchmarker =
+                new CRDT_Counter_Benchmarker<CRDT.Application.Convergent.Counter.G_CounterService>(
+                    Iterations, _nodes, CreateConvergentReplicas(_nodes))
+                {
+                    Add = ConvergentAdd
+                };
+
+            _commutativeBenchmarker =
+                new CRDT_Counter_Benchmarker<CRDT.Application.Commutative.Counter.G_CounterService>(
+                    Iterations, _nodes, CreateCommutativeReplicas(_nodes))
+                {
+                    Add = CommutativeAdd
+                };
         }
 
         [Benchmark]
-        public void Commutative_Add_NetworkOK()
+        public void Convergent_Add()
         {
-            for (int i = 1; i <= 100; i++)
-            {
-                Parallel.ForEach(_commutativeReplicas, replica =>
-                {
-                    replica.Value.Add(i, replica.Key.Id);
-
-                    CommutativeDownstreamAdd(replica.Key.Id, i);
-                });
-            }
+            _convergentBenchmarker.Benchmark_Add();
         }
 
         [Benchmark]
-        public void Convergent_Add_NetworkOK()
+        public void Commutative_Add()
         {
-            for (int i = 1; i <= 100; i++)
-            {
-                Parallel.ForEach(_convergentReplicas, replica =>
-                {
-                    replica.Value.LocalAdd(i, replica.Key.Id);
-
-                    ConvergentDownstreamMerge(replica.Key.Id, replica.Value.State);
-                });
-            }
-        }
-
-        [Benchmark]
-        public void Convergent_Add_Every2ndNodeDidNotReceiveUpdateImmediately()
-        {
-            for (int i = 1; i <= 100; i++)
-            {
-                Parallel.ForEach(_convergentReplicas, replica =>
-                {
-                    replica.Value.LocalAdd(i, replica.Key.Id);
-
-                    ConvergentMergeDownstreamWithNetworkFailures(replica.Key.Id, replica.Value.State);
-                });
-            }
-        }
-
-        private List<Node> CreateNodes(int count)
-        {
-            var nodes = new List<Node>();
-
-            for (var i = 0; i < count; i++)
-            {
-                nodes.Add(new Node());
-            }
-
-            return nodes;
+            _commutativeBenchmarker.Benchmark_Add();
         }
 
         #region Commutative
@@ -97,15 +74,16 @@ namespace Benchmarks.Counters
             return dictionary;
         }
 
-        private void CommutativeDownstreamAdd(Guid senderId, int value)
+        private void CommutativeAdd(CRDT.Application.Commutative.Counter.G_CounterService sourceReplica, Guid replicaId, int value, List<CRDT.Application.Commutative.Counter.G_CounterService> downstreamReplicas)
         {
-            var downstreamReplicas = _commutativeReplicas.Where(r => r.Key.Id != senderId);
+            sourceReplica.DownstreamAdd(value, replicaId);
 
             foreach (var downstreamReplica in downstreamReplicas)
             {
-                downstreamReplica.Value.Add(value, senderId);
+                downstreamReplica.DownstreamAdd(value, replicaId);
             }
         }
+
         #endregion
 
         #region Convergent
@@ -125,29 +103,13 @@ namespace Benchmarks.Counters
             return dictionary;
         }
 
-        private void ConvergentDownstreamMerge(Guid senderId, IEnumerable<CounterElement> state)
+        private void ConvergentAdd(CRDT.Application.Convergent.Counter.G_CounterService sourceReplica, Guid replicaId, int value, List<CRDT.Application.Convergent.Counter.G_CounterService> downstreamReplicas)
         {
-            var downstreamReplicas = _convergentReplicas.Where(r => r.Key.Id != senderId);
+            sourceReplica.LocalAdd(value, replicaId);
 
             foreach (var downstreamReplica in downstreamReplicas)
             {
-                downstreamReplica.Value.Merge(state);
-            }
-        }
-
-        private void ConvergentMergeDownstreamWithNetworkFailures(Guid senderId, IEnumerable<CounterElement> state)
-        {
-            var downstreamReplicas = _convergentReplicas.Where(r => r.Key.Id != senderId).Where((x, i) => i % 2 == 0);
-            var replicasWithoutUpdate = _convergentReplicas.Except(downstreamReplicas).Where(r => r.Key.Id != senderId);
-
-            foreach (var downstreamReplica in downstreamReplicas)
-            {
-                downstreamReplica.Value.Merge(state);
-
-                foreach (var replicaWithoutUpdate in replicasWithoutUpdate)
-                {
-                    replicaWithoutUpdate.Value.Merge(downstreamReplica.Value.State);
-                }
+                downstreamReplica.Merge(sourceReplica.State);
             }
         }
 

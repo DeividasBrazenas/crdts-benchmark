@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using CRDT.Application.Interfaces;
 using CRDT.Counters.Entities;
 
@@ -6,19 +7,19 @@ namespace CRDT.Application.UnitTests.Repositories
 {
     public class G_CounterRepository : IG_CounterRepository
     {
-        public IEnumerable<CounterElement> Elements { get; private set; }
+        public ImmutableHashSet<CounterElement> Elements { get; private set; }
 
         public G_CounterRepository()
         {
-            Elements = new List<CounterElement>();
+            Elements = ImmutableHashSet<CounterElement>.Empty;
         }
 
-        public IEnumerable<CounterElement> GetValues()
+        public ImmutableHashSet<CounterElement> GetValues()
         {
             return Elements;
         }
 
-        public void PersistValues(IEnumerable<CounterElement> values)
+        public void PersistValues(ImmutableHashSet<CounterElement> values)
         {
             Elements = values;
         }

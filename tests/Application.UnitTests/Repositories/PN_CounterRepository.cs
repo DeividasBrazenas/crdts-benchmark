@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using CRDT.Application.Interfaces;
 using CRDT.Counters.Entities;
 
@@ -6,32 +7,32 @@ namespace CRDT.Application.UnitTests.Repositories
 {
     public class PN_CounterRepository : IPN_CounterRepository
     {
-        public IEnumerable<CounterElement> Additions;
+        public ImmutableHashSet<CounterElement> Additions;
 
-        public IEnumerable<CounterElement> Subtractions;
+        public ImmutableHashSet<CounterElement> Subtractions;
 
         public PN_CounterRepository()
         {
-            Additions = new List<CounterElement>();
-            Subtractions = new List<CounterElement>();
+            Additions = ImmutableHashSet<CounterElement>.Empty;
+            Subtractions = ImmutableHashSet<CounterElement>.Empty;
         }
 
-        public IEnumerable<CounterElement> GetAdditions()
+        public ImmutableHashSet<CounterElement> GetAdditions()
         {
             return Additions;
         }
 
-        public IEnumerable<CounterElement> GetSubtractions()
+        public ImmutableHashSet<CounterElement> GetSubtractions()
         {
             return Subtractions;
         }
 
-        public void PersistAdditions(IEnumerable<CounterElement> additions)
+        public void PersistAdditions(ImmutableHashSet<CounterElement> additions)
         {
             Additions = additions;
         }
 
-        public void PersistSubtractions(IEnumerable<CounterElement> subtractions)
+        public void PersistSubtractions(ImmutableHashSet<CounterElement> subtractions)
         {
             Subtractions = subtractions;
         }

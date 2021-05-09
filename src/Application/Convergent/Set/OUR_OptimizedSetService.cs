@@ -72,9 +72,9 @@ namespace CRDT.Application.Convergent.Set
             {
                 var existingElements = _repository.GetElements();
 
-                var set = new OUR_OptimizedSet<T>(existingElements.ToImmutableHashSet());
+                var set = new OUR_OptimizedSet<T>(existingElements);
 
-                set = set.Merge(elements.ToImmutableHashSet());
+                set = set.Merge(elements);
 
                 _repository.PersistElements(set.Elements);
             }
@@ -84,7 +84,7 @@ namespace CRDT.Application.Convergent.Set
         {
             var existingElements = _repository.GetElements();
 
-            var set = new OUR_OptimizedSet<T>(existingElements.ToImmutableHashSet());
+            var set = new OUR_OptimizedSet<T>(existingElements);
 
             var lookup = set.Lookup(value);
 

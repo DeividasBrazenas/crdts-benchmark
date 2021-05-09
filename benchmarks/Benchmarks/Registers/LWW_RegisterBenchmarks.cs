@@ -23,7 +23,7 @@ namespace Benchmarks.Registers
         private CRDT_Register_Benchmarker<CRDT.Application.Commutative.Register.LWW_RegisterService<TestType>> _commutativeBenchmarker;
 
         [Params(100)]
-        public int Iterations = 100;
+        public int Iterations;
 
         [IterationSetup]
         public void Setup()

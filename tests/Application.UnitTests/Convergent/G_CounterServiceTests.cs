@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture.Xunit2;
@@ -26,8 +27,8 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Merge_TakesMaxValues(Guid nodeOneId, Guid nodeTwoId, Guid nodeThreeId, Guid nodeFourId)
         {
-            var existingElements = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) };
-            var elements = new List<CounterElement> { new(3, nodeTwoId), new(42, nodeThreeId), new(10, nodeFourId) };
+            var existingElements = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) }.ToImmutableHashSet();
+            var elements = new List<CounterElement> { new(3, nodeTwoId), new(42, nodeThreeId), new(10, nodeFourId) }.ToImmutableHashSet();
 
             _repository.PersistValues(existingElements);
 
@@ -44,8 +45,8 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Merge_IsCommutative(Guid nodeOneId, Guid nodeTwoId, Guid nodeThreeId, Guid nodeFourId)
         {
-            var existingElements = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) };
-            var elements = new List<CounterElement> { new(3, nodeTwoId), new(42, nodeThreeId), new(10, nodeFourId) };
+            var existingElements = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) }.ToImmutableHashSet();
+            var elements = new List<CounterElement> { new(3, nodeTwoId), new(42, nodeThreeId), new(10, nodeFourId) }.ToImmutableHashSet();
 
             _repository.PersistValues(existingElements);
 
@@ -65,7 +66,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Sum_TakesSumOfElements(Guid nodeOneId, Guid nodeTwoId, Guid nodeThreeId)
         {
-            var elements = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) };
+            var elements = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) }.ToImmutableHashSet();
 
             _repository.PersistValues(elements);
 
@@ -140,7 +141,7 @@ namespace CRDT.Application.UnitTests.Convergent
         }
 
 
-        private void DownstreamMerge(Guid senderId, IEnumerable<CounterElement> state, Dictionary<Node, G_CounterService> replicas)
+        private void DownstreamMerge(Guid senderId, ImmutableHashSet<CounterElement> state, Dictionary<Node, G_CounterService> replicas)
         {
             var downstreamReplicas = replicas.Where(r => r.Key.Id != senderId);
 
@@ -150,7 +151,7 @@ namespace CRDT.Application.UnitTests.Convergent
             }
         }
 
-        private void DownstreamMergeWithNetworkFailures(Guid senderId, IEnumerable<CounterElement> state, Dictionary<Node, G_CounterService> replicas)
+        private void DownstreamMergeWithNetworkFailures(Guid senderId, ImmutableHashSet<CounterElement> state, Dictionary<Node, G_CounterService> replicas)
         {
             var downstreamReplicas = replicas.Where(r => r.Key.Id != senderId).Where((x, i) => i % 2 == 0);
             var replicasWithoutUpdate = replicas.Except(downstreamReplicas).Where(r => r.Key.Id != senderId);

@@ -22,7 +22,7 @@ namespace CRDT.Application.Commutative.Set
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new LWW_Set<T>(existingAdds, existingRemoves);
 
                 set = set.Assign(value, timestamp);
 
@@ -37,7 +37,7 @@ namespace CRDT.Application.Commutative.Set
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new LWW_Set<T>(existingAdds, existingRemoves);
 
                 set = set.Remove(value, timestamp);
 
@@ -52,7 +52,7 @@ namespace CRDT.Application.Commutative.Set
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new LWW_Set<T>(existingAdds, existingRemoves);
 
                 set = set.Assign(value, timestamp);
 
@@ -67,7 +67,7 @@ namespace CRDT.Application.Commutative.Set
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new LWW_Set<T>(existingAdds, existingRemoves);
 
                 set = set.Remove(value, timestamp);
 
@@ -80,7 +80,7 @@ namespace CRDT.Application.Commutative.Set
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new LWW_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new LWW_Set<T>(existingAdds, existingRemoves);
 
             var lookup = set.Lookup(value);
 

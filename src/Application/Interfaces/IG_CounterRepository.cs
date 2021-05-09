@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using CRDT.Counters.Entities;
 
 namespace CRDT.Application.Interfaces
 {
     public interface IG_CounterRepository
     {
-        IEnumerable<CounterElement> GetValues();
+        ImmutableHashSet<CounterElement> GetValues();
 
-        void PersistValues(IEnumerable<CounterElement> values);
+        void PersistValues(ImmutableHashSet<CounterElement> values);
     }
 }

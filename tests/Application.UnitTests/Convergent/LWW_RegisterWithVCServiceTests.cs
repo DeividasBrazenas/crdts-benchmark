@@ -40,19 +40,6 @@ namespace CRDT.Application.UnitTests.Convergent
 
         [Theory]
         [AutoData]
-        public void Assign_SameValueExistsWithLowerTimestamp_DoesNotDoAnything(TestType value, Node node)
-        {
-            var clock = ImmutableSortedDictionary<Node, long>.Empty;
-
-            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
-
-            _service.DownstreamAssign(value, new VectorClock(clock.Add(node, 1)));
-
-            AssertExistsInRepository(value, new VectorClock(clock.Add(node, 0)));
-        }
-
-        [Theory]
-        [AutoData]
         public void Assign_SameValueExistsWithHigherTimestamp_DoesNotDoAnything(TestType value, Node node)
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;

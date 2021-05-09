@@ -26,10 +26,10 @@ namespace CRDT.Counters.Commutative.GrowOnly
                 element.Add(value);
             }
 
-            var elements = Elements.Where(e => e.Node.Id != nodeId).ToList();
-            elements.Add(element);
+            var elements = Elements.Where(e => e.Node.Id != nodeId).ToImmutableHashSet();
+            elements = elements.Add(element);
 
-            return new G_Counter(elements.ToImmutableHashSet());
+            return new G_Counter(elements);
         }
 
         protected override IEnumerable<object> GetEqualityComponents()

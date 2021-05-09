@@ -26,8 +26,8 @@ namespace CRDT.Counters.Convergent.GrowOnly
                 element.Add(value);
             }
 
-            var elements = Elements.Where(e => e.Node.Id != nodeId).ToList();
-            elements.Add(element);
+            var elements = Elements.Where(e => e.Node.Id != nodeId).ToImmutableHashSet();
+            elements = elements.Add(element);
 
             return new G_Counter(elements.ToImmutableHashSet());
         }

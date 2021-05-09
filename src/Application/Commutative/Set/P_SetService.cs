@@ -22,7 +22,7 @@ namespace CRDT.Application.Commutative.Set
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new P_Set<T>(existingAdds, existingRemoves);
 
                 set = set.Add(value);
 
@@ -37,7 +37,7 @@ namespace CRDT.Application.Commutative.Set
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new P_Set<T>(existingAdds, existingRemoves);
 
                 set = set.Add(value);
 
@@ -52,7 +52,7 @@ namespace CRDT.Application.Commutative.Set
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new P_Set<T>(existingAdds, existingRemoves);
 
                 set = set.Remove(value);
 
@@ -67,7 +67,7 @@ namespace CRDT.Application.Commutative.Set
                 var existingAdds = _repository.GetAdds();
                 var existingRemoves = _repository.GetRemoves();
 
-                var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+                var set = new P_Set<T>(existingAdds, existingRemoves);
 
                 set = set.Remove(value);
 
@@ -80,7 +80,7 @@ namespace CRDT.Application.Commutative.Set
             var existingAdds = _repository.GetAdds();
             var existingRemoves = _repository.GetRemoves();
 
-            var set = new P_Set<T>(existingAdds.ToImmutableHashSet(), existingRemoves.ToImmutableHashSet());
+            var set = new P_Set<T>(existingAdds, existingRemoves);
 
             var lookup = set.Lookup(value);
 

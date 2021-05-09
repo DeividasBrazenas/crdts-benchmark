@@ -27,10 +27,10 @@ namespace CRDT.Counters.Commutative.PositiveNegative
                 element.Add(value);
             }
 
-            var additions = Additions.Where(e => e.Node.Id != nodeId).ToList();
-            additions.Add(element);
+            var additions = Additions.Where(e => e.Node.Id != nodeId).ToImmutableHashSet();
+            additions = additions.Add(element);
 
-            return new PN_Counter(additions.ToImmutableHashSet(), Subtractions);
+            return new PN_Counter(additions, Subtractions);
         }
 
         public PN_Counter Subtract(int value, Guid nodeId)
@@ -46,10 +46,10 @@ namespace CRDT.Counters.Commutative.PositiveNegative
                 element.Add(Math.Abs(value));
             }
 
-            var subtractions = Subtractions.Where(e => e.Node.Id != nodeId).ToList();
-            subtractions.Add(element);
+            var subtractions = Subtractions.Where(e => e.Node.Id != nodeId).ToImmutableHashSet();
+            subtractions = subtractions.Add(element);
 
-            return new PN_Counter(Additions, subtractions.ToImmutableHashSet());
+            return new PN_Counter(Additions, subtractions);
         }
 
         protected override IEnumerable<object> GetEqualityComponents()

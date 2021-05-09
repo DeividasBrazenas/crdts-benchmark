@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoFixture.Xunit2;
@@ -29,7 +30,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Add_AddsElementToRepository(int value, Guid nodeId)
         {
-            _service.Add(value, nodeId);
+            _service.DownstreamAdd(value, nodeId);
 
             Assert.Single(_repository.Elements);
             Assert.Contains(_repository.Elements, e => e.Value == value && e.Node.Id == nodeId);
@@ -40,9 +41,9 @@ namespace CRDT.Application.UnitTests.Commutative
         public void Add_UpdatesElementInRepository(List<CounterElement> elements, int value, Guid nodeId)
         {
             elements.Add(new CounterElement(999, nodeId));
-            _repository.PersistValues(elements);
+            _repository.PersistValues(elements.ToImmutableHashSet());
 
-            _service.Add(value, nodeId);
+            _service.DownstreamAdd(value, nodeId);
 
             Assert.Equal(elements.Count, _repository.Elements.ToList().Count);
             Assert.Contains(_repository.Elements, e => e.Value == 999 + value && e.Node.Id == nodeId);
@@ -54,7 +55,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var elements = new List<CounterElement> { new(7, nodeOneId), new(17, nodeTwoId), new(9, nodeThreeId) };
 
-            _repository.PersistValues(elements);
+            _repository.PersistValues(elements.ToImmutableHashSet());
 
             var sum = _service.Sum();
 
@@ -109,7 +110,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             foreach (var replica in replicas)
             {
-                replica.Value.Add(value, senderId);
+                replica.Value.DownstreamAdd(value, senderId);
                 // _output.WriteLine($"Adding {senderId}:{value} to {replica.Key.Id}. Replica values: {JsonConvert.SerializeObject(replica.Value._repository.GetValues())}");
 
             }

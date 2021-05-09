@@ -41,13 +41,9 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var lwwSet = new LWW_OptimizedSet<TestType>();
 
-            var add = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
-            var remove = new LWW_OptimizedSetElement<TestType>(value, timestamp + 10, true);
-            var reAdd = new LWW_OptimizedSetElement<TestType>(value, timestamp + 100, false);
-
-            lwwSet = lwwSet.Merge(new[] { new LWW_OptimizedSetElement<TestType>(value, timestamp, false) }.ToImmutableHashSet());
-            lwwSet = lwwSet.Merge(new[] { new LWW_OptimizedSetElement<TestType>(value, timestamp + 10, true) }.ToImmutableHashSet());
-            lwwSet = lwwSet.Merge(new[] { new LWW_OptimizedSetElement<TestType>(value, timestamp + 100, false) }.ToImmutableHashSet());
+            lwwSet = lwwSet.Assign(value, timestamp);
+            lwwSet = lwwSet.Remove(value, timestamp + 10);
+            lwwSet = lwwSet.Assign(value, timestamp + 100);
 
             var lookup = lwwSet.Lookup(value);
 

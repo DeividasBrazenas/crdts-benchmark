@@ -24,7 +24,7 @@ namespace CRDT.Application.Convergent.Counter
                 var existingAdditions = _repository.GetAdditions();
                 var existingSubtractions = _repository.GetSubtractions();
 
-                var counter = new PN_Counter(existingAdditions.ToImmutableHashSet(), existingSubtractions.ToImmutableHashSet());
+                var counter = new PN_Counter(existingAdditions, existingSubtractions);
 
                 var mergedCounter = counter.Add(value, nodeId);
 
@@ -39,7 +39,7 @@ namespace CRDT.Application.Convergent.Counter
                 var existingAdditions = _repository.GetAdditions();
                 var existingSubtractions = _repository.GetSubtractions();
 
-                var counter = new PN_Counter(existingAdditions.ToImmutableHashSet(), existingSubtractions.ToImmutableHashSet());
+                var counter = new PN_Counter(existingAdditions, existingSubtractions);
 
                 var mergedCounter = counter.Subtract(value, nodeId);
 
@@ -47,16 +47,16 @@ namespace CRDT.Application.Convergent.Counter
             }
         }
 
-        public void Merge(IEnumerable<CounterElement> additions, IEnumerable<CounterElement> subtractions)
+        public void Merge(ImmutableHashSet<CounterElement> additions, ImmutableHashSet<CounterElement> subtractions)
         {
             lock (_lockObject)
             {
                 var existingAdditions = _repository.GetAdditions();
                 var existingSubtractions = _repository.GetSubtractions();
 
-                var counter = new PN_Counter(existingAdditions.ToImmutableHashSet(), existingSubtractions.ToImmutableHashSet());
+                var counter = new PN_Counter(existingAdditions, existingSubtractions);
 
-                var mergedCounter = counter.Merge(additions.ToImmutableHashSet(), subtractions.ToImmutableHashSet());
+                var mergedCounter = counter.Merge(additions, subtractions);
 
                 _repository.PersistAdditions(mergedCounter.Additions);
                 _repository.PersistSubtractions(mergedCounter.Subtractions);
@@ -68,11 +68,11 @@ namespace CRDT.Application.Convergent.Counter
             var existingAdditions = _repository.GetAdditions();
             var existingSubtractions = _repository.GetSubtractions();
 
-            var counter = new PN_Counter(existingAdditions.ToImmutableHashSet(), existingSubtractions.ToImmutableHashSet());
+            var counter = new PN_Counter(existingAdditions, existingSubtractions);
 
             return counter.Sum;
         }
 
-        public (IEnumerable<CounterElement>, IEnumerable<CounterElement>) State => (_repository.GetAdditions(), _repository.GetSubtractions());
+        public (ImmutableHashSet<CounterElement>, ImmutableHashSet<CounterElement>) State => (_repository.GetAdditions(), _repository.GetSubtractions());
     }
 }

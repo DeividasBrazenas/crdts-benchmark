@@ -22,7 +22,7 @@ namespace CRDT.Application.Convergent.Set
             {
                 var existingEntities = _repository.GetValues();
 
-                var set = new G_Set<T>(existingEntities.ToImmutableHashSet());
+                var set = new G_Set<T>(existingEntities);
 
                 set = set.Add(value);
 
@@ -36,9 +36,9 @@ namespace CRDT.Application.Convergent.Set
             {
                 var existingEntities = _repository.GetValues();
 
-                var set = new G_Set<T>(existingEntities.ToImmutableHashSet());
+                var set = new G_Set<T>(existingEntities);
 
-                set = set.Merge(values.ToImmutableHashSet());
+                set = set.Merge(values);
 
                 _repository.PersistValues(set.Values);
             }
@@ -48,7 +48,7 @@ namespace CRDT.Application.Convergent.Set
         {
             var existingEntities = _repository.GetValues();
 
-            var set = new G_Set<T>(existingEntities.ToImmutableHashSet());
+            var set = new G_Set<T>(existingEntities);
 
             var lookup = set.Lookup(value);
 

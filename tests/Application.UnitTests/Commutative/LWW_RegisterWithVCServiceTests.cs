@@ -213,7 +213,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var firstReplica = commutativeReplicas.First();
             firstReplica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), clock);
 
-            CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), clock, commutativeReplicas);
+            CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId).Value), clock, commutativeReplicas);
 
             clock = clock.Increment(firstReplica.Key);
 
@@ -225,7 +225,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
                     replica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), clock);
 
-                    CommutativeDownstreamAssign(replica.Key.Id, valueId, JToken.FromObject(replica.Value.GetValue(valueId)), clock, commutativeReplicas);
+                    CommutativeDownstreamAssign(replica.Key.Id, valueId, JToken.FromObject(replica.Value.GetValue(valueId).Value), clock, commutativeReplicas);
 
                     clock = clock.Increment(replica.Key);
                 }
@@ -251,7 +251,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var firstReplica = commutativeReplicas.First();
             firstReplica.Value.LocalAssign(valueId, JToken.FromObject(initialValue), clock);
 
-            CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId)), clock, commutativeReplicas);
+            CommutativeDownstreamAssign(firstReplica.Key.Id, valueId, JToken.FromObject(firstReplica.Value.GetValue(valueId).Value), clock, commutativeReplicas);
 
             clock = clock.Increment(firstReplica.Key);
 

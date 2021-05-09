@@ -23,7 +23,7 @@ namespace CRDT.Application.Convergent.Counter
             {
                 var existingElements = _repository.GetValues();
 
-                var counter = new G_Counter(existingElements.ToImmutableHashSet());
+                var counter = new G_Counter(existingElements);
 
                 counter = counter.Add(value, id);
 
@@ -31,15 +31,15 @@ namespace CRDT.Application.Convergent.Counter
             }
         }
 
-        public void Merge(IEnumerable<CounterElement> elements)
+        public void Merge(ImmutableHashSet<CounterElement> elements)
         {
             lock (_lockObject)
             {
                 var existingElements = _repository.GetValues();
 
-                var counter = new G_Counter(existingElements.ToImmutableHashSet());
+                var counter = new G_Counter(existingElements);
 
-                var mergedCounter = counter.Merge(elements.ToImmutableHashSet());
+                var mergedCounter = counter.Merge(elements);
 
                 _repository.PersistValues(mergedCounter.Elements);
             }
@@ -49,11 +49,11 @@ namespace CRDT.Application.Convergent.Counter
         {
             var existingElements = _repository.GetValues();
 
-            var counter = new G_Counter(existingElements.ToImmutableHashSet());
+            var counter = new G_Counter(existingElements);
 
             return counter.Sum();
         }
 
-        public IEnumerable<CounterElement> State => _repository.GetValues();
+        public ImmutableHashSet<CounterElement> State => _repository.GetValues();
     }
 }

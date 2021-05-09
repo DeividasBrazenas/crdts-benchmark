@@ -15,13 +15,27 @@ namespace CRDT.Application.Commutative.Counter
             _repository = repository;
         }
 
-        public void Add(int value, Guid nodeId)
+        public void LocalAdd(int value, Guid nodeId)
         {
             lock (_lockObject)
             {
                 var existingElements = _repository.GetValues();
 
-                var counter = new G_Counter(existingElements.ToImmutableHashSet());
+                var counter = new G_Counter(existingElements);
+
+                var mergedCounter = counter.Add(value, nodeId);
+
+                _repository.PersistValues(mergedCounter.Elements);
+            }
+        }
+
+        public void DownstreamAdd(int value, Guid nodeId)
+        {
+            lock (_lockObject)
+            {
+                var existingElements = _repository.GetValues();
+
+                var counter = new G_Counter(existingElements);
 
                 var mergedCounter = counter.Add(value, nodeId);
 
@@ -33,7 +47,7 @@ namespace CRDT.Application.Commutative.Counter
         {
             var existingElements = _repository.GetValues();
 
-            var counter = new G_Counter(existingElements.ToImmutableHashSet());
+            var counter = new G_Counter(existingElements);
 
             return counter.Sum();
         }

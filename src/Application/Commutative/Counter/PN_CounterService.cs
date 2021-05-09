@@ -15,14 +15,14 @@ namespace CRDT.Application.Commutative.Counter
             _repository = repository;
         }
 
-        public void Add(int value, Guid nodeId)
+        public void LocalAdd(int value, Guid nodeId)
         {
             lock (_lockObject)
             {
                 var existingAdditions = _repository.GetAdditions();
                 var existingSubtractions = _repository.GetSubtractions();
 
-                var counter = new PN_Counter(existingAdditions.ToImmutableHashSet(), existingSubtractions.ToImmutableHashSet());
+                var counter = new PN_Counter(existingAdditions, existingSubtractions);
 
                 var mergedCounter = counter.Add(value, nodeId);
 
@@ -30,14 +30,44 @@ namespace CRDT.Application.Commutative.Counter
             }
         }
 
-        public void Subtract(int value, Guid nodeId)
+        public void DownstreamAdd(int value, Guid nodeId)
         {
             lock (_lockObject)
             {
                 var existingAdditions = _repository.GetAdditions();
                 var existingSubtractions = _repository.GetSubtractions();
 
-                var counter = new PN_Counter(existingAdditions.ToImmutableHashSet(), existingSubtractions.ToImmutableHashSet());
+                var counter = new PN_Counter(existingAdditions, existingSubtractions);
+
+                var mergedCounter = counter.Add(value, nodeId);
+
+                _repository.PersistAdditions(mergedCounter.Additions);
+            }
+        }
+
+        public void LocalSubtract(int value, Guid nodeId)
+        {
+            lock (_lockObject)
+            {
+                var existingAdditions = _repository.GetAdditions();
+                var existingSubtractions = _repository.GetSubtractions();
+
+                var counter = new PN_Counter(existingAdditions, existingSubtractions);
+
+                var mergedCounter = counter.Subtract(value, nodeId);
+
+                _repository.PersistSubtractions(mergedCounter.Subtractions);
+            }
+        }
+
+        public void DownstreamSubtract(int value, Guid nodeId)
+        {
+            lock (_lockObject)
+            {
+                var existingAdditions = _repository.GetAdditions();
+                var existingSubtractions = _repository.GetSubtractions();
+
+                var counter = new PN_Counter(existingAdditions, existingSubtractions);
 
                 var mergedCounter = counter.Subtract(value, nodeId);
 
@@ -50,7 +80,7 @@ namespace CRDT.Application.Commutative.Counter
             var existingAdditions = _repository.GetAdditions();
             var existingSubtractions = _repository.GetSubtractions();
 
-            var counter = new PN_Counter(existingAdditions.ToImmutableHashSet(), existingSubtractions.ToImmutableHashSet());
+            var counter = new PN_Counter(existingAdditions, existingSubtractions);
 
             return counter.Sum;
         }
