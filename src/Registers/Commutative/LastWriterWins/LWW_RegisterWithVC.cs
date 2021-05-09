@@ -24,6 +24,21 @@ namespace CRDT.Registers.Commutative.LastWriterWins
             return this;
         }
 
+        public LWW_RegisterWithVC<T> Remove(T value, VectorClock vectorClock)
+        {
+            if (Element is null || Element.Value.Id != value.Id)
+            {
+                return this;
+            }
+
+            if (Element.VectorClock < vectorClock)
+            {
+                return new LWW_RegisterWithVC<T>(new LWW_RegisterWithVCElement<T>(value, vectorClock, true));
+            }
+
+            return this;
+        }
+
         private LWW_RegisterWithVC<T> AssignValue(JToken value, VectorClock vectorClock)
         {
             var currentValue = JObject.FromObject(Element.Value);
@@ -42,7 +57,7 @@ namespace CRDT.Registers.Commutative.LastWriterWins
                 return this;
             }
 
-            return new LWW_RegisterWithVC<T>(new LWW_RegisterWithVCElement<T>(newValue, vectorClock));
+            return new LWW_RegisterWithVC<T>(new LWW_RegisterWithVCElement<T>(newValue, vectorClock, false));
         }
 
         protected override IEnumerable<object> GetEqualityComponents()

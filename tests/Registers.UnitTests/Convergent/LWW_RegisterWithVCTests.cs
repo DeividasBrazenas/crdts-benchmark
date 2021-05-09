@@ -21,7 +21,7 @@ namespace CRDT.Registers.UnitTests.Convergent
             var leftClock = new VectorClock(clock.Add(node, 1));
             var rightClock = new VectorClock(clock.Add(node, 0));
 
-            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(leftValue, leftClock));
+            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(leftValue, leftClock, false));
             var result = lww.Assign(rightValue, rightClock);
 
             Assert.Same(lww, result);
@@ -38,7 +38,7 @@ namespace CRDT.Registers.UnitTests.Convergent
             var leftClock = new VectorClock(clock.Add(node, 1));
             var rightClock = new VectorClock(clock.Add(node, 2));
 
-            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(leftValue, leftClock));
+            var lww = new LWW_RegisterWithVC<TestType>(new LWW_RegisterWithVCElement<TestType>(leftValue, leftClock, false));
             var result = lww.Assign(rightValue, rightClock);
 
             Assert.Equal(rightValue, result.Element.Value);

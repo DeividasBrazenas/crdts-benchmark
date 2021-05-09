@@ -33,7 +33,7 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _service.DownstreamAssign(value.Id, value, new VectorClock(clock.Add(node, 0)));
+            _service.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
 
             AssertExistsInRepository(value, new VectorClock(clock.Add(node, 0)));
         }
@@ -44,9 +44,9 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
+            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
 
-            _service.DownstreamAssign(value.Id, value, new VectorClock(clock.Add(node, 1)));
+            _service.DownstreamAssign(value, new VectorClock(clock.Add(node, 1)));
 
             AssertExistsInRepository(value, new VectorClock(clock.Add(node, 0)));
         }
@@ -57,9 +57,9 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1))));
+            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), false));
 
-            _service.DownstreamAssign(value.Id, value, new VectorClock(clock.Add(node, 0)));
+            _service.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
 
             AssertExistsInRepository(value, new VectorClock(clock.Add(node, 1)));
         }
@@ -73,9 +73,9 @@ namespace CRDT.Application.UnitTests.Convergent
             var value = _builder.Build(id);
             var newValue = _builder.Build(id);
 
-            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
+            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
 
-            _service.DownstreamAssign(id, newValue, new VectorClock(clock.Add(node, 1)));
+            _service.DownstreamAssign(newValue, new VectorClock(clock.Add(node, 1)));
 
             AssertDoesNotExistInRepository(value, new VectorClock(clock.Add(node, 0)));
             AssertExistsInRepository(newValue, new VectorClock(clock.Add(node, 1)));
@@ -90,9 +90,9 @@ namespace CRDT.Application.UnitTests.Convergent
             var value = _builder.Build(id);
             var newValue = _builder.Build(id);
 
-            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1))));
+            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), false));
 
-            _service.DownstreamAssign(value.Id, newValue, new VectorClock(clock.Add(node, 0)));
+            _service.DownstreamAssign(newValue, new VectorClock(clock.Add(node, 0)));
 
             AssertExistsInRepository(value, new VectorClock(clock.Add(node, 1)));
             AssertDoesNotExistInRepository(newValue, new VectorClock(clock.Add(node, 0)));
@@ -112,11 +112,11 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _service.DownstreamAssign(value.Id, value, new VectorClock(clock.Add(node, 0)));
+            _service.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
 
             var actualValue = _service.GetValue(value.Id);
 
-            Assert.Equal(value, actualValue);
+            Assert.Equal(value, actualValue.Value);
         }
 
         [Fact]
@@ -131,9 +131,9 @@ namespace CRDT.Application.UnitTests.Convergent
             var clock = new VectorClock(nodes);
 
             var firstReplica = convergentReplicas.First();
-            firstReplica.Value.LocalAssign(valueId, initialValue, clock);
+            firstReplica.Value.LocalAssign(initialValue, clock);
 
-            ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId), clock, convergentReplicas);
+            ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId).Value, clock, convergentReplicas);
 
             clock = clock.Increment(firstReplica.Key);
 
@@ -143,9 +143,9 @@ namespace CRDT.Application.UnitTests.Convergent
                 {
                     initialValue = _builder.Build(valueId);
 
-                    replica.Value.LocalAssign(valueId, initialValue, clock);
+                    replica.Value.LocalAssign(initialValue, clock);
 
-                    ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId), clock, convergentReplicas);
+                    ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId).Value, clock, convergentReplicas);
 
                     clock = clock.Increment(replica.Key);
                 }
@@ -153,7 +153,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             foreach (var replica in convergentReplicas)
             {
-                Assert.Equal(initialValue, replica.Value.GetValue(valueId));
+                Assert.Equal(initialValue, replica.Value.GetValue(valueId).Value);
             }
         }
 
@@ -169,9 +169,9 @@ namespace CRDT.Application.UnitTests.Convergent
             var clock = new VectorClock(nodes);
 
             var firstReplica = convergentReplicas.First();
-            firstReplica.Value.LocalAssign(valueId, initialValue, clock);
+            firstReplica.Value.LocalAssign(initialValue, clock);
 
-            ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId), clock, convergentReplicas);
+            ConvergentDownstreamAssign(firstReplica.Key.Id, firstReplica.Value.GetValue(valueId).Value, clock, convergentReplicas);
 
             clock = clock.Increment(firstReplica.Key);
 
@@ -181,9 +181,9 @@ namespace CRDT.Application.UnitTests.Convergent
                 {
                     initialValue.StringValue = Guid.NewGuid().ToString();
 
-                    replica.Value.LocalAssign(valueId, initialValue, clock);
+                    replica.Value.LocalAssign(initialValue, clock);
 
-                    ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId), clock, convergentReplicas);
+                    ConvergentDownstreamAssign(replica.Key.Id, replica.Value.GetValue(valueId).Value, clock, convergentReplicas);
 
                     clock = clock.Increment(replica.Key);
                 }
@@ -191,7 +191,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             foreach (var replica in convergentReplicas)
             {
-                Assert.Equal(initialValue, replica.Value.GetValue(valueId));
+                Assert.Equal(initialValue, replica.Value.GetValue(valueId).Value);
             }
         }
 
@@ -228,7 +228,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             foreach (var downstreamReplica in downstreamReplicas)
             {
-                downstreamReplica.Value.DownstreamAssign(state.Id, state, clock);
+                downstreamReplica.Value.DownstreamAssign(state, clock);
             }
 
             return true;

@@ -10,16 +10,20 @@ namespace CRDT.Registers.Entities
 
         public VectorClock VectorClock { get; }
 
-        public LWW_RegisterWithVCElement(T value, VectorClock vectorClock)
+        public bool Removed { get; }
+
+        public LWW_RegisterWithVCElement(T value, VectorClock vectorClock, bool removed)
         {
             Value = value;
             VectorClock = vectorClock;
+            Removed = removed;
         }
 
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Value;
             yield return VectorClock;
+            yield return Removed;
         }
     }
 }

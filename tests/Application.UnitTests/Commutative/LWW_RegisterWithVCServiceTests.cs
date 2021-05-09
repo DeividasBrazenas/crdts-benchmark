@@ -46,7 +46,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
+            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
 
             _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 1)));
 
@@ -59,7 +59,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1))));
+            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), false));
 
             _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(value)), new VectorClock(clock.Add(node, 0)));
 
@@ -75,7 +75,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var value = _builder.Build(id);
             var newValue = _builder.Build(id);
 
-            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0))));
+            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false));
 
             _service.DownstreamAssign(value.Id, JToken.Parse(JsonConvert.SerializeObject(newValue)), new VectorClock(clock.Add(node, 1)));
 
@@ -92,7 +92,7 @@ namespace CRDT.Application.UnitTests.Commutative
             var value = _builder.Build(id);
             var newValue = _builder.Build(id);
 
-            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1))));
+            _repository.PersistElement(new LWW_RegisterWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), false));
 
             _service.DownstreamAssign(id, JToken.Parse(JsonConvert.SerializeObject(newValue)), new VectorClock(clock.Add(node, 0)));
 
@@ -196,7 +196,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             var actualValue = _service.GetValue(value.Id);
 
-            Assert.Equal(value, actualValue);
+            Assert.Equal(value, actualValue.Value);
         }
 
         [Fact]
@@ -233,7 +233,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             foreach (var replica in commutativeReplicas)
             {
-                Assert.Equal(initialValue, replica.Value.GetValue(valueId));
+                Assert.Equal(initialValue, replica.Value.GetValue(valueId).Value);
             }
         }
 
@@ -273,7 +273,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             foreach (var replica in commutativeReplicas)
             {
-                Assert.Equal(initialValue, replica.Value.GetValue(valueId));
+                Assert.Equal(initialValue, replica.Value.GetValue(valueId).Value);
             }
         }
 

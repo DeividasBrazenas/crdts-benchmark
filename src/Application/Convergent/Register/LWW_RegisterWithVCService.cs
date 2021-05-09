@@ -17,16 +17,16 @@ namespace CRDT.Application.Convergent.Register
             _repository = repository;
         }
 
-        public void LocalAssign(Guid id, T value, VectorClock vectorClock)
+        public void LocalAssign(T value, VectorClock vectorClock)
         {
             lock (_lockObject)
             {
-                var existingEntity = _repository.GetElement(id);
+                var existingEntity = _repository.GetElement(value.Id);
 
                 LWW_RegisterWithVC<T> existingRegister;
                 if (existingEntity is null)
                 {
-                    existingRegister = new LWW_RegisterWithVC<T>(new LWW_RegisterWithVCElement<T>(null, new VectorClock()));
+                    existingRegister = new LWW_RegisterWithVC<T>(new LWW_RegisterWithVCElement<T>(null, new VectorClock(), false));
                 }
                 else
                 {
@@ -39,16 +39,39 @@ namespace CRDT.Application.Convergent.Register
             }
         }
 
-        public void DownstreamAssign(Guid id, T value, VectorClock vectorClock)
+        public void LocalRemove(T value, VectorClock vectorClock)
         {
             lock (_lockObject)
             {
-                var existingEntity = _repository.GetElement(id);
+                var existingEntity = _repository.GetElement(value.Id);
+
+                LWW_RegisterWithVC<T> register;
+                if (existingEntity is null)
+                {
+                    var element = new LWW_RegisterWithVCElement<T>(null, new VectorClock(), false);
+                    register = new LWW_RegisterWithVC<T>(element);
+                }
+                else
+                {
+                    register = new LWW_RegisterWithVC<T>(existingEntity);
+                }
+
+                register = register.Remove(value, vectorClock);
+
+                _repository.PersistElement(register.Element);
+            }
+        }
+
+        public void DownstreamAssign(T value, VectorClock vectorClock)
+        {
+            lock (_lockObject)
+            {
+                var existingEntity = _repository.GetElement(value.Id);
 
                 LWW_RegisterWithVC<T> existingRegister;
                 if (existingEntity is null)
                 {
-                    existingRegister = new LWW_RegisterWithVC<T>(new LWW_RegisterWithVCElement<T>(null, new VectorClock()));
+                    existingRegister = new LWW_RegisterWithVC<T>(new LWW_RegisterWithVCElement<T>(null, new VectorClock(), false));
                 }
                 else
                 {
@@ -61,11 +84,29 @@ namespace CRDT.Application.Convergent.Register
             }
         }
 
-        public T GetValue(Guid id)
+        public void DownstreamRemove(T value, VectorClock vectorClock)
         {
-            var entity = _repository.GetElement(id);
+            lock (_lockObject)
+            {
+                var existingEntity = _repository.GetElement(value.Id);
 
-            return entity?.Value;
+                LWW_RegisterWithVC<T> register;
+                if (existingEntity is null)
+                {
+                    var element = new LWW_RegisterWithVCElement<T>(null, new VectorClock(), false);
+                    register = new LWW_RegisterWithVC<T>(element);
+                }
+                else
+                {
+                    register = new LWW_RegisterWithVC<T>(existingEntity);
+                }
+
+                register = register.Remove(value, vectorClock);
+
+                _repository.PersistElement(register.Element);
+            }
         }
+
+        public LWW_RegisterWithVCElement<T> GetValue(Guid id) => _repository.GetElement(id);
     }
 }

@@ -27,7 +27,7 @@ namespace CRDT.Application.Commutative.Register
                 LWW_RegisterWithVC<T> register;
                 if (existingEntity is null)
                 {
-                    var element = new LWW_RegisterWithVCElement<T>(BaseObject(id), new VectorClock());
+                    var element = new LWW_RegisterWithVCElement<T>(BaseObject(id), new VectorClock(), false);
                     register = new LWW_RegisterWithVC<T>(element);
                 }
                 else
@@ -43,6 +43,29 @@ namespace CRDT.Application.Commutative.Register
                 }
 
                 _repository.PersistElement(newRegister.Element);
+            }
+        }
+
+        public void LocalRemove(T value, VectorClock vectorClock)
+        {
+            lock (_lockObject)
+            {
+                var existingEntity = _repository.GetElement(value.Id);
+
+                LWW_RegisterWithVC<T> register;
+                if (existingEntity is null)
+                {
+                    var element = new LWW_RegisterWithVCElement<T>(BaseObject(value.Id), new VectorClock(), false);
+                    register = new LWW_RegisterWithVC<T>(element);
+                }
+                else
+                {
+                    register = new LWW_RegisterWithVC<T>(existingEntity);
+                }
+
+                register = register.Remove(value, vectorClock);
+
+                _repository.PersistElement(register.Element);
             }
         }
 
@@ -55,7 +78,7 @@ namespace CRDT.Application.Commutative.Register
                 LWW_RegisterWithVC<T> register;
                 if (existingEntity is null)
                 {
-                    var element = new LWW_RegisterWithVCElement<T>(BaseObject(id), new VectorClock());
+                    var element = new LWW_RegisterWithVCElement<T>(BaseObject(id), new VectorClock(), false);
                     register = new LWW_RegisterWithVC<T>(element);
                 }
                 else
@@ -74,12 +97,29 @@ namespace CRDT.Application.Commutative.Register
             }
         }
 
-        public T GetValue(Guid id)
+        public void DownstreamRemove(T value, VectorClock vectorClock)
         {
-            var entity = _repository.GetElement(id);
+            lock (_lockObject)
+            {
+                var existingEntity = _repository.GetElement(value.Id);
 
-            return entity?.Value;
+                LWW_RegisterWithVC<T> register;
+                if (existingEntity is null)
+                {
+                    var element = new LWW_RegisterWithVCElement<T>(BaseObject(value.Id), new VectorClock(), false);
+                    register = new LWW_RegisterWithVC<T>(element);
+                }
+                else
+                {
+                    register = new LWW_RegisterWithVC<T>(existingEntity);
+                }
+
+                register = register.Remove(value, vectorClock);
+
+                _repository.PersistElement(register.Element);
+            }
         }
+        public LWW_RegisterWithVCElement<T> GetValue(Guid id) => _repository.GetElement(id);
 
         private T BaseObject(Guid id)
         {

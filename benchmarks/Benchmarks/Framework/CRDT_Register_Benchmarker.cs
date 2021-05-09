@@ -13,8 +13,7 @@ namespace Benchmarks.Framework
         private int _iterations;
         private readonly List<Node> _nodes;
         private readonly Dictionary<Node, TCRDT> _replicas;
-        private readonly List<TestType> _addObjects;
-        private readonly List<TestType> _updateObjects;
+        private readonly List<TestType> _objects;
 
 
         public Action<TCRDT, TestType, long, List<TCRDT>> ConvergentAssignWithTimestamp { get; set; }
@@ -26,8 +25,8 @@ namespace Benchmarks.Framework
         public Action<TCRDT, Guid, JToken, long, List<TCRDT>> CommutativeAssignWithTimestamp { get; set; }
         public Action<TCRDT, TestType, long, List<TCRDT>> CommutativeRemoveWithTimestamp { get; set; }
 
-        public Action<TCRDT, JToken, VectorClock, List<TCRDT>> CommutativeAssignWithVectorClock { get; set; }
-        public Action<TCRDT, JToken, VectorClock, List<TCRDT>> CommutativeRemoveWithVectorClock { get; set; }
+        public Action<TCRDT, Guid, JToken, VectorClock, List<TCRDT>> CommutativeAssignWithVectorClock { get; set; }
+        public Action<TCRDT, TestType, VectorClock, List<TCRDT>> CommutativeRemoveWithVectorClock { get; set; }
 
         public CRDT_Register_Benchmarker(int iterations, List<Node> nodes, Dictionary<Node, TCRDT> replicas)
         {
@@ -36,8 +35,7 @@ namespace Benchmarks.Framework
             _replicas = replicas;
             var objectIds = GenerateGuids(iterations * _nodes.Count);
             var random = new Random();
-            _addObjects = GenerateObjects(random, objectIds);
-            _updateObjects = GenerateObjects(random, objectIds);
+            _objects = GenerateObjects(random, objectIds);
         }
 
         #region WithTimestamp
@@ -58,7 +56,7 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Assign
-                    value = _addObjects[i * _iterations + j];
+                    value = _objects[i * _iterations + j];
                     ConvergentAssignWithTimestamp(replica, value, ts, downstreamReplicas);
                     ts++;
                 }
@@ -81,7 +79,7 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Assign
-                    value = _addObjects[i * _iterations + j];
+                    value = _objects[i * _iterations + j];
                     CommutativeAssignWithTimestamp(replica, value.Id, JToken.FromObject(value), ts, downstreamReplicas);
                     ts++;
                 }
@@ -90,7 +88,7 @@ namespace Benchmarks.Framework
 
         public void Benchmark_Convergent_AssignSingleProperty_WithTimestamp()
         {
-            TestType value = _addObjects[0];
+            TestType value = _objects[0];
             TCRDT replica;
             List<TCRDT> downstreamReplicas;
 
@@ -113,7 +111,7 @@ namespace Benchmarks.Framework
 
         public void Benchmark_Commutative_AssignSingleProperty_WithTimestamp()
         {
-            TestType value = _addObjects[0];
+            TestType value = _objects[0];
             TCRDT replica;
             List<TCRDT> downstreamReplicas;
 
@@ -151,7 +149,7 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Assign
-                    value = _addObjects[i * _iterations + j];
+                    value = _objects[i * _iterations + j];
                     ConvergentAssignWithTimestamp(replica, value, ts, downstreamReplicas);
                     ts++;
 
@@ -178,7 +176,7 @@ namespace Benchmarks.Framework
                 for (int j = 0; j < _iterations; j++)
                 {
                     // Assign
-                    value = _addObjects[i * _iterations + j];
+                    value = _objects[i * _iterations + j];
                     CommutativeAssignWithTimestamp(replica, value.Id, JToken.FromObject(value),  ts, downstreamReplicas);
                     ts++;
 
@@ -193,115 +191,152 @@ namespace Benchmarks.Framework
 
         #region WithVectorClock
 
-        //public void Benchmark_Add_WithVectorClock()
-        //{
-        //    TestType value;
-        //    TCRDT replica;
-        //    List<TCRDT> downstreamReplicas;
+        public void Benchmark_Convergent_Assign_WithVectorClock()
+        {
+            TestType value;
+            TCRDT replica;
+            List<TCRDT> downstreamReplicas;
 
-        //    var clock = new VectorClock(_nodes);
+            var clock = new VectorClock(_nodes);
 
-        //    for (int i = 0; i < _nodes.Count; i++)
-        //    {
-        //        replica = _replicas[_nodes[i]];
-        //        downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                replica = _replicas[_nodes[i]];
+                downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
 
-        //        for (int j = 0; j < _iterations; j++)
-        //        {
-        //            // Add
-        //            value = _addObjects[i * _iterations + j];
-        //            ConvergentAddWithVectorClock(replica, value, clock, downstreamReplicas);
-        //            clock = clock.Increment(_nodes[i]);
-        //        }
-        //    }
-        //}
+                for (int j = 0; j < _iterations; j++)
+                {
+                    // Assign
+                    value = _objects[i * _iterations + j];
+                    ConvergentAssignWithVectorClock(replica, value, clock, downstreamReplicas);
+                    clock.Increment(_nodes[i]);
+                }
+            }
+        }
 
-        //public void Benchmark_AddAndUpdate_WithVectorClock()
-        //{
-        //    TestType value;
-        //    TCRDT replica;
-        //    List<TCRDT> downstreamReplicas;
+        public void Benchmark_Commutative_Assign_WithVectorClock()
+        {
+            TestType value;
+            TCRDT replica;
+            List<TCRDT> downstreamReplicas;
 
-        //    var clock = new VectorClock(_nodes);
+            var clock = new VectorClock(_nodes);
 
-        //    for (int i = 0; i < _nodes.Count; i++)
-        //    {
-        //        replica = _replicas[_nodes[i]];
-        //        downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                replica = _replicas[_nodes[i]];
+                downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
 
-        //        for (int j = 0; j < _iterations; j++)
-        //        {
-        //            // Add
-        //            value = _addObjects[i * _iterations + j];
-        //            ConvergentAddWithVectorClock(replica, value, clock, downstreamReplicas);
-        //            clock = clock.Increment(_nodes[i]);
+                for (int j = 0; j < _iterations; j++)
+                {
+                    // Assign
+                    value = _objects[i * _iterations + j];
+                    CommutativeAssignWithVectorClock(replica, value.Id, JToken.FromObject(value), clock, downstreamReplicas);
+                    clock.Increment(_nodes[i]);
+                }
+            }
+        }
 
-        //            // Update
-        //            value = _updateObjects[i * _iterations + j];
-        //            ConvergentUpdateWithVectorClock(replica, value, clock, downstreamReplicas);
-        //            clock = clock.Increment(_nodes[i]);
-        //        }
-        //    }
-        //}
+        public void Benchmark_Convergent_AssignSingleProperty_WithVectorClock()
+        {
+            TestType value = _objects[0];
+            TCRDT replica;
+            List<TCRDT> downstreamReplicas;
 
-        //public void Benchmark_AddAndRemove_WithVectorClock()
-        //{
-        //    TestType value;
-        //    TCRDT replica;
-        //    List<TCRDT> downstreamReplicas;
+            var clock = new VectorClock(_nodes);
 
-        //    var clock = new VectorClock(_nodes);
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                replica = _replicas[_nodes[i]];
+                downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
 
-        //    for (int i = 0; i < _nodes.Count; i++)
-        //    {
-        //        replica = _replicas[_nodes[i]];
-        //        downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
+                for (int j = 0; j < _iterations; j++)
+                {
+                    // Assign
+                    value.StringValue = Guid.NewGuid().ToString();
+                    ConvergentAssignWithVectorClock(replica, value, clock, downstreamReplicas);
+                    clock.Increment(_nodes[i]);
+                }
+            }
+        }
 
-        //        for (int j = 0; j < _iterations; j++)
-        //        {
-        //            // Add
-        //            value = _addObjects[i * _iterations + j];
-        //            ConvergentAddWithVectorClock(replica, value, clock, downstreamReplicas);
-        //            clock = clock.Increment(_nodes[i]);
+        public void Benchmark_Commutative_AssignSingleProperty_WithVectorClock()
+        {
+            TestType value = _objects[0];
+            TCRDT replica;
+            List<TCRDT> downstreamReplicas;
 
-        //            // Remove
-        //            ConvergentRemoveWithVectorClock(replica, value, clock, downstreamReplicas);
-        //            clock = clock.Increment(_nodes[i]);
-        //        }
-        //    }
-        //}
+            var clock = new VectorClock(_nodes);
 
-        //public void Benchmark_AddUpdateAndRemove_WithVectorClock()
-        //{
-        //    TestType value;
-        //    TCRDT replica;
-        //    List<TCRDT> downstreamReplicas;
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                replica = _replicas[_nodes[i]];
+                downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
 
-        //    var clock = new VectorClock(_nodes);
+                for (int j = 0; j < _iterations; j++)
+                {
+                    // Assign
+                    value.StringValue = Guid.NewGuid().ToString();
+                    var jToken = JToken.Parse($"{{\"StringValue\":\"{value.StringValue}\"}}");
+                    CommutativeAssignWithVectorClock(replica, value.Id, jToken, clock, downstreamReplicas);
+                    clock.Increment(_nodes[i]);
+                }
+            }
+        }
 
-        //    for (int i = 0; i < _nodes.Count; i++)
-        //    {
-        //        replica = _replicas[_nodes[i]];
-        //        downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
+        public void Benchmark_Convergent_AssignAndRemove_WithVectorClock()
+        {
+            TestType value;
+            TCRDT replica;
+            List<TCRDT> downstreamReplicas;
 
-        //        for (int j = 0; j < _iterations; j++)
-        //        {
-        //            // Add
-        //            value = _addObjects[i * _iterations + j];
-        //            ConvergentAddWithVectorClock(replica, value, clock, downstreamReplicas);
-        //            clock = clock.Increment(_nodes[i]);
+            var clock = new VectorClock(_nodes);
 
-        //            // Update
-        //            value = _updateObjects[i * _iterations + j];
-        //            ConvergentUpdateWithVectorClock(replica, value, clock, downstreamReplicas);
-        //            clock = clock.Increment(_nodes[i]);
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                replica = _replicas[_nodes[i]];
+                downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
 
-        //            // Remove
-        //            ConvergentRemoveWithVectorClock(replica, value, clock, downstreamReplicas);
-        //            clock = clock.Increment(_nodes[i]);
-        //        }
-        //    }
-        //}
+                for (int j = 0; j < _iterations; j++)
+                {
+                    // Assign
+                    value = _objects[i * _iterations + j];
+                    ConvergentAssignWithVectorClock(replica, value, clock, downstreamReplicas);
+                    clock.Increment(_nodes[i]);
+
+                    // Remove
+                    ConvergentRemoveWithVectorClock(replica, value, clock, downstreamReplicas);
+                    clock.Increment(_nodes[i]);
+                }
+            }
+        }
+
+        public void Benchmark_Commutative_AssignAndRemove_WithVectorClock()
+        {
+            TestType value;
+            TCRDT replica;
+            List<TCRDT> downstreamReplicas;
+
+            var clock = new VectorClock(_nodes);
+
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                replica = _replicas[_nodes[i]];
+                downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
+
+                for (int j = 0; j < _iterations; j++)
+                {
+                    // Assign
+                    value = _objects[i * _iterations + j];
+                    CommutativeAssignWithVectorClock(replica, value.Id, JToken.FromObject(value), clock, downstreamReplicas);
+                    clock.Increment(_nodes[i]);
+
+                    // Remove
+                    CommutativeRemoveWithVectorClock(replica, value, clock, downstreamReplicas);
+                    clock.Increment(_nodes[i]);
+                }
+            }
+        }
 
         #endregion
 
