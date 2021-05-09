@@ -91,14 +91,11 @@ namespace CRDT.Application.Commutative.Set
             return lookup;
         }
 
-
-        public List<Guid> GetTags(T value)
+        public List<Guid> GetTags(Guid id)
         {
-            var existingElements = _repository.GetElements();
+            var existingElements = _repository.GetElements(id);
 
-            var set = new OR_OptimizedSet<T>(existingElements);
-
-            return set.ValidElements.Where(e => Equals(e.Value, value)).Select(e => e.Tag).ToList();
+            return existingElements.Where(e => !e.Removed).Select(e => e.Tag).ToList();
         }
     }
 }
