@@ -172,7 +172,7 @@ namespace CRDT.Application.UnitTests.Commutative
             _ourSetService.DownstreamAdd(value, tag, timestamp);
 
             var newValue = _builder.Build(value.Id);
-            _ourSetService.DownstreamUpdate(newValue, tag, timestamp + 3);
+            _ourSetService.DownstreamUpdate(newValue, new[] { tag }, timestamp + 3);
 
             var lookup = _ourSetService.Lookup(newValue);
             Assert.True(lookup);
@@ -185,7 +185,7 @@ namespace CRDT.Application.UnitTests.Commutative
             _ourSetService.DownstreamAdd(value, tag, timestamp);
 
             var newValue = _builder.Build(value.Id);
-            _ourSetService.DownstreamUpdate(newValue, tag, timestamp + 3);
+            _ourSetService.DownstreamUpdate(newValue, new[] { tag }, timestamp + 3);
 
             var lookup = _ourSetService.Lookup(value);
             Assert.False(lookup);

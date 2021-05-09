@@ -10,6 +10,8 @@ namespace CRDT.Registers.Entities
 
         public long Timestamp { get; set; }
 
+        //TODO Add removed
+
         public LWW_RegisterElement(T value, long timestamp)
         {
             Value = value;

@@ -18,6 +18,18 @@ namespace CRDT.Core.Cluster
             Id = id;
         }
 
+        public static List<Node> CreateNodes(int count)
+        {
+            var nodes = new List<Node>();
+
+            for (var i = 0; i < count; i++)
+            {
+                nodes.Add(new Node());
+            }
+
+            return nodes;
+        }
+
         protected override IEnumerable<object> GetEqualityComponents()
         {
             yield return Id;

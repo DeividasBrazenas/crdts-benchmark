@@ -34,7 +34,7 @@ namespace CRDT.Application.Convergent.Set
             }
         }
 
-        public void LocalUpdate(T value, Guid tag, VectorClock vectorClock)
+        public void LocalUpdate(T value, IEnumerable<Guid> tags, VectorClock vectorClock)
         {
             lock (_lockObject)
             {
@@ -42,7 +42,10 @@ namespace CRDT.Application.Convergent.Set
 
                 var set = new OUR_OptimizedSetWithVC<T>(existingElements);
 
-                set = set.Update(value, tag, vectorClock);
+                foreach (var tag in tags)
+                {
+                    set = set.Update(value, tag, vectorClock);
+                }
 
                 _repository.PersistElements(set.Elements);
             }
@@ -91,13 +94,11 @@ namespace CRDT.Application.Convergent.Set
 
         public ImmutableHashSet<OUR_OptimizedSetWithVCElement<T>> State => _repository.GetElements();
 
-        public List<Guid> GetTags(T value)
+        public List<Guid> GetTags(Guid id)
         {
             var existingElements = _repository.GetElements();
 
-            var set = new OUR_OptimizedSetWithVC<T>(existingElements);
-
-            return set.ValidElements.Where(e => Equals(e.Value, value)).Select(e => e.Tag).ToList();
+            return existingElements.Where(e => e.Tag == id && !e.Removed).Select(e => e.Tag).ToList();
         }
     }
 }
