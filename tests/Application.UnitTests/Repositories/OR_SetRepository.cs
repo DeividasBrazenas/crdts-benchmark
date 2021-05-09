@@ -23,6 +23,16 @@ namespace CRDT.Application.UnitTests.Repositories
 
         public ImmutableHashSet<OR_SetElement<TestType>> GetRemoves() => Removes;
 
+        public ImmutableHashSet<OR_SetElement<TestType>> GetAdds(Guid id)
+        {
+            return Adds.Where(x => x.ValueId == id).ToImmutableHashSet();
+        }
+
+        public ImmutableHashSet<OR_SetElement<TestType>> GetRemoves(Guid id)
+        {
+            return Removes.Where(x => x.ValueId == id).ToImmutableHashSet();
+        }
+
         public void PersistAdds(ImmutableHashSet<OR_SetElement<TestType>> values)
         {
             Adds = values;

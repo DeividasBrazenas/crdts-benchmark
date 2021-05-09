@@ -15,9 +15,8 @@ namespace Benchmarks.Framework
         private readonly List<TestType> _addObjects;
         private readonly List<TestType> _updateObjects;
 
-        public Action<TCRDT, TestType, long, List<TCRDT>> Add { get; set; }
-        public Action<TCRDT, TestType, long, List<TCRDT>> Update { get; set; }
-        public Action<TCRDT, TestType, long, List<TCRDT>> Remove { get; set; }
+        public Action<TCRDT, TestType, List<TCRDT>> Add { get; set; }
+        public Action<TCRDT, TestType, List<TCRDT>> Remove { get; set; }
 
         public Action<TCRDT, TestType, long, List<TCRDT>> AddWithTimestamp { get; set; }
         public Action<TCRDT, TestType, long, List<TCRDT>> UpdateWithTimestamp { get; set; }
@@ -38,6 +37,52 @@ namespace Benchmarks.Framework
             _updateObjects = GenerateObjects(random, objectIds);
         }
 
+        #region WithoutTime
+
+        public void Benchmark_Add()
+        {
+            TestType value;
+            TCRDT replica;
+            List<TCRDT> downstreamReplicas;
+
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                replica = _replicas[_nodes[i]];
+                downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
+
+                for (int j = 0; j < _iterations; j++)
+                {
+                    // Add
+                    value = _addObjects[i * _iterations + j];
+                    Add(replica, value, downstreamReplicas);
+                }
+            }
+        }
+        
+        public void Benchmark_AddAndRemove()
+        {
+            TestType value;
+            TCRDT replica;
+            List<TCRDT> downstreamReplicas;
+
+            for (int i = 0; i < _nodes.Count; i++)
+            {
+                replica = _replicas[_nodes[i]];
+                downstreamReplicas = _replicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
+
+                for (int j = 0; j < _iterations; j++)
+                {
+                    // Add
+                    value = _addObjects[i * _iterations + j];
+                    Add(replica, value, downstreamReplicas);
+
+                    // Remove
+                    Remove(replica, value, downstreamReplicas);
+                }
+            }
+        }
+        
+        #endregion
 
         #region WithTimestamp
 
@@ -95,7 +140,6 @@ namespace Benchmarks.Framework
         public void Benchmark_AddAndRemove_WithTimestamp()
         {
             TestType value;
-            TestType newValue;
             TCRDT replica;
             List<TCRDT> downstreamReplicas;
 
@@ -210,7 +254,6 @@ namespace Benchmarks.Framework
         public void Benchmark_AddAndRemove_WithVectorClock()
         {
             TestType value;
-            TestType newValue;
             TCRDT replica;
             List<TCRDT> downstreamReplicas;
 

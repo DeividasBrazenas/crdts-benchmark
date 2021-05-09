@@ -96,14 +96,12 @@ namespace CRDT.Application.Commutative.Set
             return lookup;
         }
 
-        public List<Guid> GetTags(T value)
+        public List<Guid> GetTags(Guid id)
         {
-            var existingAdds = _repository.GetAdds();
-            var existingRemoves = _repository.GetRemoves();
+            var adds = _repository.GetAdds(id);
+            var removes = _repository.GetRemoves(id);
 
-            var set = new OR_Set<T>(existingAdds, existingRemoves);
-
-            return set.Elements.Where(e => Equals(e.Value, value)).Select(e => e.Tag).ToList();
+            return adds.Except(removes).Select(a => a.Tag).ToList();
         }
     }
 }

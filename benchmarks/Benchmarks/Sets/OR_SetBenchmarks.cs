@@ -5,6 +5,7 @@ using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
+using Benchmarks.Framework;
 using Benchmarks.Repositories;
 using Benchmarks.TestTypes;
 using CRDT.Core.Cluster;
@@ -18,9 +19,8 @@ namespace Benchmarks.Sets
     public class OR_SetBenchmarks
     {
         private List<Node> _nodes;
-        private Dictionary<Node, CRDT.Application.Commutative.Set.OR_SetService<TestType>> _commutativeReplicas;
-        private Dictionary<Node, CRDT.Application.Convergent.Set.OR_SetService<TestType>> _convergentReplicas;
-        private List<TestType> _objects;
+        private CRDT_Set_Benchmarker<CRDT.Application.Convergent.Set.OR_SetService<TestType>> _convergentBenchmarker;
+        private CRDT_Set_Benchmarker<CRDT.Application.Commutative.Set.OR_SetService<TestType>> _commutativeBenchmarker;
 
         [Params(100)]
         public int Iterations;
@@ -28,124 +28,48 @@ namespace Benchmarks.Sets
         [IterationSetup]
         public void Setup()
         {
-            _nodes = CreateNodes(3);
-            _commutativeReplicas = CreateCommutativeReplicas(_nodes);
-            _convergentReplicas = CreateConvergentReplicas(_nodes);
-            _objects = new TestTypeBuilder(new Random()).Build(Guid.NewGuid(), _nodes.Count * Iterations);
+            _nodes = Node.CreateNodes(3);
+
+            _convergentBenchmarker =
+                new CRDT_Set_Benchmarker<CRDT.Application.Convergent.Set.OR_SetService<TestType>>(
+                    Iterations, _nodes, CreateConvergentReplicas(_nodes))
+                {
+                    Add = ConvergentAdd,
+                    Remove = ConvergentRemove
+                };
+
+            _commutativeBenchmarker =
+                new CRDT_Set_Benchmarker<CRDT.Application.Commutative.Set.OR_SetService<TestType>>(
+                    Iterations, _nodes, CreateCommutativeReplicas(_nodes))
+                {
+                    Add = CommutativeAdd,
+                    Remove = CommutativeRemove,
+                };
         }
 
         [Benchmark]
         public void Convergent_AddNewValue()
         {
-            TestType value;
-            CRDT.Application.Convergent.Set.OR_SetService<TestType> replica;
-            List<CRDT.Application.Convergent.Set.OR_SetService<TestType>> downstreamReplicas;
-
-            for (int i = 0; i < _nodes.Count; i++)
-            {
-                replica = _convergentReplicas[_nodes[i]];
-                downstreamReplicas = _convergentReplicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
-
-                for (int j = 0; j < Iterations; j++)
-                {
-                    value = _objects[i * Iterations + j];
-
-                    replica.LocalAdd(value, _nodes[i].Id);
-
-                    var (adds, removes) = replica.State;
-
-                    ConvergentDownstreamMerge(adds, removes, downstreamReplicas);
-                }
-            }
+            _convergentBenchmarker.Benchmark_Add();
         }
 
         [Benchmark]
         public void Commutative_AddNewValue()
         {
-            TestType value;
-            CRDT.Application.Commutative.Set.OR_SetService<TestType> replica;
-            List<CRDT.Application.Commutative.Set.OR_SetService<TestType>> downstreamReplicas;
-
-            for (int i = 0; i < _nodes.Count; i++)
-            {
-                replica = _commutativeReplicas[_nodes[i]];
-                downstreamReplicas = _commutativeReplicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
-
-                for (int j = 0; j < Iterations; j++)
-                {
-                    value = _objects[i * Iterations + j];
-
-                    replica.LocalAdd(value, _nodes[i].Id);
-
-                    CommutativeDownstreamAdd(value, _nodes[i].Id, downstreamReplicas);
-                }
-            }
+            _commutativeBenchmarker.Benchmark_Add();
         }
+
 
         [Benchmark]
         public void Convergent_AddAndRemoveValue()
         {
-            TestType value;
-            CRDT.Application.Convergent.Set.OR_SetService<TestType> replica;
-            List<CRDT.Application.Convergent.Set.OR_SetService<TestType>> downstreamReplicas;
-
-            for (int i = 0; i < _nodes.Count; i++)
-            {
-                replica = _convergentReplicas[_nodes[i]];
-                downstreamReplicas = _convergentReplicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
-
-                for (int j = 0; j < Iterations; j++)
-                {
-                    value = _objects[i * Iterations + j];
-
-                    replica.LocalAdd(value, _nodes[i].Id);
-                    var (adds, removes) = replica.State;
-                    ConvergentDownstreamMerge(adds, removes, downstreamReplicas);
-
-                    var observedTags = replica.GetTags(value);
-                    replica.LocalRemove(value, observedTags);
-                    (adds, removes) = replica.State;
-                    ConvergentDownstreamMerge(adds, removes, downstreamReplicas);
-                }
-            }
+            _convergentBenchmarker.Benchmark_AddAndRemove();
         }
 
         [Benchmark]
         public void Commutative_AddAndRemoveValue()
         {
-            TestType value;
-            CRDT.Application.Commutative.Set.OR_SetService<TestType> replica;
-            List<CRDT.Application.Commutative.Set.OR_SetService<TestType>> downstreamReplicas;
-
-            for (int i = 0; i < _nodes.Count; i++)
-            {
-                replica = _commutativeReplicas[_nodes[i]];
-                downstreamReplicas = _commutativeReplicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
-
-                for (int j = 0; j < Iterations; j++)
-                {
-                    value = _objects[i * Iterations + j];
-
-                    replica.LocalAdd(value, _nodes[i].Id);
-                    CommutativeDownstreamAdd(value, _nodes[i].Id, downstreamReplicas);
-
-                    var observedTags = replica.GetTags(value);
-                    replica.LocalRemove(value, observedTags);
-                    CommutativeDownstreamRemove(value, observedTags, downstreamReplicas);
-                }
-            }
-        }
-
-        private List<Node> CreateNodes(int count)
-        {
-            var nodes = new List<Node>();
-
-            for (var i = 0; i < count; i++)
-            {
-                nodes.Add(new Node());
-            }
-
-            return nodes;
+            _commutativeBenchmarker.Benchmark_AddAndRemove();
         }
 
         #region Commutative
@@ -165,19 +89,25 @@ namespace Benchmarks.Sets
             return dictionary;
         }
 
-        private void CommutativeDownstreamAdd(TestType value, Guid tag, List<CRDT.Application.Commutative.Set.OR_SetService<TestType>> downstreamReplicas)
+        private void CommutativeAdd(CRDT.Application.Commutative.Set.OR_SetService<TestType> sourceReplica, TestType value, List<CRDT.Application.Commutative.Set.OR_SetService<TestType>> downstreamReplicas)
         {
+            var tag = Guid.NewGuid();
+            sourceReplica.LocalAdd(value, tag);
+
             foreach (var downstreamReplica in downstreamReplicas)
             {
                 downstreamReplica.DownstreamAdd(value, tag);
             }
         }
 
-        private void CommutativeDownstreamRemove(TestType value, List<Guid> tags, List<CRDT.Application.Commutative.Set.OR_SetService<TestType>> downstreamReplicas)
+        private void CommutativeRemove(CRDT.Application.Commutative.Set.OR_SetService<TestType> sourceReplica, TestType value, List<CRDT.Application.Commutative.Set.OR_SetService<TestType>> downstreamReplicas)
         {
+            var observedTags = sourceReplica.GetTags(value.Id);
+            sourceReplica.LocalRemove(value, observedTags);
+
             foreach (var downstreamReplica in downstreamReplicas)
             {
-                downstreamReplica.DownstreamRemove(value, tags);
+                downstreamReplica.DownstreamRemove(value, observedTags);
             }
         }
         #endregion
@@ -199,8 +129,25 @@ namespace Benchmarks.Sets
             return dictionary;
         }
 
-        private void ConvergentDownstreamMerge(ImmutableHashSet<OR_SetElement<TestType>> adds, ImmutableHashSet<OR_SetElement<TestType>> removes, List<CRDT.Application.Convergent.Set.OR_SetService<TestType>> downstreamReplicas)
+        private void ConvergentAdd(CRDT.Application.Convergent.Set.OR_SetService<TestType> sourceReplica, TestType value, List<CRDT.Application.Convergent.Set.OR_SetService<TestType>> downstreamReplicas)
         {
+            sourceReplica.LocalAdd(value, Guid.NewGuid());
+
+            var (adds, removes) = sourceReplica.State;
+
+            foreach (var downstreamReplica in downstreamReplicas)
+            {
+                downstreamReplica.Merge(adds, removes);
+            }
+        }
+
+        private void ConvergentRemove(CRDT.Application.Convergent.Set.OR_SetService<TestType> sourceReplica, TestType value, List<CRDT.Application.Convergent.Set.OR_SetService<TestType>> downstreamReplicas)
+        {
+            var observedTags = sourceReplica.GetTags(value.Id);
+            sourceReplica.LocalRemove(value, observedTags);
+
+            var (adds, removes) = sourceReplica.State;
+
             foreach (var downstreamReplica in downstreamReplicas)
             {
                 downstreamReplica.Merge(adds, removes);

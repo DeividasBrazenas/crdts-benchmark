@@ -12,6 +12,10 @@ namespace CRDT.Application.Interfaces
 
         ImmutableHashSet<OR_SetElement<T>> GetRemoves();
 
+        ImmutableHashSet<OR_SetElement<T>> GetAdds(Guid id);
+
+        ImmutableHashSet<OR_SetElement<T>> GetRemoves(Guid id);
+
         void PersistAdds(ImmutableHashSet<OR_SetElement<T>> values);
 
         void PersistRemoves(ImmutableHashSet<OR_SetElement<T>> values);
