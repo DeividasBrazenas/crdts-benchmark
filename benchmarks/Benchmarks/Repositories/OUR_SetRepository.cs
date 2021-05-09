@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Benchmarks.TestTypes;
@@ -21,6 +22,16 @@ namespace Benchmarks.Repositories
         public ImmutableHashSet<OUR_SetElement<TestType>> GetAdds() => Adds;
 
         public ImmutableHashSet<OUR_SetElement<TestType>> GetRemoves() => Removes;
+
+        public ImmutableHashSet<OUR_SetElement<TestType>> GetAdds(Guid id)
+        {
+            return Adds.Where(x => x.Value.Id == id).ToImmutableHashSet();
+        }
+
+        public ImmutableHashSet<OUR_SetElement<TestType>> GetRemoves(Guid id)
+        {
+            return Removes.Where(x => x.Value.Id == id).ToImmutableHashSet();
+        }
 
         public void PersistAdds(ImmutableHashSet<OUR_SetElement<TestType>> values)
         {

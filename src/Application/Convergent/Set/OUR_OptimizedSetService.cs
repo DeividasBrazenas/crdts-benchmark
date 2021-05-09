@@ -97,7 +97,7 @@ namespace CRDT.Application.Convergent.Set
         {
             var existingElements = _repository.GetElements();
 
-            return existingElements.Where(e => e.Tag == id && !e.Removed).Select(e => e.Tag).ToList();
+            return existingElements.Where(e => e.Value.Id == id && !e.Removed).Select(e => e.Tag).ToList();
         }
     }
 }

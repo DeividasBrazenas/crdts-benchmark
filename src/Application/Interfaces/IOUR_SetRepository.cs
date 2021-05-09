@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Entities;
@@ -10,6 +11,10 @@ namespace CRDT.Application.Interfaces
         ImmutableHashSet<OUR_SetElement<T>> GetAdds();
 
         ImmutableHashSet<OUR_SetElement<T>> GetRemoves();
+
+        ImmutableHashSet<OUR_SetElement<T>> GetAdds(Guid id);
+
+        ImmutableHashSet<OUR_SetElement<T>> GetRemoves(Guid id);
 
         void PersistAdds(ImmutableHashSet<OUR_SetElement<T>> values);
 
