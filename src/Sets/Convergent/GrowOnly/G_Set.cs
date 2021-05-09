@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Linq;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Bases;
 

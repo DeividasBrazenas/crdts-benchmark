@@ -7,7 +7,6 @@ using CRDT.Sets.Convergent.ObservedUpdatedRemoved;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
-using static CRDT.UnitTestHelpers.TestTypes.TestTypeBuilder;
 
 namespace CRDT.Sets.UnitTests.Convergent
 {

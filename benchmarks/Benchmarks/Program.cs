@@ -1,7 +1,5 @@
 ﻿using BenchmarkDotNet.Running;
 using Benchmarks.Counters;
-using Benchmarks.Registers;
-using Benchmarks.Sets;
 
 namespace Benchmarks
 {

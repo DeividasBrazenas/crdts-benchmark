@@ -6,7 +6,6 @@ using CRDT.Sets.Commutative.ObservedUpdatedRemoved;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
-using static CRDT.UnitTestHelpers.TestTypes.TestTypeBuilder;
 
 namespace CRDT.Sets.UnitTests.Commutative
 {

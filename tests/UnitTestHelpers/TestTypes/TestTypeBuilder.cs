@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using AutoFixture;
 
 namespace CRDT.UnitTestHelpers.TestTypes
 {

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Benchmarks.TestTypes;
 using CRDT.Core.Cluster;
-using CRDT.Core.DistributedTime;
 
 namespace Benchmarks.Framework
 {

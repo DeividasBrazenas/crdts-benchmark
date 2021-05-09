@@ -11,7 +11,6 @@ using CRDT.Core.DistributedTime;
 using CRDT.Sets.Entities;
 using CRDT.UnitTestHelpers.TestTypes;
 using Xunit;
-using static CRDT.UnitTestHelpers.TestTypes.TestTypeBuilder;
 
 namespace CRDT.Application.UnitTests.Commutative
 {

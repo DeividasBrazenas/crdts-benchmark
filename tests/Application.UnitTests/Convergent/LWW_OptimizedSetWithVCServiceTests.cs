@@ -121,13 +121,9 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            var addElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
-            var removeElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
-            var reAddElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 2)), false);
-
-            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { addElement }.ToImmutableHashSet());
-            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { removeElement }.ToImmutableHashSet());
-            _lwwSetService.Merge(new HashSet<LWW_OptimizedSetWithVCElement<TestType>> { reAddElement }.ToImmutableHashSet());
+            _lwwSetService.LocalAssign(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.LocalRemove(value, new VectorClock(clock.Add(node, 1)));
+            _lwwSetService.LocalAssign(value, new VectorClock(clock.Add(node, 2)));
 
             var lookup = _lwwSetService.Lookup(value);
 

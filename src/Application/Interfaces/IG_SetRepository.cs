@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using CRDT.Core.Abstractions;
 
 namespace CRDT.Application.Interfaces

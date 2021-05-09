@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using CRDT.Core.Abstractions;
 using CRDT.Sets.Entities;
