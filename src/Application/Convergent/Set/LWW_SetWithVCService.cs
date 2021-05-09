@@ -18,7 +18,7 @@ namespace CRDT.Application.Convergent.Set
             _repository = repository;
         }
 
-        public void LocalAdd(T value, VectorClock vectorClock)
+        public void LocalAssign(T value, VectorClock vectorClock)
         {
             lock (_lockObject)
             {

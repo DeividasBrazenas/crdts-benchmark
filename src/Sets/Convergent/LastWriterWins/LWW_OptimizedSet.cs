@@ -18,7 +18,7 @@ namespace CRDT.Sets.Convergent.LastWriterWins
         {
         }
 
-        public LWW_OptimizedSet<T> Add(T value, long timestamp)
+        public LWW_OptimizedSet<T> Assign(T value, long timestamp)
         {
             var existingElement = Elements.FirstOrDefault(a => a.Value.Id == value.Id);
 

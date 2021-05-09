@@ -30,7 +30,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(value, repositoryValues.Select(v => v.Value));
@@ -44,7 +44,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _repository.PersistAdds(adds.ToImmutableHashSet());
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
 
             var repositoryValues = _repository.GetAdds();
             Assert.Contains(value, repositoryValues.Select(v => v.Value));
@@ -68,7 +68,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
             _lwwSetService.DownstreamRemove(value, new VectorClock(clock.Add(node, 1)));
 
             var repositoryValues = _repository.GetRemoves();
@@ -84,7 +84,7 @@ namespace CRDT.Application.UnitTests.Commutative
             _repository.PersistAdds(existingAdds.ToImmutableHashSet());
             _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -100,7 +100,7 @@ namespace CRDT.Application.UnitTests.Commutative
             _repository.PersistAdds(existingAdds.ToImmutableHashSet());
             _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
             _lwwSetService.DownstreamRemove(value, new VectorClock(clock.Add(node, 1)));
 
             var lookup = _lwwSetService.Lookup(value);
@@ -117,9 +117,9 @@ namespace CRDT.Application.UnitTests.Commutative
             _repository.PersistAdds(existingAdds.ToImmutableHashSet());
             _repository.PersistRemoves(existingRemoves.ToImmutableHashSet());
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
             _lwwSetService.DownstreamRemove(value, new VectorClock(clock.Add(node, 1)));
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 2)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 2)));
 
             var lookup = _lwwSetService.Lookup(value);
 

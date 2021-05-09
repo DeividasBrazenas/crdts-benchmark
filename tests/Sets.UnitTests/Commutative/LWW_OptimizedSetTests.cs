@@ -18,7 +18,7 @@ namespace CRDT.Sets.UnitTests.Commutative
 
             var add = new LWW_OptimizedSetElement<TestType>(value, DateTime.Now.Ticks, false);
 
-            lwwSet = lwwSet.Add(add.Value, add.Timestamp);
+            lwwSet = lwwSet.Assign(add.Value, add.Timestamp);
 
             Assert.Contains(add, lwwSet.Elements);
         }
@@ -32,8 +32,8 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstAdd = new LWW_OptimizedSetElement<TestType>(value, DateTime.Now.Ticks, false);
             var secondAdd = new LWW_OptimizedSetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks, false);
 
-            lwwSet = lwwSet.Add(firstAdd.Value, firstAdd.Timestamp);
-            lwwSet = lwwSet.Add(secondAdd.Value, secondAdd.Timestamp);
+            lwwSet = lwwSet.Assign(firstAdd.Value, firstAdd.Timestamp);
+            lwwSet = lwwSet.Assign(secondAdd.Value, secondAdd.Timestamp);
 
             Assert.True(lwwSet.Elements.Count(e => Equals(e, firstAdd)) == 0);
             Assert.True(lwwSet.Elements.Count(e => Equals(e, secondAdd)) == 1);
@@ -48,8 +48,8 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstAdd = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
             var secondAdd = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
 
-            lwwSet = lwwSet.Add(firstAdd.Value, firstAdd.Timestamp);
-            lwwSet = lwwSet.Add(secondAdd.Value, secondAdd.Timestamp);
+            lwwSet = lwwSet.Assign(firstAdd.Value, firstAdd.Timestamp);
+            lwwSet = lwwSet.Assign(secondAdd.Value, secondAdd.Timestamp);
 
             Assert.Equal(1, lwwSet.Elements.Count(e => Equals(e.Value, value)));
         }
@@ -74,7 +74,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var add = new LWW_OptimizedSetElement<TestType>(value, DateTime.Now.Ticks, false);
             var remove = new LWW_OptimizedSetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks, true);
 
-            lwwSet = lwwSet.Add(add.Value, add.Timestamp);
+            lwwSet = lwwSet.Assign(add.Value, add.Timestamp);
             lwwSet = lwwSet.Remove(remove.Value, remove.Timestamp);
 
             Assert.DoesNotContain(add, lwwSet.Elements);
@@ -91,7 +91,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstRemove = new LWW_OptimizedSetElement<TestType>(value, DateTime.Now.AddMinutes(1).Ticks, true);
             var secondRemove = new LWW_OptimizedSetElement<TestType>(value, DateTime.Now.AddMinutes(2).Ticks, true);
 
-            lwwSet = lwwSet.Add(add.Value, add.Timestamp);
+            lwwSet = lwwSet.Assign(add.Value, add.Timestamp);
             lwwSet = lwwSet.Remove(firstRemove.Value, firstRemove.Timestamp);
             lwwSet = lwwSet.Remove(secondRemove.Value, secondRemove.Timestamp);
 
@@ -108,7 +108,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstRemove = new LWW_OptimizedSetElement<TestType>(value, timestamp + 100, true);
             var secondRemove = new LWW_OptimizedSetElement<TestType>(value, timestamp + 100, true);
 
-            lwwSet = lwwSet.Add(add.Value, add.Timestamp);
+            lwwSet = lwwSet.Assign(add.Value, add.Timestamp);
             lwwSet = lwwSet.Remove(firstRemove.Value, firstRemove.Timestamp);
             lwwSet = lwwSet.Remove(secondRemove.Value, secondRemove.Timestamp);
 
@@ -121,7 +121,7 @@ namespace CRDT.Sets.UnitTests.Commutative
         {
             var lwwSet = new LWW_OptimizedSet<TestType>();
 
-            lwwSet = lwwSet.Add(element.Value, element.Timestamp);
+            lwwSet = lwwSet.Assign(element.Value, element.Timestamp);
 
             var lookup = lwwSet.Lookup(element.Value);
 
@@ -137,7 +137,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var add = new LWW_OptimizedSetElement<TestType>(value, timestamp, false);
             var remove = new LWW_OptimizedSetElement<TestType>(value, timestamp + 10, true);
 
-            lwwSet = lwwSet.Add(add.Value, add.Timestamp);
+            lwwSet = lwwSet.Assign(add.Value, add.Timestamp);
             lwwSet = lwwSet.Remove(remove.Value, remove.Timestamp);
 
             var lookup = lwwSet.Lookup(value);
@@ -155,9 +155,9 @@ namespace CRDT.Sets.UnitTests.Commutative
             var remove = new LWW_OptimizedSetElement<TestType>(value, timestamp + 10, true);
             var reAdd = new LWW_OptimizedSetElement<TestType>(value, timestamp + 100, false);
 
-            lwwSet = lwwSet.Add(add.Value, add.Timestamp);
+            lwwSet = lwwSet.Assign(add.Value, add.Timestamp);
             lwwSet = lwwSet.Remove(remove.Value, remove.Timestamp);
-            lwwSet = lwwSet.Add(reAdd.Value, reAdd.Timestamp);
+            lwwSet = lwwSet.Assign(reAdd.Value, reAdd.Timestamp);
 
             var lookup = lwwSet.Lookup(value);
 

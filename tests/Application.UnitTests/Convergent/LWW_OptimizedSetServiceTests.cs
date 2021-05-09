@@ -51,7 +51,7 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var removeElement = new LWW_OptimizedSetElement<TestType>(value, timestamp + 10, true);
 
-            _lwwSetService.LocalAdd(value, timestamp);
+            _lwwSetService.LocalAssign(value, timestamp);
             _lwwSetService.LocalRemove(value, timestamp + 10);
 
             var repositoryValues = _repository.GetElements();
@@ -93,7 +93,7 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_Removed_ReturnsFalse(TestType value, long timestamp)
         {
-            _lwwSetService.LocalAdd(value, timestamp);
+            _lwwSetService.LocalAssign(value, timestamp);
             _lwwSetService.LocalRemove(value, timestamp + 10);
 
             var lookup = _lwwSetService.Lookup(value);
@@ -105,9 +105,9 @@ namespace CRDT.Application.UnitTests.Convergent
         [AutoData]
         public void Lookup_ReAdded_ReturnsTrue(TestType value, long timestamp)
         {
-            _lwwSetService.LocalAdd(value, timestamp);
+            _lwwSetService.LocalAssign(value, timestamp);
             _lwwSetService.LocalRemove(value, timestamp + 10);
-            _lwwSetService.LocalAdd(value, timestamp + 20);
+            _lwwSetService.LocalAssign(value, timestamp + 20);
 
             var lookup = _lwwSetService.Lookup(value);
 

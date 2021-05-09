@@ -18,7 +18,7 @@ namespace CRDT.Sets.Commutative.LastWriterWins
         {
         }
 
-        public LWW_SetWithVC<T> Add(T value, VectorClock vectorClock)
+        public LWW_SetWithVC<T> Assign(T value, VectorClock vectorClock)
         {
             var existingElement = Adds.FirstOrDefault(a => a.Value.Id == value.Id);
 

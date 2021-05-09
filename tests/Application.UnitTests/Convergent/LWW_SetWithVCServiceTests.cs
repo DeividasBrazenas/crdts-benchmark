@@ -151,9 +151,9 @@ namespace CRDT.Application.UnitTests.Convergent
 
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _lwwSetService.LocalAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.LocalAssign(value, new VectorClock(clock.Add(node, 0)));
             _lwwSetService.LocalRemove(value, new VectorClock(clock.Add(node, 1)));
-            _lwwSetService.LocalAdd(value, new VectorClock(clock.Add(node, 2)));
+            _lwwSetService.LocalAssign(value, new VectorClock(clock.Add(node, 2)));
 
             var lookup = _lwwSetService.Lookup(value);
 

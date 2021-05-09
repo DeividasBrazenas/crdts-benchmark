@@ -44,7 +44,7 @@ namespace CRDT.Sets.UnitTests.Commutative
 
             var add = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)));
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
 
             Assert.Contains(add, lwwSet.Adds);
         }
@@ -59,8 +59,8 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstAdd = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)));
             var secondAdd = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
 
-            lwwSet = lwwSet.Add(firstAdd.Value, firstAdd.VectorClock);
-            lwwSet = lwwSet.Add(secondAdd.Value, secondAdd.VectorClock);
+            lwwSet = lwwSet.Assign(firstAdd.Value, firstAdd.VectorClock);
+            lwwSet = lwwSet.Assign(secondAdd.Value, secondAdd.VectorClock);
 
             Assert.True(lwwSet.Adds.Count(e => Equals(e, secondAdd)) == 1);
             Assert.True(lwwSet.Adds.Count(e => Equals(e, firstAdd)) == 0);
@@ -76,8 +76,8 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstAdd = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)));
             var secondAdd = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)));
 
-            lwwSet = lwwSet.Add(firstAdd.Value, firstAdd.VectorClock);
-            lwwSet = lwwSet.Add(secondAdd.Value, secondAdd.VectorClock);
+            lwwSet = lwwSet.Assign(firstAdd.Value, firstAdd.VectorClock);
+            lwwSet = lwwSet.Assign(secondAdd.Value, secondAdd.VectorClock);
 
             Assert.Equal(1, lwwSet.Adds.Count(e => Equals(e.Value, value)));
         }
@@ -104,7 +104,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var add = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)));
             var remove = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
             lwwSet = lwwSet.Remove(remove.Value, remove.VectorClock);
 
             Assert.Contains(remove, lwwSet.Removes);
@@ -121,7 +121,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstRemove = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
             var secondRemove = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 2)));
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
             lwwSet = lwwSet.Remove(firstRemove.Value, firstRemove.VectorClock);
             lwwSet = lwwSet.Remove(secondRemove.Value, secondRemove.VectorClock);
 
@@ -139,7 +139,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstRemove = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
             var secondRemove = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
             lwwSet = lwwSet.Remove(firstRemove.Value, firstRemove.VectorClock);
             lwwSet = lwwSet.Remove(secondRemove.Value, secondRemove.VectorClock);
 
@@ -153,7 +153,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
             var lwwSet = new LWW_SetWithVC<TestType>();
 
-            lwwSet = lwwSet.Add(value, new VectorClock(clock.Add(node, 0)));
+            lwwSet = lwwSet.Assign(value, new VectorClock(clock.Add(node, 0)));
 
             var lookup = lwwSet.Lookup(value);
 
@@ -170,7 +170,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var add = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)));
             var remove = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
             lwwSet = lwwSet.Remove(remove.Value, remove.VectorClock);
 
             var lookup = lwwSet.Lookup(value);
@@ -189,9 +189,9 @@ namespace CRDT.Sets.UnitTests.Commutative
             var remove = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)));
             var reAdd = new LWW_SetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 2)));
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
             lwwSet = lwwSet.Remove(remove.Value, remove.VectorClock);
-            lwwSet = lwwSet.Add(reAdd.Value, reAdd.VectorClock);
+            lwwSet = lwwSet.Assign(reAdd.Value, reAdd.VectorClock);
 
             var lookup = lwwSet.Lookup(value);
 

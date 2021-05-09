@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
+using Benchmarks.Framework;
 using Benchmarks.Repositories;
 using Benchmarks.TestTypes;
 using CRDT.Core.Cluster;
 using CRDT.Core.DistributedTime;
-using CRDT.Sets.Entities;
 
 namespace Benchmarks.Sets
 {
@@ -18,9 +15,8 @@ namespace Benchmarks.Sets
     public class LWW_SetWithVCBenchmarks
     {
         private List<Node> _nodes;
-        private Dictionary<Node, CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType>> _commutativeReplicas;
-        private Dictionary<Node, CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType>> _convergentReplicas;
-        private List<TestType> _object;
+        private CRDT_Set_Benchmarker<CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType>> _convergentBenchmarker;
+        private CRDT_Set_Benchmarker<CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType>> _commutativeBenchmarker;
 
         [Params(100)]
         public int Iterations;
@@ -28,136 +24,73 @@ namespace Benchmarks.Sets
         [IterationSetup]
         public void Setup()
         {
-            _nodes = CreateNodes(3);
-            _commutativeReplicas = CreateCommutativeReplicas(_nodes);
-            _convergentReplicas = CreateConvergentReplicas(_nodes);
-            _object = new TestTypeBuilder(new Random()).Build(Guid.NewGuid(), _nodes.Count * Iterations);
+            _nodes = Node.CreateNodes(3);
+
+            _convergentBenchmarker =
+                new CRDT_Set_Benchmarker<CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType>>(
+                    Iterations, _nodes, CreateConvergentReplicas(_nodes))
+                {
+                    AddWithVectorClock = ConvergentAdd,
+                    UpdateWithVectorClock = ConvergentUpdate,
+                    RemoveWithVectorClock = ConvergentRemove
+                };
+
+            _commutativeBenchmarker =
+                new CRDT_Set_Benchmarker<CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType>>(
+                    Iterations, _nodes, CreateCommutativeReplicas(_nodes))
+                {
+                    AddWithVectorClock = CommutativeAdd,
+                    UpdateWithVectorClock = CommutativeUpdate,
+                    RemoveWithVectorClock = CommutativeRemove,
+                };
         }
 
         [Benchmark]
         public void Convergent_AddNewValue()
         {
-            TestType value;
-            CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType> replica;
-            List<CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType>> downstreamReplicas;
-            var clock = new VectorClock(_nodes);
-
-            for (int i = 0; i < _nodes.Count; i++)
-            {
-                replica = _convergentReplicas[_nodes[i]];
-                downstreamReplicas = _convergentReplicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
-
-                for (int j = 0; j < Iterations; j++)
-                {
-                    value = _object[i * Iterations + j];
-
-                    replica.LocalAdd(value, clock);
-
-                    clock = clock.Increment(_nodes[i]);
-
-                    var (adds, removes) = replica.State;
-
-                    ConvergentDownstreamMerge(adds, removes, downstreamReplicas);
-                }
-            }
+            _convergentBenchmarker.Benchmark_Add_WithVectorClock();
         }
 
         [Benchmark]
         public void Commutative_AddNewValue()
         {
-            TestType value;
-            CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType> replica;
-            List<CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType>> downstreamReplicas;
-            var clock = new VectorClock(_nodes);
+            _commutativeBenchmarker.Benchmark_Add_WithVectorClock();
+        }
 
-            for (int i = 0; i < _nodes.Count; i++)
-            {
-                replica = _commutativeReplicas[_nodes[i]];
-                downstreamReplicas = _commutativeReplicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
+        [Benchmark]
+        public void Convergent_AddAndUpdateValue()
+        {
+            _convergentBenchmarker.Benchmark_AddAndUpdate_WithVectorClock();
+        }
 
-                for (int j = 0; j < Iterations; j++)
-                {
-                    value = _object[i * Iterations + j];
-
-                    replica.LocalAdd(value, clock);
-
-                    CommutativeDownstreamAdd(value, clock, downstreamReplicas);
-
-                    clock = clock.Increment(_nodes[i]);
-                }
-            }
+        [Benchmark]
+        public void Commutative_AddAndUpdateValue()
+        {
+            _commutativeBenchmarker.Benchmark_AddAndUpdate_WithVectorClock();
         }
 
         [Benchmark]
         public void Convergent_AddAndRemoveValue()
         {
-            TestType value;
-            CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType> replica;
-            List<CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType>> downstreamReplicas;
-            var clock = new VectorClock(_nodes);
-
-            for (int i = 0; i < _nodes.Count; i++)
-            {
-                replica = _convergentReplicas[_nodes[i]];
-                downstreamReplicas = _convergentReplicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
-
-                for (int j = 0; j < Iterations; j++)
-                {
-                    value = _object[i * Iterations + j];
-
-                    replica.LocalAdd(value, clock);
-                    var (adds, removes) = replica.State;
-                    ConvergentDownstreamMerge(adds, removes, downstreamReplicas);
-                    clock = clock.Increment(_nodes[i]);
-
-
-                    replica.LocalRemove(value, clock);
-                    (adds, removes) = replica.State;
-                    ConvergentDownstreamMerge(adds, removes, downstreamReplicas);
-                    clock = clock.Increment(_nodes[i]);
-                }
-            }
+            _convergentBenchmarker.Benchmark_AddAndRemove_WithVectorClock();
         }
 
         [Benchmark]
         public void Commutative_AddAndRemoveValue()
         {
-            TestType value;
-            CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType> replica;
-            List<CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType>> downstreamReplicas;
-            var clock = new VectorClock(_nodes);
-
-            for (int i = 0; i < _nodes.Count; i++)
-            {
-                replica = _commutativeReplicas[_nodes[i]];
-                downstreamReplicas = _commutativeReplicas.Where(r => r.Key.Id != _nodes[i].Id).Select(v => v.Value).ToList();
-
-                for (int j = 0; j < Iterations; j++)
-                {
-                    value = _object[i * Iterations + j];
-
-                    replica.LocalAdd(value, clock);
-                    CommutativeDownstreamAdd(value, clock, downstreamReplicas);
-                    clock = clock.Increment(_nodes[i]);
-
-
-                    replica.LocalRemove(value, clock);
-                    CommutativeDownstreamRemove(value, clock, downstreamReplicas);
-                    clock = clock.Increment(_nodes[i]);
-                }
-            }
+            _commutativeBenchmarker.Benchmark_AddAndRemove_WithVectorClock();
         }
 
-        private List<Node> CreateNodes(int count)
+        [Benchmark]
+        public void Convergent_AddUpdateAndRemoveValue()
         {
-            var nodes = new List<Node>();
+            _convergentBenchmarker.Benchmark_AddUpdateAndRemove_WithVectorClock();
+        }
 
-            for (var i = 0; i < count; i++)
-            {
-                nodes.Add(new Node());
-            }
-
-            return nodes;
+        [Benchmark]
+        public void Commutative_AddUpdateAndRemoveValue()
+        {
+            _commutativeBenchmarker.Benchmark_AddUpdateAndRemove_WithVectorClock();
         }
 
         #region Commutative
@@ -177,16 +110,30 @@ namespace Benchmarks.Sets
             return dictionary;
         }
 
-        private void CommutativeDownstreamAdd(TestType value, VectorClock vectorClock, List<CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType>> downstreamReplicas)
+        private void CommutativeAdd(CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType> sourceReplica, TestType value, VectorClock vectorClock, List<CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType>> downstreamReplicas)
         {
+            sourceReplica.LocalAssign(value, vectorClock);
+
             foreach (var downstreamReplica in downstreamReplicas)
             {
-                downstreamReplica.DownstreamAdd(value, vectorClock);
+                downstreamReplica.DownstreamAssign(value, vectorClock);
             }
         }
 
-        private void CommutativeDownstreamRemove(TestType value, VectorClock vectorClock, List<CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType>> downstreamReplicas)
+        private void CommutativeUpdate(CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType> sourceReplica, TestType value, VectorClock vectorClock, List<CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType>> downstreamReplicas)
         {
+            sourceReplica.LocalAssign(value, vectorClock);
+
+            foreach (var downstreamReplica in downstreamReplicas)
+            {
+                downstreamReplica.DownstreamAssign(value, vectorClock);
+            }
+        }
+
+        private void CommutativeRemove(CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType> sourceReplica, TestType value, VectorClock vectorClock, List<CRDT.Application.Commutative.Set.LWW_SetWithVCService<TestType>> downstreamReplicas)
+        {
+            sourceReplica.LocalRemove(value, vectorClock);
+
             foreach (var downstreamReplica in downstreamReplicas)
             {
                 downstreamReplica.DownstreamRemove(value, vectorClock);
@@ -211,8 +158,36 @@ namespace Benchmarks.Sets
             return dictionary;
         }
 
-        private void ConvergentDownstreamMerge(ImmutableHashSet<LWW_SetWithVCElement<TestType>> adds, ImmutableHashSet<LWW_SetWithVCElement<TestType>> removes, List<CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType>> downstreamReplicas)
+        private void ConvergentAdd(CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType> sourceReplica, TestType value, VectorClock vectorClock, List<CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType>> downstreamReplicas)
         {
+            sourceReplica.LocalAssign(value, vectorClock);
+
+            var (adds, removes) = sourceReplica.State;
+
+            foreach (var downstreamReplica in downstreamReplicas)
+            {
+                downstreamReplica.Merge(adds, removes);
+            }
+        }
+
+        private void ConvergentUpdate(CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType> sourceReplica, TestType value, VectorClock vectorClock, List<CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType>> downstreamReplicas)
+        {
+            sourceReplica.LocalAssign(value, vectorClock);
+
+            var (adds, removes) = sourceReplica.State;
+
+            foreach (var downstreamReplica in downstreamReplicas)
+            {
+                downstreamReplica.Merge(adds, removes);
+            }
+        }
+
+        private void ConvergentRemove(CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType> sourceReplica, TestType value, VectorClock vectorClock, List<CRDT.Application.Convergent.Set.LWW_SetWithVCService<TestType>> downstreamReplicas)
+        {
+            sourceReplica.LocalRemove(value, vectorClock);
+
+            var (adds, removes) = sourceReplica.State;
+
             foreach (var downstreamReplica in downstreamReplicas)
             {
                 downstreamReplica.Merge(adds, removes);

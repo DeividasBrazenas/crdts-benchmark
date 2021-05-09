@@ -27,7 +27,7 @@ namespace CRDT.Sets.UnitTests.Convergent
         {
             var lwwSet = new LWW_OptimizedSet<TestType>();
 
-            lwwSet.Add(value, timestamp);
+            lwwSet.Assign(value, timestamp);
             lwwSet.Remove(value, timestamp + 1);
 
             var lookup = lwwSet.Lookup(value);

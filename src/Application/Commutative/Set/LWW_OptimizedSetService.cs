@@ -15,7 +15,7 @@ namespace CRDT.Application.Commutative.Set
             _repository = repository;
         }
 
-        public void LocalAdd(T value, long timestamp)
+        public void LocalAssign(T value, long timestamp)
         {
             lock (_lockObject)
             {
@@ -23,7 +23,7 @@ namespace CRDT.Application.Commutative.Set
 
                 var set = new LWW_OptimizedSet<T>(existingElements);
 
-                set = set.Add(value, timestamp);
+                set = set.Assign(value, timestamp);
 
                 _repository.PersistElements(set.Elements);
             }
@@ -43,7 +43,7 @@ namespace CRDT.Application.Commutative.Set
             }
         }
 
-        public void DownstreamAdd(T value, long timestamp)
+        public void DownstreamAssign(T value, long timestamp)
         {
             lock (_lockObject)
             {
@@ -51,7 +51,7 @@ namespace CRDT.Application.Commutative.Set
 
                 var set = new LWW_OptimizedSet<T>(existingElements);
 
-                set = set.Add(value, timestamp);
+                set = set.Assign(value, timestamp);
 
                 _repository.PersistElements(set.Elements);
             }

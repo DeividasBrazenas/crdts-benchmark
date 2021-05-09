@@ -25,7 +25,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Add_NoExistingValues_AddsElementToTheRepository(TestType value, long timestamp)
         {
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
 
             var repositoryValues = _repository.GetElements();
 
@@ -39,7 +39,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             _repository.PersistElements(elements.ToImmutableHashSet());
 
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
 
             var repositoryValues = _repository.GetElements();
 
@@ -51,7 +51,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Remove_AddExistsWithLowerTimestamp_AddsElementToTheRepository(TestType value, long timestamp)
         {
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
             _lwwSetService.DownstreamRemove(value, timestamp + 10);
 
             var repositoryValues = _repository.GetElements();
@@ -64,7 +64,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_Added_ReturnsTrue(TestType value, long timestamp)
         {
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -75,7 +75,7 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_Removed_ReturnsFalse(TestType value, long timestamp)
         {
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
             _lwwSetService.DownstreamRemove(value, timestamp + 10);
 
             var lookup = _lwwSetService.Lookup(value);
@@ -87,9 +87,9 @@ namespace CRDT.Application.UnitTests.Commutative
         [AutoData]
         public void Lookup_ReAdded_ReturnsTrue(TestType value, long timestamp)
         {
-            _lwwSetService.DownstreamAdd(value, timestamp);
+            _lwwSetService.DownstreamAssign(value, timestamp);
             _lwwSetService.DownstreamRemove(value, timestamp + 10);
-            _lwwSetService.DownstreamAdd(value, timestamp + 100);
+            _lwwSetService.DownstreamAssign(value, timestamp + 100);
 
             var lookup = _lwwSetService.Lookup(value);
 
