@@ -19,7 +19,7 @@ namespace CRDT.Sets.Convergent.LastWriterWins
         {
         }
 
-        public LWW_OptimizedSetWithVC<T> Add(T value, VectorClock vectorClock)
+        public LWW_OptimizedSetWithVC<T> Assign(T value, VectorClock vectorClock)
         {
             var existingElement = Elements.FirstOrDefault(a => a.Value.Id == value.Id);
 

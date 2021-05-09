@@ -18,7 +18,7 @@ namespace CRDT.Application.Convergent.Set
             _repository = repository;
         }
 
-        public void LocalAdd(T value, VectorClock vectorClock)
+        public void LocalAssign(T value, VectorClock vectorClock)
         {
             lock (_lockObject)
             {
@@ -26,7 +26,7 @@ namespace CRDT.Application.Convergent.Set
 
                 var set = new LWW_OptimizedSetWithVC<T>(existingElements);
 
-                set = set.Add(value, vectorClock);
+                set = set.Assign(value, vectorClock);
 
                 _repository.PersistElements(set.Elements);
             }

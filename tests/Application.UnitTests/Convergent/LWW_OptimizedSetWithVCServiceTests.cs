@@ -59,7 +59,7 @@ namespace CRDT.Application.UnitTests.Convergent
 
             var removeElement = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
 
-            _lwwSetService.LocalAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.LocalAssign(value, new VectorClock(clock.Add(node, 0)));
             _lwwSetService.LocalRemove(value, new VectorClock(clock.Add(node, 1)));
 
             var repositoryValues = _repository.GetElements();
@@ -107,7 +107,7 @@ namespace CRDT.Application.UnitTests.Convergent
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _lwwSetService.LocalAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.LocalAssign(value, new VectorClock(clock.Add(node, 0)));
             _lwwSetService.LocalRemove(value, new VectorClock(clock.Add(node, 1)));
 
             var lookup = _lwwSetService.Lookup(value);

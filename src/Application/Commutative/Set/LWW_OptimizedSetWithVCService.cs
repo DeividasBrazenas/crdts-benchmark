@@ -16,7 +16,7 @@ namespace CRDT.Application.Commutative.Set
             _repository = repository;
         }
 
-        public void LocalAdd(T value, VectorClock vectorClock)
+        public void LocalAssign(T value, VectorClock vectorClock)
         {
             lock (_lockObject)
             {
@@ -24,7 +24,7 @@ namespace CRDT.Application.Commutative.Set
 
                 var set = new LWW_OptimizedSetWithVC<T>(existingElements);
 
-                set = set.Add(value, vectorClock);
+                set = set.Assign(value, vectorClock);
 
                 _repository.PersistElements(set.Elements);
             }
@@ -44,7 +44,7 @@ namespace CRDT.Application.Commutative.Set
             }
         }
 
-        public void DownstreamAdd(T value, VectorClock vectorClock)
+        public void DownstreamAssign(T value, VectorClock vectorClock)
         {
             lock (_lockObject)
             {
@@ -52,7 +52,7 @@ namespace CRDT.Application.Commutative.Set
 
                 var set = new LWW_OptimizedSetWithVC<T>(existingElements);
 
-                set = set.Add(value, vectorClock);
+                set = set.Assign(value, vectorClock);
 
                 _repository.PersistElements(set.Elements);
             }

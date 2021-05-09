@@ -21,7 +21,7 @@ namespace CRDT.Sets.UnitTests.Commutative
 
             var add = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
 
-            lwwSet = lwwSet.Add(add.Value, new VectorClock(clock.Add(node, 0)));
+            lwwSet = lwwSet.Assign(add.Value, new VectorClock(clock.Add(node, 0)));
 
             Assert.Contains(add, lwwSet.Elements);
         }
@@ -36,8 +36,8 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstAdd = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
             var secondAdd = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), false);
 
-            lwwSet = lwwSet.Add(firstAdd.Value, firstAdd.VectorClock);
-            lwwSet = lwwSet.Add(secondAdd.Value, secondAdd.VectorClock);
+            lwwSet = lwwSet.Assign(firstAdd.Value, firstAdd.VectorClock);
+            lwwSet = lwwSet.Assign(secondAdd.Value, secondAdd.VectorClock);
 
             Assert.True(lwwSet.Elements.Count(e => Equals(e, firstAdd)) == 0);
             Assert.True(lwwSet.Elements.Count(e => Equals(e, secondAdd)) == 1);
@@ -53,8 +53,8 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstAdd = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
             var secondAdd = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
 
-            lwwSet = lwwSet.Add(firstAdd.Value, firstAdd.VectorClock);
-            lwwSet = lwwSet.Add(secondAdd.Value, secondAdd.VectorClock);
+            lwwSet = lwwSet.Assign(firstAdd.Value, firstAdd.VectorClock);
+            lwwSet = lwwSet.Assign(secondAdd.Value, secondAdd.VectorClock);
 
             Assert.Equal(1, lwwSet.Elements.Count(e => Equals(e.Value, value)));
         }
@@ -80,7 +80,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var add = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
             var remove = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
             lwwSet = lwwSet.Remove(remove.Value, remove.VectorClock);
 
             Assert.DoesNotContain(add, lwwSet.Elements);
@@ -98,7 +98,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstRemove = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
             var secondRemove = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 2)), true);
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
             lwwSet = lwwSet.Remove(firstRemove.Value, firstRemove.VectorClock);
             lwwSet = lwwSet.Remove(secondRemove.Value, secondRemove.VectorClock);
 
@@ -116,7 +116,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var firstRemove = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
             var secondRemove = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
             lwwSet = lwwSet.Remove(firstRemove.Value, firstRemove.VectorClock);
             lwwSet = lwwSet.Remove(secondRemove.Value, secondRemove.VectorClock);
 
@@ -130,7 +130,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
             var lwwSet = new LWW_OptimizedSetWithVC<TestType>();
 
-            lwwSet = lwwSet.Add(element.Value, element.VectorClock);
+            lwwSet = lwwSet.Assign(element.Value, element.VectorClock);
 
             var lookup = lwwSet.Lookup(element.Value);
 
@@ -147,7 +147,7 @@ namespace CRDT.Sets.UnitTests.Commutative
             var add = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 0)), false);
             var remove = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
             lwwSet = lwwSet.Remove(remove.Value, remove.VectorClock);
 
             var lookup = lwwSet.Lookup(value);
@@ -166,9 +166,9 @@ namespace CRDT.Sets.UnitTests.Commutative
             var remove = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 1)), true);
             var reAdd = new LWW_OptimizedSetWithVCElement<TestType>(value, new VectorClock(clock.Add(node, 2)), false);
 
-            lwwSet = lwwSet.Add(add.Value, add.VectorClock);
+            lwwSet = lwwSet.Assign(add.Value, add.VectorClock);
             lwwSet = lwwSet.Remove(remove.Value, remove.VectorClock);
-            lwwSet = lwwSet.Add(reAdd.Value, reAdd.VectorClock);
+            lwwSet = lwwSet.Assign(reAdd.Value, reAdd.VectorClock);
 
             var lookup = lwwSet.Lookup(value);
 

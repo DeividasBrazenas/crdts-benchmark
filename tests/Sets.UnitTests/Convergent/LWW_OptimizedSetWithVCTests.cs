@@ -33,7 +33,7 @@ namespace CRDT.Sets.UnitTests.Convergent
 
             var lwwSet = new LWW_OptimizedSetWithVC<TestType>();
 
-            lwwSet.Add(value, new VectorClock(clock.Add(node, 0)));
+            lwwSet.Assign(value, new VectorClock(clock.Add(node, 0)));
             lwwSet.Remove(value, new VectorClock(clock.Add(node, 1)));
 
             var lookup = lwwSet.Lookup(value);
@@ -49,9 +49,9 @@ namespace CRDT.Sets.UnitTests.Convergent
 
             var lwwSet = new LWW_OptimizedSetWithVC<TestType>();
 
-            lwwSet = lwwSet.Add(value, new VectorClock(clock.Add(node, 0)));
+            lwwSet = lwwSet.Assign(value, new VectorClock(clock.Add(node, 0)));
             lwwSet = lwwSet.Remove(value, new VectorClock(clock.Add(node, 1)));
-            lwwSet = lwwSet.Add(value, new VectorClock(clock.Add(node, 2)));
+            lwwSet = lwwSet.Assign(value, new VectorClock(clock.Add(node, 2)));
 
             var lookup = lwwSet.Lookup(value);
 

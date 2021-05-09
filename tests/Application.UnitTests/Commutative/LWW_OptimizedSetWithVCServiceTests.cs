@@ -29,7 +29,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
 
             var repositoryValues = _repository.GetElements();
 
@@ -45,7 +45,7 @@ namespace CRDT.Application.UnitTests.Commutative
 
             _repository.PersistElements(elements.ToImmutableHashSet());
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
 
             var repositoryValues = _repository.GetElements();
 
@@ -59,7 +59,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
             _lwwSetService.DownstreamRemove(value, new VectorClock(clock.Add(node, 1)));
 
             var repositoryValues = _repository.GetElements();
@@ -74,7 +74,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
 
             var lookup = _lwwSetService.Lookup(value);
 
@@ -87,7 +87,7 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
             _lwwSetService.DownstreamRemove(value, new VectorClock(clock.Add(node, 1)));
 
             var lookup = _lwwSetService.Lookup(value);
@@ -101,9 +101,9 @@ namespace CRDT.Application.UnitTests.Commutative
         {
             var clock = ImmutableSortedDictionary<Node, long>.Empty;
 
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 0)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 0)));
             _lwwSetService.DownstreamRemove(value, new VectorClock(clock.Add(node, 1)));
-            _lwwSetService.DownstreamAdd(value, new VectorClock(clock.Add(node, 2)));
+            _lwwSetService.DownstreamAssign(value, new VectorClock(clock.Add(node, 2)));
 
             var lookup = _lwwSetService.Lookup(value);
 
